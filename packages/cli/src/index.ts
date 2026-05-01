@@ -27,13 +27,14 @@ async function main() {
         }
 
         const source = fs.readFileSync(filePath, 'utf-8');
+        const scriptArgs = args.slice(1);
         try {
             const lexer = new Lexer(source);
             const tokens = lexer.tokenize();
             const compiler = new Compiler();
             const { bytecode, stringPool } = compiler.compile(tokens);
             const vm = new VM();
-            vm.run(bytecode, stringPool);
+            vm.run(bytecode, stringPool, scriptArgs);
         } catch (err: any) {
             console.error(`Runtime Error: ${err.message}`);
         }

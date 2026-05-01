@@ -17,7 +17,8 @@
 - **Verification:** It is compulsory to run `npm run build` to verify that your changes haven't broken the build.
 - **AI Agent Identification:** Any AI agent making changes or updates **MUST** explicitly state its name (e.g., "Developed by Gemini CLI") in commit messages or documentation updates.
 - **Mandatory AI Logging:** Every AI agent **MUST** append a detailed entry to `AGENTS_LOG.md` documenting their identity, the user's prompt context, and the technical implementation details of their work.
-- **Documentation & Rules:** Keep `.md` files, documentation, and these rules updated whenever core changes or significant updates are made. **AGENTS.md and GEMINI.md must always be kept as identical mirrors.**
+- **Documentation & Rules:** Keep `.md` files, documentation, and these rules updated whenever core changes or significant updates are made. **AGENTS.md, GEMINI.md, and CLAUDE.md must always be kept as identical mirrors.**
+- **Real-World Challenge Protocol:** Users can issue complex challenges to build real applications in Cortex. The AI **MUST** accept the challenge, create a dedicated folder inside `tests/real_world_tests/<challenge_name>`, and work iteratively—adding any necessary language features—until the challenge is 100% successfully completed.
 - **Standards:** Adhere to ESM and modern TypeScript best practices. Avoid outdated patterns.
 
 ## Architecture & Quality Standards

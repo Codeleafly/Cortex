@@ -24,4 +24,7 @@ export enum Opcode {
     NOT = 18,
     RET = 19,
     CALL = 20,
+    ARG_COUNT = 21,
+    GET_ARG = 22,
+    TO_NUMBER = 23,
 }

@@ -2,6 +2,7 @@
   "name": "cortex",
   "version": "1.0.0",
   "private": true,
+  "type": "module",
   "description": "Cortex - A high-performance programming language built from scratch",
   "workspaces": [
     "packages/*"

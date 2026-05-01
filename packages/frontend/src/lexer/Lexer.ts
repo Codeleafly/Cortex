@@ -87,7 +87,10 @@ export class Lexer {
                     'return': TokenType.RETURN,
                     'true': TokenType.TRUE,
                     'false': TokenType.FALSE,
-                    'null': TokenType.NULL
+                    'null': TokenType.NULL,
+                    'arg_count': TokenType.ARG_COUNT,
+                    'get_arg': TokenType.GET_ARG,
+                    'to_number': TokenType.TO_NUMBER
                 };
                 tokens.push({ type: keywords[val] ?? TokenType.IDENTIFIER, value: val, line: this.line, col: startCol });
                 continue;

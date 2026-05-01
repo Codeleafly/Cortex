@@ -276,6 +276,18 @@ export class Compiler {
         } else if (token.type === TokenType.NULL) {
             this.emit(Opcode.PUSH);
             this.emit(0);
+        } else if (token.type === TokenType.ARG_COUNT) {
+            this.emit(Opcode.ARG_COUNT);
+        } else if (token.type === TokenType.GET_ARG) {
+            this.match(TokenType.LPAREN);
+            this.expression();
+            this.match(TokenType.RPAREN);
+            this.emit(Opcode.GET_ARG);
+        } else if (token.type === TokenType.TO_NUMBER) {
+            this.match(TokenType.LPAREN);
+            this.expression();
+            this.match(TokenType.RPAREN);
+            this.emit(Opcode.TO_NUMBER);
         } else if (token.type === TokenType.IDENTIFIER) {
             const name = token.value!;
             if (this.peek().type === TokenType.LPAREN) {

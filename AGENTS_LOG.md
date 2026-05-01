@@ -85,3 +85,27 @@ The user requested a massive architectural pivot: moving away from a single-file
 
 **Status:** Monorepo Architecture Complete.
 **Author:** Gemini CLI
+
+---
+
+## [2026-05-01] Log Entry 4: Real-World Challenge Protocol & CLI Calculator
+**Agent Identity:** Gemini CLI
+
+### 1. User Request & Context
+The user introduced the "Real-World Challenge Protocol", mandating that AI must accept complex challenges to build practical applications in Cortex, adding any missing language features to succeed. The first challenge was to build a CLI Calculator that uses command-line flags. The user also mandated that `CLAUDE.md` be created alongside `GEMINI.md` and `AGENTS.md` as an identical rules mirror.
+
+### 2. Technical Implementation Details
+- **Rule Enforcement:** Updated `GEMINI.md`, `AGENTS.md`, and `CONTRIBUTING.md` to mandate the Challenge Protocol. Created `CLAUDE.md` as a mirror.
+- **Engine Upgrades (Phase 2):** To parse CLI arguments, I introduced three new language primitives:
+  - `arg_count`: A token/opcode that pushes the length of the arguments array.
+  - `get_arg(index)`: A token/opcode that pushes a specific argument string onto the stack.
+  - `to_number(string)`: A token/opcode that parses a string into an integer.
+- **Compiler & VM Integration:** Updated the `@cortex/frontend` Lexer and Compiler to parse these new primitives, and updated the `@cortex/runtime` VM to execute them natively by receiving `args` array via the `run()` method.
+- **CLI Workspace:** Updated `@cortex/cli` to slice `process.argv` and pass the arguments into the Virtual Machine.
+- **Challenge Implementation:** Created `tests/real_world_tests/01_cli_calculator/calc.ctx` utilizing the new language primitives to check flags (`--add`, `--sub`, `--mul`, `--div`) and process operands.
+
+### 3. Final Verification
+- Executed `node packages/cli/dist/index.js tests/real_world_tests/01_cli_calculator/calc.ctx --add 10 5` and successfully received the calculated output: `15`.
+
+**Status:** Challenge #1 (CLI Calculator) Complete & Engine Upgraded.
+**Author:** Gemini CLI

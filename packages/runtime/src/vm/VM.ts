@@ -12,20 +12,23 @@ export class VM {
     
     private bytecode: Int32Array = new Int32Array(0);
     private stringPool: string[] = [];
+    private args: string[] = [];
 
     constructor() {}
 
-    public run(bytecode: Int32Array, stringPool: string[] = []) {
+    public run(bytecode: Int32Array, stringPool: string[] = [], args: string[] = []) {
         this.bytecode = bytecode;
         this.stringPool = stringPool;
+        this.args = args;
         this.ip = 0;
         this.logs = [];
         this.execute();
     }
 
-    public runSnippet(bytecode: Int32Array, stringPool: string[], startIp: number) {
+    public runSnippet(bytecode: Int32Array, stringPool: string[], startIp: number, args: string[] = []) {
         this.bytecode = bytecode;
         this.stringPool = stringPool;
+        this.args = args;
         this.ip = startIp;
         this.logs = [];
         this.execute();
@@ -150,6 +153,20 @@ export class VM {
                 case Opcode.POP:
                     this.stack.pop();
                     break;
+                case Opcode.ARG_COUNT: {
+                    this.stack.push(this.args.length);
+                    break;
+                }
+                case Opcode.GET_ARG: {
+                    const idx = this.stack.pop();
+                    this.stack.push(this.args[idx] ?? null);
+                    break;
+                }
+                case Opcode.TO_NUMBER: {
+                    const val = this.stack.pop();
+                    this.stack.push(parseInt(val, 10));
+                    break;
+                }
                 default:
                     throw new Error(`Unknown opcode: ${opcode} at ${this.ip - 1}`);
             }
