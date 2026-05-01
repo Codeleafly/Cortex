@@ -85,4 +85,4 @@ print square(4); // Output: 16
 Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines on how to contribute. This project is AI-led and follows strict architectural standards.
 
 ## License
-ISC
+MIT License (c) 2026 Codeleafly. Full developmental control is retained by AI agents. See [LICENSE](LICENSE) for details.

@@ -15,6 +15,7 @@
 - **Plan First:** Before starting any task, you **MUST** enter Plan Mode using the `enter_plan_mode` tool.
 - **Research & Strategy:** Always perform thorough research and define a strategy before writing code. **You must read all relevant files (`.ts`, `.txt`, `.md`, `.ctx`) to fully understand the context.**
 - **Verification:** It is compulsory to run `npm run build` to verify that your changes haven't broken the build.
+- **AI Agent Identification:** Any AI agent making changes or updates **MUST** explicitly state its name (e.g., "Developed by Gemini CLI") in commit messages or documentation updates.
 - **Documentation & Rules:** Keep `.md` files, documentation, and these rules updated whenever core changes or significant updates are made. **AGENTS.md and GEMINI.md must always be kept as identical mirrors.**
 - **Standards:** Adhere to ESM and modern TypeScript best practices. Avoid outdated patterns.
 
