@@ -1,0 +1,31 @@
+{
+  "name": "cortex",
+  "version": "1.0.0",
+  "description": "A programming language built from scratch in TypeScript.",
+  "type": "module",
+  "main": "./dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "start": "tsx src/index.ts"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Codeleafly/Cortex.git"
+  },
+  "keywords": [
+    "cortex",
+    "programming-language",
+    "typescript",
+    "compiler"
+  ],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0",
+    "tsx": "^4.0.0",
+    "vitest": "^1.0.0"
+  }
+}
