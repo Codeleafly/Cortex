@@ -19,6 +19,7 @@
 - **Standards:** Adhere to ESM and modern TypeScript best practices. Avoid outdated patterns.
 
 ## Architecture & Quality Standards
+- **Bytecode-First:** Cortex must prioritize numeric bytecode execution over AST interpretation for maximum performance.
 - **Test-Driven Development (TDD):** Every language feature (tokens, syntax, built-ins) must have corresponding unit tests. Aim for high coverage in Lexer and Parser.
 - **Clear Error Reporting:** Compiler/Interpreter errors must provide line/column numbers and helpful suggestions, not just stack traces.
 - **Strict Separation of Concerns:** Lexer, Parser, and Evaluator/Interpreter must be strictly decoupled.
