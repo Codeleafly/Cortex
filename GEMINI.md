@@ -16,6 +16,7 @@
 - **Research & Strategy:** Always perform thorough research and define a strategy before writing code. **You must read all relevant files (`.ts`, `.txt`, `.md`, `.ctx`) to fully understand the context.**
 - **Verification:** It is compulsory to run `npm run build` to verify that your changes haven't broken the build.
 - **AI Agent Identification:** Any AI agent making changes or updates **MUST** explicitly state its name (e.g., "Developed by Gemini CLI") in commit messages or documentation updates.
+- **Mandatory AI Logging:** Every AI agent **MUST** append a detailed entry to `AGENTS_LOG.md` documenting their identity, the user's prompt context, and the technical implementation details of their work.
 - **Documentation & Rules:** Keep `.md` files, documentation, and these rules updated whenever core changes or significant updates are made. **AGENTS.md and GEMINI.md must always be kept as identical mirrors.**
 - **Standards:** Adhere to ESM and modern TypeScript best practices. Avoid outdated patterns.
 
