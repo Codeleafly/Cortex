@@ -21,9 +21,10 @@
 - **Standards:** Adhere to ESM and modern TypeScript best practices. Avoid outdated patterns.
 
 ## Architecture & Quality Standards
+- **Monorepo Structure:** The project MUST follow a professional, scalable monorepo architecture. Code must be divided into distinct workspaces under a `packages/` directory (e.g., `packages/frontend` for Lexer/Parser/Compiler, `packages/runtime` for the VM, `packages/cli` for the REPL). Deeply nested, modular folders are required.
 - **Bytecode-First:** Cortex must prioritize numeric bytecode execution over AST interpretation for maximum performance.
 - **Test-Driven Development (TDD):** Every language feature (tokens, syntax, built-ins) must have corresponding unit tests. Aim for high coverage in Lexer and Parser.
 - **Clear Error Reporting:** Compiler/Interpreter errors must provide line/column numbers and helpful suggestions, not just stack traces.
-- **Strict Separation of Concerns:** Lexer, Parser, and Evaluator/Interpreter must be strictly decoupled.
+- **Strict Separation of Concerns:** Lexer, Compiler, and VM must be strictly decoupled into their respective packages.
 - **Zero-Tolerance for `any`:** Use strict TypeScript typing. Avoid `any` to prevent runtime bugs in the compiler.
 - **Documentation-as-Code:** Document major architectural decisions and language features in the `/docs` folder or relevant `.md` files.

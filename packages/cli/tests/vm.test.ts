@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { Lexer, Compiler, VM } from '../src/cortex.js';
+import { Lexer, Compiler } from '@cortex/frontend';
+import { VM } from '@cortex/runtime';
 import fs from 'fs';
 import path from 'path';
 
@@ -7,10 +8,10 @@ function runFile(filePath: string) {
     const source = fs.readFileSync(filePath, 'utf-8');
     const lexer = new Lexer(source);
     const tokens = lexer.tokenize();
-    const compiler = new Compiler(tokens);
-    const { bytecode, stringPool } = compiler.compile();
-    const vm = new VM(bytecode, stringPool);
-    vm.run();
+    const compiler = new Compiler();
+    const { bytecode, stringPool } = compiler.compile(tokens);
+    const vm = new VM();
+    vm.run(bytecode, stringPool);
     return vm.logs;
 }
 

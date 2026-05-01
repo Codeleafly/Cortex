@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
-import { render, Text, Box, useInput, useApp, Static } from 'ink';
+import React, { useState, useRef } from 'react';
+import { render, Text, Box, useApp, Static } from 'ink';
 import TextInput from 'ink-text-input';
-import { Lexer, Compiler, VM } from '../cortex.js';
+import { Lexer, Compiler } from '@cortex/frontend';
+import { VM } from '@cortex/runtime';
 
 const HELP_TEXT = `
 Available Commands:
@@ -11,9 +12,9 @@ Available Commands:
   .editor  - Toggle multi-line editor mode (WIP)
 
 Syntax Examples:
-  let x = 10;
-  print x + 5;
-  while (x > 0) { print x; let x = x - 1; }
+  let x = 10
+  print x + 5
+  while (x > 0) { print x; x = x - 1 }
 `;
 
 const REPL = () => {
@@ -25,18 +26,22 @@ const REPL = () => {
     const [editorMode, setEditorMode] = useState(false);
     const [multiLineInput, setMultiLineInput] = useState('');
 
+    // Persist Compiler and VM across the session
+    const compilerRef = useRef(new Compiler());
+    const vmRef = useRef(new VM());
+
     const execute = (code: string) => {
         try {
             const lexer = new Lexer(code);
             const tokens = lexer.tokenize();
-            const compiler = new Compiler(tokens);
-            const { bytecode, stringPool } = compiler.compile();
-            const vm = new VM(bytecode, stringPool);
             
-            // Capture console.log output if needed, but our VM has vm.logs
-            vm.run();
+            // Incremental Compilation
+            const { bytecode, stringPool, startIp } = compilerRef.current.compileSnippet(tokens);
             
-            return { success: true, logs: vm.logs };
+            // Incremental Execution
+            vmRef.current.runSnippet(bytecode, stringPool, startIp);
+            
+            return { success: true, logs: vmRef.current.logs };
         } catch (err: any) {
             return { success: false, error: err.message };
         }
@@ -58,6 +63,8 @@ const REPL = () => {
         }
 
         if (!editorMode && trimmed === '.reset') {
+            compilerRef.current = new Compiler();
+            vmRef.current = new VM();
             setHistory([{ type: 'info', text: 'Environment reset.' }]);
             setInput('');
             return;
@@ -81,7 +88,7 @@ const REPL = () => {
         setHistory(prev => [...prev, { type: 'input', text: val }]);
         const result = execute(fullInput);
         if (result.success) {
-            result.logs!.forEach(log => {
+            result.logs!.forEach((log: string) => {
                 setHistory(prev => [...prev, { type: 'output', text: log }]);
             });
         } else {
@@ -118,4 +125,6 @@ const REPL = () => {
     );
 };
 
-render(<REPL />);
+export function startRepl() {
+    render(<REPL />);
+}

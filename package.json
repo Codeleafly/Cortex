@@ -1,42 +1,21 @@
 {
   "name": "cortex",
   "version": "1.0.0",
-  "description": "A programming language built from scratch in TypeScript.",
-  "type": "module",
-  "main": "./dist/index.js",
-  "bin": {
-    "cortex": "./dist/index.js"
-  },
-  "scripts": {
-    "build": "tsc",
-    "test": "vitest run",
-    "test:watch": "vitest",
-    "start": "tsx src/index.ts"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/Codeleafly/Cortex.git"
-  },
-  "keywords": [
-    "cortex",
-    "programming-language",
-    "typescript",
-    "compiler"
+  "private": true,
+  "description": "Cortex - A high-performance programming language built from scratch",
+  "workspaces": [
+    "packages/*"
   ],
-  "author": "",
-  "license": "ISC",
+  "scripts": {
+    "build": "tsc -b",
+    "test": "vitest run",
+    "start": "npm run start --workspace=@cortex/cli",
+    "clean": "tsc -b --clean"
+  },
   "devDependencies": {
     "@types/node": "^20.0.0",
+    "typescript": "^5.4.0",
     "tsx": "^4.0.0",
-    "typescript": "^5.0.0",
-    "vitest": "^1.0.0"
-  },
-  "dependencies": {
-    "@types/react": "^19.2.14",
-    "@types/react-dom": "^19.2.3",
-    "ink": "^7.0.1",
-    "ink-text-input": "^6.0.0",
-    "react": "^19.2.5",
-    "react-dom": "^19.2.5"
+    "vitest": "^1.4.0"
   }
 }

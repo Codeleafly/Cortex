@@ -59,3 +59,29 @@ The user requested a full audit of all project files to ensure consistency and t
 
 **Status:** Project Governance & Documentation Audit Complete. Ready for Production.
 **Author:** Gemini CLI
+
+---
+
+## [2026-05-01] Log Entry 3: Monorepo Restructuring & Modern ESM Migration
+**Agent Identity:** Gemini CLI
+
+### 1. User Request & Context
+The user requested a massive architectural pivot: moving away from a single-file engine into a deeply nested, professional monorepo structure. The user also explicitly mandated avoiding "old" patterns, forcing a fully modern ESM approach.
+
+### 2. Technical Implementation Details
+- **NPM Workspaces Setup:** Configured a root `package.json` to manage workspaces and centralized devDependencies.
+- **Deep Decoupling:** Split the core engine into four distinct packages:
+  - `@cortex/shared`: `Opcode` and `TokenType` definitions.
+  - `@cortex/frontend`: `Lexer` and `Compiler` components.
+  - `@cortex/runtime`: The `VM` responsible for executing bytecode.
+  - `@cortex/cli`: The Ink-based REPL and executable entry point.
+- **Modern ESM Configuration:** Eliminated legacy `main` and `types` patterns in favor of modern `exports` mapping in every `package.json`.
+- **TypeScript Project References:** Created a `tsconfig.base.json` and utilized composite project references (`tsc -b`) to build the entire monorepo top-down flawlessly.
+- **Dependency Conflict Resolution:** Modernized dependency constraints (e.g., `ink@^5.0.0` and `ink-text-input@^6.0.0`) to natively resolve peer dependency trees.
+
+### 3. Final Verification
+- Compiled the entire monorepo successfully via `tsc -b`.
+- Relocated and verified all 6 integration tests via `npm run test` inside the CLI workspace.
+
+**Status:** Monorepo Architecture Complete.
+**Author:** Gemini CLI
