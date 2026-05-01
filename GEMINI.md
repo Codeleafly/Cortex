@@ -6,7 +6,7 @@
 - **Technology Stack:** TypeScript, Node.js (ESM), following modern standards.
 
 ## Development Principles
-- **AI-First Development:** This project is primarily developed, reviewed, and managed using Gemini CLI and other AI agents. AI is responsible for coding, reviewing PRs, and proactively creating issues.
+- **AI-First Development:** This project is primarily developed, reviewed, and managed using AI agents (such as Gemini CLI, Claude, and others). AI is responsible for coding, reviewing PRs, and proactively creating issues.
 - **Human Documentation:** Humans can participate in development and oversight, but any human-authored changes or manual interventions **MUST be explicitly documented** in code comments or documentation files.
 - **Full Implementation:** Aim for complete, working solutions rather than placeholders or partial implementations.
 - **Contribution Standards:** All development must strictly follow the guidelines in `CONTRIBUTING.md`.

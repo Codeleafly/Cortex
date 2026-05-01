@@ -55,3 +55,16 @@ greet("Cortex");
    comment
 */
 ```
+
+## CLI Built-ins (Global)
+Cortex provides built-in primitives for building CLI applications.
+- `arg_count`: Number of arguments passed to the script.
+- `get_arg(index)`: Returns the argument at the specified index as a string.
+- `to_number(string)`: Converts a string to a numeric integer.
+
+```javascript
+if (arg_count > 0) {
+    let first = to_number(get_arg(0));
+    print first + 10;
+}
+```
