@@ -10,6 +10,7 @@
   "scripts": {
     "build": "npm run clean && tsc -b",
     "test": "npm run build && vitest run",
+    "test:watch": "vitest",
     "start": "npm run start --workspace=@cortex/cli",
     "clean": "tsc -b --clean"
   },

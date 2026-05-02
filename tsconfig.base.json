@@ -8,18 +8,13 @@
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "declaration": true,
+    "declarationMap": true,
     "composite": true,
     "jsx": "react-jsx",
     "baseUrl": ".",
     "paths": {
-      "@cortex/shared": [
-        "packages/shared/src/index.ts"
-      ],
-      "@cortex/frontend": [
-        "packages/frontend/src/index.ts"
-      ],
-      "@cortex/runtime": [
-        "packages/runtime/src/index.ts"
+      "@cortex/*": [
+        "packages/*"
       ]
     }
   }

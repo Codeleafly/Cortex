@@ -85,8 +85,14 @@ print square(4); // Output: 16
 ## Verification
 After making changes, run:
 ```bash
+npm run clean
 npm run build
 npm run test
+```
+
+For faster local iteration (without the full pre-build test flow), use:
+```bash
+npm run test:watch
 ```
 
 ## Contributing
