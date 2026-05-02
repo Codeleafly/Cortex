@@ -181,3 +181,24 @@ The user requested an audit of `AGENTS.md` to identify missing rules and mandate
 
 **Status:** AI Governance Standardized & Root Config Solidified.
 **Author:** Gemini CLI
+
+---
+
+## [2026-05-01] Log Entry 8: Documentation Audit & Refinement
+**Agent Identity:** Gemini CLI
+
+### 1. User Request & Context
+The user requested a full read and fix of the `docs/` folder to ensure all information is accurate and consistent with the codebase.
+
+### 2. Technical Implementation Details
+- **Architecture Guide Update:** Corrected `architecture.md` to reflect the transition from one-pass compilation to a Two-Stage Frontend (Parser/AST).
+- **CLI Guide Update:** Enhanced `cli.md` to explain the advanced multi-line detection logic instead of the placeholder `.editor` mode.
+- **Skills Guide Update:** Updated `SKILLS.md` to list the four newly created repository skills (`bytecode-instruction-adder`, `real-world-challenge-solver`, etc.).
+- **Consistency Check:** Verified that all examples in `syntax.md` and root files are compatible with the latest engine version.
+
+### 3. Final Verification
+- Built the project and ran tests to ensure documentation changes didn't affect the build graph.
+- Verified all modular links in `AGENTS.md`.
+
+**Status:** Documentation Audit 100% Complete & Verified.
+**Author:** Gemini CLI

@@ -21,5 +21,9 @@ skills/skill-name/
 
 ## Available Skills
 - `skill-creator`: A built-in skill to help agents design effective new capabilities.
+- `bytecode-instruction-adder`: Workflow for adding new Opcodes and syntax.
+- `real-world-challenge-solver`: Protocol for 100% success-driven user challenges.
+- `performance-optimizer`: Guardrails for Bytecode-First purity.
+- `monorepo-package-generator`: Standards for monorepo expansion.
 
 For the full specification, visit [agentskills.io](https://agentskills.io).
