@@ -2,7 +2,7 @@
 import { fileURLToPath } from 'url';
 import path from 'path';
 import fs from 'fs';
-import { Lexer, Compiler } from '@cortex/frontend';
+import { Lexer, Parser, Compiler } from '@cortex/frontend';
 import { VM } from '@cortex/runtime';
 import { startRepl } from './repl/Repl.js';
 
@@ -31,12 +31,15 @@ async function main() {
         try {
             const lexer = new Lexer(source);
             const tokens = lexer.tokenize();
+            const parser = new Parser();
+            const statements = parser.parse(tokens);
             const compiler = new Compiler();
-            const { bytecode, stringPool } = compiler.compile(tokens);
+            const { bytecode, stringPool } = compiler.compile(statements);
             const vm = new VM();
             vm.run(bytecode, stringPool, scriptArgs);
-        } catch (err: any) {
-            console.error(`Runtime Error: ${err.message}`);
+        } catch (err: unknown) {
+            const message = err instanceof Error ? err.message : String(err);
+            console.error(`Runtime Error: ${message}`);
         }
     }
 }

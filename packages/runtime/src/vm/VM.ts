@@ -4,7 +4,7 @@ import { Opcode } from '@cortex/shared';
  * Virtual Machine: Executes the numeric bytecode.
  */
 export class VM {
-    private stack: any[] = []; 
+    private stack: (number | string | boolean | null)[] = []; 
     private memory = new Array(1024).fill(0); 
     private ip = 0; 
     private callStack: number[] = []; // Stack for return addresses
@@ -50,26 +50,26 @@ export class VM {
                     break;
                 }
                 case Opcode.ADD: {
-                    const b = this.stack.pop();
-                    const a = this.stack.pop();
+                    const b = this.stack.pop() as any;
+                    const a = this.stack.pop() as any;
                     this.stack.push(a + b);
                     break;
                 }
                 case Opcode.SUB: {
-                    const b = this.stack.pop();
-                    const a = this.stack.pop();
+                    const b = this.stack.pop() as number;
+                    const a = this.stack.pop() as number;
                     this.stack.push(a - b);
                     break;
                 }
                 case Opcode.MUL: {
-                    const b = this.stack.pop();
-                    const a = this.stack.pop();
+                    const b = this.stack.pop() as number;
+                    const a = this.stack.pop() as number;
                     this.stack.push(a * b);
                     break;
                 }
                 case Opcode.DIV: {
-                    const b = this.stack.pop();
-                    const a = this.stack.pop();
+                    const b = this.stack.pop() as number;
+                    const a = this.stack.pop() as number;
                     this.stack.push(Math.floor(a / b));
                     break;
                 }
@@ -80,7 +80,7 @@ export class VM {
                 }
                 case Opcode.STORE: {
                     const addr = this.bytecode[this.ip++];
-                    const val = this.stack.pop();
+                    const val = this.stack.pop() as any;
                     this.memory[addr] = val;
                     break;
                 }
@@ -100,14 +100,14 @@ export class VM {
                     break;
                 }
                 case Opcode.CMP_GT: {
-                    const b = this.stack.pop();
-                    const a = this.stack.pop();
+                    const b = this.stack.pop() as number;
+                    const a = this.stack.pop() as number;
                     this.stack.push(a > b ? 1 : 0);
                     break;
                 }
                 case Opcode.CMP_LT: {
-                    const b = this.stack.pop();
-                    const a = this.stack.pop();
+                    const b = this.stack.pop() as number;
+                    const a = this.stack.pop() as number;
                     this.stack.push(a < b ? 1 : 0);
                     break;
                 }
@@ -140,7 +140,7 @@ export class VM {
                     
                     const args = [];
                     for(let i=0; i<argCount; i++) args.push(this.stack.pop());
-                    for(let i=argCount-1; i>=0; i--) this.stack.push(args[i]);
+                    for(let i=argCount-1; i>=0; i--) this.stack.push(args[i] as (number | string | boolean | null));
                     
                     this.callStack.push(this.ip);
                     this.ip = address;
@@ -158,12 +158,12 @@ export class VM {
                     break;
                 }
                 case Opcode.GET_ARG: {
-                    const idx = this.stack.pop();
+                    const idx = this.stack.pop() as number;
                     this.stack.push(this.args[idx] ?? null);
                     break;
                 }
                 case Opcode.TO_NUMBER: {
-                    const val = this.stack.pop();
+                    const val = this.stack.pop() as string;
                     this.stack.push(parseInt(val, 10));
                     break;
                 }

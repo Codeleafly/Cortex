@@ -1,18 +1,18 @@
 # Cortex Architecture
 
-Cortex is designed for maximum performance through a **Bytecode-First** approach.
+Cortex is a programming language built from scratch in TypeScript, designed for high performance and AI-first development.
 
-## 1. One-Pass Compiler
-Unlike traditional compilers that generate a heavy Object-oriented Abstract Syntax Tree (AST), the Cortex compiler performs a "one-pass" scan. It tokenizes and emits numeric bytecode directly.
+## Core Decisions
+- **Monorepo Structure:** The project follows a professional monorepo architecture. Code is divided into isolated packages under `packages/` (`shared`, `frontend`, `runtime`, `cli`).
+- **Bytecode-First:** Cortex prioritizes numeric bytecode execution (`Int32Array`) over AST interpretation for maximum performance.
+- **Strict Separation of Concerns:** Lexer, Parser, Compiler, and VM are strictly decoupled into their respective packages.
+- **One-Pass Compilation:** The compiler translates source code directly into numeric opcodes in a single pass.
 
-## 2. Numeric Bytecode
-The output of the compiler is an `Int32Array`. This is a contiguous block of memory containing numeric opcodes (e.g., `PUSH=1`, `ADD=2`). This allows the VM to execute commands with minimal overhead.
+## Package Layout
+- `packages/frontend`: Lexer and Parser for hybrid JS/Python syntax.
+- `packages/runtime`: Stack-based Virtual Machine (VM).
+- `packages/shared`: Common types, tokens, and opcodes.
+- `packages/cli`: Interactive Ink-based REPL and executable entry point.
 
-## 3. Stack-Based Virtual Machine
-The VM uses a stack to perform operations.
-- **Operand Stack:** Used for math and temporary values.
-- **Call Stack:** Used to track return addresses for function calls.
-- **Memory:** A pre-allocated array for variable storage.
-
-## 4. Dispatcher
-The VM uses a highly optimized `switch-case` loop to dispatch opcodes. By avoiding complex object lookups and property access, Cortex achieves high execution speeds in a TypeScript-based environment.
+For syntax details, see [syntax.md](syntax.md).
+For CLI usage, see [cli.md](cli.md).

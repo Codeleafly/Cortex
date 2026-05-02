@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { render, Text, Box, useApp, Static } from 'ink';
 import TextInput from 'ink-text-input';
-import { Lexer, Compiler } from '@cortex/frontend';
+import { Lexer, Parser, Compiler } from '@cortex/frontend';
 import { VM } from '@cortex/runtime';
 
 const HELP_TEXT = `
@@ -34,16 +34,19 @@ const REPL = () => {
         try {
             const lexer = new Lexer(code);
             const tokens = lexer.tokenize();
+            const parser = new Parser();
+            const statements = parser.parse(tokens);
             
             // Incremental Compilation
-            const { bytecode, stringPool, startIp } = compilerRef.current.compileSnippet(tokens);
+            const { bytecode, stringPool, startIp } = compilerRef.current.compileSnippet(statements);
             
             // Incremental Execution
             vmRef.current.runSnippet(bytecode, stringPool, startIp);
             
             return { success: true, logs: vmRef.current.logs };
-        } catch (err: any) {
-            return { success: false, error: err.message };
+        } catch (err: unknown) {
+            const message = err instanceof Error ? err.message : String(err);
+            return { success: false, error: message };
         }
     };
 
