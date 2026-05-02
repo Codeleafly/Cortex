@@ -52,8 +52,24 @@ export class Lexer {
                 const startCol = this.col;
                 this.pos++; this.col++;
                 while (this.pos < this.source.length && this.source[this.pos] !== quote) {
-                    val += this.source[this.pos++];
-                    this.col++;
+                    let current = this.source[this.pos];
+                    if (current === '\\') {
+                        this.pos++; this.col++;
+                        const next = this.source[this.pos];
+                        switch (next) {
+                            case 'n': val += '\n'; break;
+                            case 'r': val += '\r'; break;
+                            case 't': val += '\t'; break;
+                            case '\\': val += '\\'; break;
+                            case 'e': val += '\x1b'; break; // ANSI Escape
+                            case '"': val += '"'; break;
+                            case "'": val += "'"; break;
+                            default: val += '\\' + next; break;
+                        }
+                    } else {
+                        val += current;
+                    }
+                    this.pos++; this.col++;
                 }
                 this.pos++; this.col++; // Closing quote
                 tokens.push({ type: TokenType.STRING, value: val, line: this.line, col: startCol });
@@ -91,7 +107,16 @@ export class Lexer {
                     'null': TokenType.NULL,
                     'arg_count': TokenType.ARG_COUNT,
                     'get_arg': TokenType.GET_ARG,
-                    'to_number': TokenType.TO_NUMBER
+                    'to_number': TokenType.TO_NUMBER,
+                    'read_file': TokenType.READ_FILE,
+                    'write_file': TokenType.WRITE_FILE,
+                    'file_exists': TokenType.FILE_EXISTS,
+                    'str_upper': TokenType.STR_UPPER,
+                    'str_words': TokenType.STR_WORDS,
+                    'read_line': TokenType.READ_LINE,
+                    'str_at': TokenType.STR_AT,
+                    'str_len': TokenType.STR_LEN,
+                    'run_command': TokenType.RUN_CMD
                 };
                 tokens.push({ type: keywords[val] ?? TokenType.IDENTIFIER, value: val, line: this.line, col: startCol });
                 continue;
@@ -127,6 +152,17 @@ export class Lexer {
             if (char === '|' && this.source[this.pos + 1] === '|') {
                 tokens.push({ type: TokenType.OR_OR, line: this.line, col: this.col });
                 this.pos += 2; this.col += 2;
+                continue;
+            }
+
+            if (char === '!') {
+                if (this.source[this.pos + 1] === '=') {
+                    tokens.push({ type: TokenType.BANG_EQ, line: this.line, col: this.col });
+                    this.pos += 2; this.col += 2;
+                } else {
+                    tokens.push({ type: TokenType.BANG, line: this.line, col: this.col });
+                    this.pos++; this.col++;
+                }
                 continue;
             }
 

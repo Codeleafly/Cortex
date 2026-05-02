@@ -8,7 +8,9 @@ A high-performance, general-purpose programming language built from scratch in T
 - **Stack-Based Architecture:** Efficient execution using a numeric virtual machine.
 - **Modern CLI/REPL:** Interactive REPL built with React and Ink, featuring multi-line support and dot commands.
 - **Advanced Types:** Support for Strings, Booleans, Numbers, and Null.
-- **Control Flow:** `if` statements, `while` loops, and function declarations (`fn`).
+- **Control Flow:** `if/else` statements, `while` loops, and function declarations (`fn`).
+- **Granular Security:** Deno-inspired permission system (`--allow-read`, `--allow-write`, `--allow-run`).
+- **Standard Library:** Built-in support for File I/O, String manipulation, and Shell commands.
 
 ## Installation
 ```bash
@@ -72,6 +74,15 @@ fn square(n) {
 print square(4); // Output: 16
 ```
 
+### File I/O & Security
+```javascript
+// Requires --allow-read
+if (file_exists("hello.txt")) {
+    let content = read_file("hello.txt");
+    print str_upper(content);
+}
+```
+
 ### Comments
 ```javascript
 // Single-line comment
@@ -85,8 +96,14 @@ print square(4); // Output: 16
 ## Verification
 After making changes, run:
 ```bash
+npm run clean
 npm run build
 npm run test
+```
+
+For faster local iteration (without the full pre-build test flow), use:
+```bash
+npm run test:watch
 ```
 
 ## Contributing

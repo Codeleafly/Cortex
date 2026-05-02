@@ -10,7 +10,41 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 async function main() {
-    const args = process.argv.slice(2);
+    const rawArgs = process.argv.slice(2);
+    const flags = {
+        read: false,
+        write: false,
+        run: false
+    };
+    const args: string[] = [];
+
+    for (const arg of rawArgs) {
+        if (arg.startsWith('--allow=')) {
+            const perms = arg.split('=')[1].split(',');
+            for (const p of perms) {
+                if (p === 'read') flags.read = true;
+                if (p === 'write') flags.write = true;
+                if (p === 'run') flags.run = true;
+                if (p === 'all') {
+                    flags.read = true;
+                    flags.write = true;
+                    flags.run = true;
+                }
+            }
+        } else if (arg === '--allow-read') {
+            flags.read = true;
+        } else if (arg === '--allow-write') {
+            flags.write = true;
+        } else if (arg === '--allow-run') {
+            flags.run = true;
+        } else if (arg === '--allow-all') {
+            flags.read = true;
+            flags.write = true;
+            flags.run = true;
+        } else {
+            args.push(arg);
+        }
+    }
 
     if (args.length === 0) {
         // Start REPL
@@ -35,7 +69,7 @@ async function main() {
             const statements = parser.parse(tokens);
             const compiler = new Compiler();
             const { bytecode, stringPool } = compiler.compile(statements);
-            const vm = new VM();
+            const vm = new VM(flags);
             vm.run(bytecode, stringPool, scriptArgs);
         } catch (err: unknown) {
             const message = err instanceof Error ? err.message : String(err);

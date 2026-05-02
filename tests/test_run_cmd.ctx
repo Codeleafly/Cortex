@@ -1,0 +1,4 @@
+print "Running 'ls' command..."
+let result = run_command("ls")
+print "Output:"
+print result

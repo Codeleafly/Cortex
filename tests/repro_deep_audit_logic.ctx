@@ -1,0 +1,39 @@
+
+let called = 0;
+fn side_effect() {
+    called = 1;
+    return 1;
+}
+
+print "Testing short-circuiting &&:";
+if (0 && side_effect()) {
+    print "Should not happen";
+}
+if (called == 1) {
+    print "FAILED: side_effect() was called in 0 && side_effect()";
+} else {
+    print "PASSED: side_effect() was not called";
+}
+
+called = 0;
+print "Testing short-circuiting ||:";
+if (1 || side_effect()) {
+    print "OK";
+}
+if (called == 1) {
+    print "FAILED: side_effect() was called in 1 || side_effect()";
+} else {
+    print "PASSED: side_effect() was not called";
+}
+
+print "Testing != operator:";
+if (1 != 2) {
+    print "PASSED: 1 != 2 is true";
+} else {
+    print "FAILED: 1 != 2 is false";
+}
+if (1 != 1) {
+    print "FAILED: 1 != 1 is true";
+} else {
+    print "PASSED: 1 != 1 is false";
+}

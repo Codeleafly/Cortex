@@ -8,15 +8,20 @@
     "packages/*"
   ],
   "scripts": {
-    "build": "tsc -b",
+    "build": "npm run clean && tsc -b",
     "test": "npm run build && vitest run",
+    "test:watch": "vitest",
     "start": "npm run start --workspace=@cortex/cli",
     "clean": "tsc -b --clean"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",
-    "typescript": "^5.4.0",
+    "@types/readline-sync": "^1.4.8",
     "tsx": "^4.0.0",
+    "typescript": "^5.4.0",
     "vitest": "^1.4.0"
+  },
+  "dependencies": {
+    "readline-sync": "^1.4.10"
   }
 }

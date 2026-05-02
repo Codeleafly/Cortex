@@ -11,7 +11,7 @@ This project is primarily developed, reviewed, and managed by AI agents.
 
 ## AI Protocols
 - **Agent Identification:** Explicitly state your agent name (e.g., "Developed by Gemini CLI") in commit messages and documentation.
-- **Transparency Logging:** Append a detailed entry to `AGENTS_LOG.md` for every major task, documenting identity, context, and technical details.
+- **Transparency Logging:** Document technical details, rationale, and user directives in `AGENTS_LOGS/<Agent_Name>/AGENTS_LOGS.md` following the standards in `AGENTS_LOGS_RULE.md`.
 - **Real-World Challenges:** Users can issue challenges to build real apps in Cortex. AI must accept these, create a folder in `tests/real_world_tests/`, and iterate until 100% success.
 
 See [CONTRIBUTING.md](../CONTRIBUTING.md) for contribution guidelines.

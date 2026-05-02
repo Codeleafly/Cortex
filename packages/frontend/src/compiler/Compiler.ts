@@ -40,11 +40,27 @@ export class Compiler {
 
     private emit(op: number) { this.bytecode.push(op); }
 
+    private getCurrentOffset(): number {
+        let offset = 0;
+        for (let i = this.functionStartScopeIndex; i < this.scopes.length; i++) {
+            offset += this.scopes[i].size;
+        }
+        return offset;
+    }
+
+    private reclaimOffset(offset: number) {
+        // This is a no-op at compile-time but documents the intent.
+        // The defineVariable logic already uses the current cumulative size.
+    }
+
     private resolveVariable(name: string): number {
         for (let i = this.scopes.length - 1; i >= 0; i--) {
             if (this.scopes[i].has(name)) {
                 const addr = this.scopes[i].get(name)!;
-                if (i === 0) return ~addr; // Global
+                // If we are at the top level (not in a function), all scopes are global
+                if (this.functionStartScopeIndex === 0) return ~addr;
+                // If we are in a function, only scope 0 is global
+                if (i === 0) return ~addr;
                 return addr; // Local
             }
         }
@@ -126,11 +142,14 @@ export class Compiler {
                 const jumpToElseIdx = this.bytecode.length;
                 this.emit(0); 
 
+                // Track starting offset for memory reclamation
+                const startOffset = this.getCurrentOffset();
                 this.scopes.push(new Map());
                 for (const thenStmt of stmt.thenBranch) {
                     this.statement(thenStmt);
                 }
                 this.scopes.pop();
+                this.reclaimOffset(startOffset);
 
                 if (stmt.elseBranch) {
                     this.emit(Opcode.JMP);
@@ -139,11 +158,13 @@ export class Compiler {
 
                     this.bytecode[jumpToElseIdx] = this.bytecode.length;
 
+                    const elseStartOffset = this.getCurrentOffset();
                     this.scopes.push(new Map());
                     for (const elseStmt of stmt.elseBranch) {
                         this.statement(elseStmt);
                     }
                     this.scopes.pop();
+                    this.reclaimOffset(elseStartOffset);
 
                     this.bytecode[jumpToEndIdx] = this.bytecode.length;
                 } else {
@@ -159,11 +180,13 @@ export class Compiler {
                 const jumpOffsetIdx = this.bytecode.length;
                 this.emit(0); 
 
+                const startOffset = this.getCurrentOffset();
                 this.scopes.push(new Map());
                 for (const bodyStmt of stmt.body) {
                     this.statement(bodyStmt);
                 }
                 this.scopes.pop();
+                this.reclaimOffset(startOffset);
 
                 this.emit(Opcode.JMP);
                 this.emit(loopStart);
@@ -185,18 +208,51 @@ export class Compiler {
     private expression(expr: Expr) {
         switch (expr.type) {
             case 'BinaryExpr':
-                this.expression(expr.left);
-                this.expression(expr.right);
-                switch (expr.operator.type) {
-                    case TokenType.PLUS: this.emit(Opcode.ADD); break;
-                    case TokenType.MINUS: this.emit(Opcode.SUB); break;
-                    case TokenType.STAR: this.emit(Opcode.MUL); break;
-                    case TokenType.SLASH: this.emit(Opcode.DIV); break;
-                    case TokenType.GT: this.emit(Opcode.CMP_GT); break;
-                    case TokenType.LT: this.emit(Opcode.CMP_LT); break;
-                    case TokenType.EQ_EQ: this.emit(Opcode.CMP_EQ); break;
-                    case TokenType.AND_AND: this.emit(Opcode.AND); break;
-                    case TokenType.OR_OR: this.emit(Opcode.OR); break;
+                if (expr.operator.type === TokenType.AND_AND) {
+                    this.expression(expr.left);
+                    this.emit(Opcode.JMP_IF_FALSE);
+                    const jumpToFalseIdx = this.bytecode.length;
+                    this.emit(0);
+
+                    this.expression(expr.right);
+                    this.emit(Opcode.JMP);
+                    const jumpToEndIdx = this.bytecode.length;
+                    this.emit(0);
+
+                    this.bytecode[jumpToFalseIdx] = this.bytecode.length;
+                    this.emit(Opcode.PUSH);
+                    this.emit(0);
+
+                    this.bytecode[jumpToEndIdx] = this.bytecode.length;
+                } else if (expr.operator.type === TokenType.OR_OR) {
+                    this.expression(expr.left);
+                    this.emit(Opcode.JMP_IF_TRUE);
+                    const jumpToTrueIdx = this.bytecode.length;
+                    this.emit(0);
+
+                    this.expression(expr.right);
+                    this.emit(Opcode.JMP);
+                    const jumpToEndIdx = this.bytecode.length;
+                    this.emit(0);
+
+                    this.bytecode[jumpToTrueIdx] = this.bytecode.length;
+                    this.emit(Opcode.PUSH);
+                    this.emit(1);
+
+                    this.bytecode[jumpToEndIdx] = this.bytecode.length;
+                } else {
+                    this.expression(expr.left);
+                    this.expression(expr.right);
+                    switch (expr.operator.type) {
+                        case TokenType.PLUS: this.emit(Opcode.ADD); break;
+                        case TokenType.MINUS: this.emit(Opcode.SUB); break;
+                        case TokenType.STAR: this.emit(Opcode.MUL); break;
+                        case TokenType.SLASH: this.emit(Opcode.DIV); break;
+                        case TokenType.GT: this.emit(Opcode.CMP_GT); break;
+                        case TokenType.LT: this.emit(Opcode.CMP_LT); break;
+                        case TokenType.EQ_EQ: this.emit(Opcode.CMP_EQ); break;
+                        case TokenType.BANG_EQ: this.emit(Opcode.CMP_NEQ); break;
+                    }
                 }
                 break;
             case 'UnaryExpr':
@@ -238,6 +294,24 @@ export class Compiler {
                     this.emit(Opcode.GET_ARG);
                 } else if (expr.callee === 'to_number') {
                     this.emit(Opcode.TO_NUMBER);
+                } else if (expr.callee === 'read_file') {
+                    this.emit(Opcode.READ_FILE);
+                } else if (expr.callee === 'write_file') {
+                    this.emit(Opcode.WRITE_FILE);
+                } else if (expr.callee === 'file_exists') {
+                    this.emit(Opcode.FILE_EXISTS);
+                } else if (expr.callee === 'str_upper') {
+                    this.emit(Opcode.STR_UPPER);
+                } else if (expr.callee === 'str_words') {
+                    this.emit(Opcode.STR_WORDS);
+                } else if (expr.callee === 'read_line') {
+                    this.emit(Opcode.READ_LINE);
+                } else if (expr.callee === 'str_at') {
+                    this.emit(Opcode.STR_AT);
+                } else if (expr.callee === 'str_len') {
+                    this.emit(Opcode.STR_LEN);
+                } else if (expr.callee === 'run_command') {
+                    this.emit(Opcode.RUN_CMD);
                 } else {
                     const fn = this.functions.get(expr.callee);
                     if (!fn) throw new Error(`Undefined function: ${expr.callee}`);

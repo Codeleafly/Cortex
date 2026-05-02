@@ -68,10 +68,17 @@ export class Parser {
         const condition = this.expression();
         this.consume(TokenType.RPAREN, "Expect ')' after if condition.");
         const thenBranch = this.block();
-        let elseBranch: Stmt[] | undefined;
+
+        let elseBranch: Stmt[] | undefined = undefined;
         if (this.match(TokenType.ELSE)) {
-            elseBranch = this.block();
+            if (this.check(TokenType.IF)) {
+                this.advance(); // consume 'if'
+                elseBranch = [this.ifStatement()];
+            } else {
+                elseBranch = this.block();
+            }
         }
+
         return { type: 'IfStmt', condition, thenBranch, elseBranch };
     }
 
@@ -126,8 +133,18 @@ export class Parser {
     }
 
     private logicalAnd(): Expr {
-        let expr = this.comparison();
+        let expr = this.equality();
         while (this.match(TokenType.AND_AND)) {
+            const operator = this.previous();
+            const right = this.equality();
+            expr = { type: 'BinaryExpr', left: expr, operator, right };
+        }
+        return expr;
+    }
+
+    private equality(): Expr {
+        let expr = this.comparison();
+        while (this.match(TokenType.EQ_EQ, TokenType.BANG_EQ)) {
             const operator = this.previous();
             const right = this.comparison();
             expr = { type: 'BinaryExpr', left: expr, operator, right };
@@ -137,7 +154,7 @@ export class Parser {
 
     private comparison(): Expr {
         let expr = this.term();
-        while (this.match(TokenType.GT, TokenType.LT, TokenType.EQ_EQ)) {
+        while (this.match(TokenType.GT, TokenType.LT)) {
             const operator = this.previous();
             const right = this.term();
             expr = { type: 'BinaryExpr', left: expr, operator, right };
@@ -178,7 +195,12 @@ export class Parser {
         if (this.match(TokenType.FALSE)) return { type: 'LiteralExpr', value: false };
         if (this.match(TokenType.TRUE)) return { type: 'LiteralExpr', value: true };
         if (this.match(TokenType.NULL)) return { type: 'LiteralExpr', value: null };
-        if (this.match(TokenType.ARG_COUNT)) return { type: 'ArgCountExpr' };
+        if (this.match(TokenType.ARG_COUNT)) {
+            if (this.match(TokenType.LPAREN)) {
+                this.consume(TokenType.RPAREN, "Expect ')' after 'arg_count'.");
+            }
+            return { type: 'ArgCountExpr' };
+        }
 
         if (this.match(TokenType.NUMBER)) {
             return { type: 'LiteralExpr', value: parseInt(this.previous().value!) };
@@ -216,6 +238,73 @@ export class Parser {
             const arg = this.expression();
             this.consume(TokenType.RPAREN, "Expect ')' after argument.");
             return { type: 'CallExpr', callee: 'to_number', args: [arg] };
+        }
+
+        if (this.match(TokenType.READ_FILE)) {
+            this.consume(TokenType.LPAREN, "Expect '(' after 'read_file'.");
+            const arg = this.expression();
+            this.consume(TokenType.RPAREN, "Expect ')' after argument.");
+            return { type: 'CallExpr', callee: 'read_file', args: [arg] };
+        }
+
+        if (this.match(TokenType.WRITE_FILE)) {
+            this.consume(TokenType.LPAREN, "Expect '(' after 'write_file'.");
+            const arg1 = this.expression();
+            this.consume(TokenType.COMMA, "Expect ',' after first argument.");
+            const arg2 = this.expression();
+            this.consume(TokenType.RPAREN, "Expect ')' after arguments.");
+            return { type: 'CallExpr', callee: 'write_file', args: [arg1, arg2] };
+        }
+
+        if (this.match(TokenType.FILE_EXISTS)) {
+            this.consume(TokenType.LPAREN, "Expect '(' after 'file_exists'.");
+            const arg = this.expression();
+            this.consume(TokenType.RPAREN, "Expect ')' after argument.");
+            return { type: 'CallExpr', callee: 'file_exists', args: [arg] };
+        }
+
+        if (this.match(TokenType.STR_UPPER)) {
+            this.consume(TokenType.LPAREN, "Expect '(' after 'str_upper'.");
+            const arg = this.expression();
+            this.consume(TokenType.RPAREN, "Expect ')' after argument.");
+            return { type: 'CallExpr', callee: 'str_upper', args: [arg] };
+        }
+
+        if (this.match(TokenType.STR_WORDS)) {
+            this.consume(TokenType.LPAREN, "Expect '(' after 'str_words'.");
+            const arg = this.expression();
+            this.consume(TokenType.RPAREN, "Expect ')' after argument.");
+            return { type: 'CallExpr', callee: 'str_words', args: [arg] };
+        }
+
+        if (this.match(TokenType.READ_LINE)) {
+            if (this.match(TokenType.LPAREN)) {
+                this.consume(TokenType.RPAREN, "Expect ')' after 'read_line'.");
+            }
+            return { type: 'CallExpr', callee: 'read_line', args: [] };
+        }
+
+        if (this.match(TokenType.STR_AT)) {
+            this.consume(TokenType.LPAREN, "Expect '(' after 'str_at'.");
+            const str = this.expression();
+            this.consume(TokenType.COMMA, "Expect ',' after string.");
+            const idx = this.expression();
+            this.consume(TokenType.RPAREN, "Expect ')' after arguments.");
+            return { type: 'CallExpr', callee: 'str_at', args: [str, idx] };
+        }
+
+        if (this.match(TokenType.STR_LEN)) {
+            this.consume(TokenType.LPAREN, "Expect '(' after 'str_len'.");
+            const str = this.expression();
+            this.consume(TokenType.RPAREN, "Expect ')' after argument.");
+            return { type: 'CallExpr', callee: 'str_len', args: [str] };
+        }
+
+        if (this.match(TokenType.RUN_CMD)) {
+            this.consume(TokenType.LPAREN, "Expect '(' after 'run_command'.");
+            const cmd = this.expression();
+            this.consume(TokenType.RPAREN, "Expect ')' after argument.");
+            return { type: 'CallExpr', callee: 'run_command', args: [cmd] };
         }
 
         if (this.match(TokenType.LPAREN)) {

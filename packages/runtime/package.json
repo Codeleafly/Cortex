@@ -4,7 +4,7 @@
   "type": "module",
   "exports": {
     ".": {
-      "types": "./src/index.ts",
+      "types": "./dist/index.d.ts",
       "import": "./dist/index.js",
       "default": "./dist/index.js"
     }
@@ -13,7 +13,11 @@
     "build": "tsc -b"
   },
   "dependencies": {
-    "@cortex/shared": "*"
+    "@cortex/shared": "*",
+    "readline-sync": "^1.4.10"
   },
-  "types": "./src/index.ts"
+  "types": "./dist/index.d.ts",
+  "devDependencies": {
+    "@types/readline-sync": "^1.4.8"
+  }
 }

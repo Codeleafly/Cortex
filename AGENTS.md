@@ -14,8 +14,8 @@ Cortex is a high-performance, general-purpose programming language built from sc
 ## Core Mandates (Mandatory for all AI Agents)
 1. **Plan First:** Always enter Plan Mode and get user approval before modifying code.
 2. **AI Identification:** State your agent name in every major commit, PR, and documentation update.
-3. **Transparency Logging:** Append technical details, rationale, and implementation steps to `AGENTS_LOG.md` after completion.
-4. **Mandatory Rule Maintenance:** AI agents MUST update `AGENTS.md` and related modular documentation whenever core rules, project structure, or workflows change.
+3. **Transparency Logging:** Document technical details, rationale, and user directives in `AGENTS_LOGS/<Agent_Name>/AGENTS_LOGS.md` following the standards in `AGENTS_LOGS_RULE.md`.
+4. **Mandatory Rule Maintenance:** AI agents MUST update `AGENTS.md`, `AGENTS_LOGS_RULE.md`, and related modular documentation whenever core rules, project structure, or workflows change.
 5. **Zero-Tolerance for `any`:** Strict TypeScript typing is required. `any` is strictly prohibited.
 6. **Bytecode-First:** Prioritize numeric `Int32Array` bytecode and a stack-based VM for maximum performance.
 7. **Verification Loop:** It is **compulsory** to run `npm run build` and execute all `.ctx` integration tests after every update.
@@ -24,6 +24,8 @@ Cortex is a high-performance, general-purpose programming language built from sc
 10. **Official Skills Standardization:** All new skills MUST follow the [Agent Skills Standard](https://agentskills.io), including full YAML frontmatter and documentation-first structure.
 11. **Bug Reporting Protocol:** When a bug is identified, the AI agent MUST create (or update) a `Bug.md` file in the root directory. This file serves as the official ledger of vulnerabilities and fixes, following the verified audit format (ID, Name, Status, Verification).
 12. **Human Participation Disclosure:** Any human-authored code or manual intervention MUST be explicitly documented.
+13. **Zero-Litter Policy:** AI agents MUST NOT create temporary, reproduction, or garbage files in the root directory. All such files MUST reside within the `tests/` directory or package-specific subdirectories to maintain workspace cleanliness.
+14. **Git Protocol Integrity:** AI agents MUST NEVER use `git push --force` or overwrite remote history unless explicitly directed by the user. Always prioritize `git pull` and manual conflict resolution to preserve the collaborative audit trail.
 
 ## Progressive Disclosure
 For detailed rules, architectural deep-dives, and coding patterns, refer to:
@@ -40,4 +42,4 @@ This repository supports **Agent Skills**, a lightweight format for extending AI
 - **Creation:** Agents should create new skills for repeatable, high-stakes workflows following the [Best Practices](docs/SKILLS.md).
 
 Refer to [CONTRIBUTING.md](CONTRIBUTING.md) for branching and security guidelines.
-Refer to [AGENTS_LOG.md](AGENTS_LOG.md) for the AI contribution history.
+Refer to [AGENTS_LOGS/](AGENTS_LOGS/) for the decentralized AI contribution history.
