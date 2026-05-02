@@ -109,3 +109,20 @@
 
 **Status:** Stainless & Production Ready.
 **Author:** Gemini CLI
+
+---
+
+# [2026-05-02] Log Entry 17: Constitutional Rule Formalization
+**Agent Identity:** Gemini CLI
+
+### 1. User Instructions (Directives)
+*   **Request:** Implement the "new rules" into the core configuration.
+*   **Goal:** Formalize decentralized logging, Zero-Litter Policy, and Git Protocol Integrity in `AGENTS.md`.
+
+### 2. Technical Implementation Details
+*   **Architecture Changes:** Updated `AGENTS.md` (Cortex Constitution) to include mandatory rules for workspace cleanliness and source control safety.
+*   **Files Modified:** `AGENTS.md`.
+*   **Logic Forensics:** Integrated the decentralized logging reference into the Progressive Disclosure section.
+
+**Status:** Complete
+**Author:** Gemini CLI

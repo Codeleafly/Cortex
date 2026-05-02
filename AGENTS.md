@@ -24,6 +24,8 @@ Cortex is a high-performance, general-purpose programming language built from sc
 10. **Official Skills Standardization:** All new skills MUST follow the [Agent Skills Standard](https://agentskills.io), including full YAML frontmatter and documentation-first structure.
 11. **Bug Reporting Protocol:** When a bug is identified, the AI agent MUST create (or update) a `Bug.md` file in the root directory. This file serves as the official ledger of vulnerabilities and fixes, following the verified audit format (ID, Name, Status, Verification).
 12. **Human Participation Disclosure:** Any human-authored code or manual intervention MUST be explicitly documented.
+13. **Zero-Litter Policy:** AI agents MUST NOT create temporary, reproduction, or garbage files in the root directory. All such files MUST reside within the `tests/` directory or package-specific subdirectories to maintain workspace cleanliness.
+14. **Git Protocol Integrity:** AI agents MUST NEVER use `git push --force` or overwrite remote history unless explicitly directed by the user. Always prioritize `git pull` and manual conflict resolution to preserve the collaborative audit trail.
 
 ## Progressive Disclosure
 For detailed rules, architectural deep-dives, and coding patterns, refer to:
@@ -40,4 +42,4 @@ This repository supports **Agent Skills**, a lightweight format for extending AI
 - **Creation:** Agents should create new skills for repeatable, high-stakes workflows following the [Best Practices](docs/SKILLS.md).
 
 Refer to [CONTRIBUTING.md](CONTRIBUTING.md) for branching and security guidelines.
-Refer to [AGENTS_LOG.md](AGENTS_LOG.md) for the AI contribution history.
+Refer to [AGENTS_LOGS/](AGENTS_LOGS/) for the decentralized AI contribution history.
