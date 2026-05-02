@@ -57,6 +57,20 @@ export class VM {
         if (!resolved.startsWith(process.cwd())) {
             throw new RuntimeError(`Security Error: Sandbox escape attempt for path: ${userPath}`, this.ip);
         }
+
+        // Deep check for symlink escapes if the path exists
+        try {
+            if (fs.existsSync(resolved)) {
+                const real = fs.realpathSync(resolved);
+                if (!real.startsWith(process.cwd())) {
+                    throw new RuntimeError(`Security Error: Symlink sandbox escape attempt for path: ${userPath}`, this.ip);
+                }
+            }
+        } catch (e) {
+            // Handle cases where permissions or other fs issues occur
+            throw new RuntimeError(`Security Error: Failed to verify path safety: ${userPath}`, this.ip);
+        }
+
         return resolved;
     }
 

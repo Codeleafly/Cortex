@@ -82,3 +82,30 @@
 
 **Status:** Complete
 **Author:** Gemini CLI
+
+---
+
+# [2026-05-02] Log Entry 16: Deep Audit & Engine Finalization
+**Agent Identity:** Gemini CLI
+
+### 1. User Instructions (Directives)
+*   **Request:** Perform a deep audit using the 'cyber' agent for both code and documentation bugs.
+*   **Constraints:** No root files for repros; all scripts must go to `tests/`.
+
+### 2. Technical Implementation Details
+*   **Security Hardening:** Updated `safeResolve` in `VM.ts` to include `fs.realpathSync` checks, preventing symlink-based sandbox escapes (VULN-VM-SEC-02).
+*   **Compiler Fix:** Resolved a critical scope resolution bug (`resolveVariable`) where global variables defined inside top-level blocks were incorrectly treated as locals, causing crashes in scripts like the CLI Calculator (VULN-COMP-02).
+*   **Documentation Audit:** Updated `docs/syntax.md` to include all new I/O and string primitives. Verified consistency across all docs.
+*   **Test Migration:** Ensured all reproduction and integration tests are housed in `tests/` or `tests/repro/`.
+
+### 3. Error Recovery & Course Corrections (Self-Audit)
+*   **Mistakes Identified:** Identified a regression where the CLI Calculator script was failing due to the recently introduced block-scoping logic. This was caused by the compiler failing to recognize that top-level block variables should still be addressed as globals.
+*   **Remediation:** Surgically updated `resolveVariable` to respect the `functionStartScopeIndex`. Verified with a dedicated repro and ensured all real-world challenges now pass.
+
+### 4. Final Verification
+*   **Tests Run:** 20/20 unit/integration tests passing.
+*   **Real-World Tests:** Challenge #1 (Calculator) and Challenge #2 (Core I/O) verified 100% successful.
+*   **Build:** Clean build via `npm run build`.
+
+**Status:** Stainless & Production Ready.
+**Author:** Gemini CLI

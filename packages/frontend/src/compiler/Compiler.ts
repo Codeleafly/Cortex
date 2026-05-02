@@ -57,7 +57,10 @@ export class Compiler {
         for (let i = this.scopes.length - 1; i >= 0; i--) {
             if (this.scopes[i].has(name)) {
                 const addr = this.scopes[i].get(name)!;
-                if (i === 0) return ~addr; // Global
+                // If we are at the top level (not in a function), all scopes are global
+                if (this.functionStartScopeIndex === 0) return ~addr;
+                // If we are in a function, only scope 0 is global
+                if (i === 0) return ~addr;
                 return addr; // Local
             }
         }

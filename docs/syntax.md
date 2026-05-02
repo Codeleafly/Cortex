@@ -60,13 +60,22 @@ greet("Cortex");
 
 ## CLI Built-ins (Global)
 Cortex provides built-in primitives for building CLI applications.
-- `arg_count`: Number of arguments passed to the script.
+- `arg_count()`: Number of arguments passed to the script.
 - `get_arg(index)`: Returns the argument at the specified index as a string.
 - `to_number(string)`: Converts a string to a numeric integer.
+- `read_file(path)`: Reads the content of a file. Returns `null` if the file doesn't exist or cannot be read.
+- `write_file(path, content)`: Writes content to a file. Returns `1` on success, `0` on failure.
+- `file_exists(path)`: Returns `1` if the file exists within the workspace, `0` otherwise.
+- `str_upper(string)`: Returns the uppercase version of the string.
+- `str_words(string)`: Returns the number of words in the string.
 
 ```javascript
-if (arg_count > 0) {
-    let first = to_number(get_arg(0));
-    print first + 10;
+if (arg_count() > 0) {
+    let path = get_arg(0);
+    if (file_exists(path)) {
+        let content = read_file(path);
+        print str_upper(content);
+        print "Words: " + str_words(content);
+    }
 }
 ```
