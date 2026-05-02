@@ -8,7 +8,8 @@ type StackValue = number | string | boolean | null;
  */
 export class VM {
     private stack: StackValue[] = []; 
-    private memory: StackValue[] = new Array(1024).fill(0); 
+    private memory: StackValue[] = new Array(1024).fill(null); 
+    private globals: StackValue[] = new Array(512).fill(null); 
     private ip = 0; 
     private bp = 0; 
     private memoryStackPointer = 0; 
@@ -59,6 +60,7 @@ export class VM {
         this.logs = [];
         this.stack = [];
         this.callStack = [];
+        this.globals.fill(null);
         this.execute();
     }
 
@@ -129,38 +131,40 @@ export class VM {
                 }
                 case Opcode.LOAD: {
                     const addr = this.readOperand();
-                    let finalAddr: number;
                     if (addr < 0) {
-                        finalAddr = ~addr; // Global (absolute)
+                        const finalAddr = ~addr;
+                        if (finalAddr < 0 || finalAddr >= this.globals.length) {
+                            throw new RuntimeError(`Invalid global address: ${finalAddr}`, this.ip);
+                        }
+                        this.push(this.globals[finalAddr]);
                     } else {
-                        finalAddr = this.bp + addr; // Local (relative)
+                        const finalAddr = this.bp + addr;
+                        if (finalAddr < 0 || finalAddr >= this.memory.length) {
+                            throw new RuntimeError(`Invalid memory address: ${finalAddr} (bp: ${this.bp})`, this.ip);
+                        }
+                        this.push(this.memory[finalAddr]);
                     }
-
-                    if (finalAddr < 0 || finalAddr >= this.memory.length) {
-                        throw new RuntimeError(`Invalid memory address: ${finalAddr} (raw: ${addr}, bp: ${this.bp})`, this.ip);
-                    }
-                    this.push(this.memory[finalAddr]);
                     break;
                 }
                 case Opcode.STORE: {
                     const addr = this.readOperand();
-                    let finalAddr: number;
-                    if (addr < 0) {
-                        finalAddr = ~addr; // Global (absolute)
-                    } else {
-                        finalAddr = this.bp + addr; // Local (relative)
-                    }
-
-                    if (finalAddr < 0 || finalAddr >= this.memory.length) {
-                        throw new RuntimeError(`Invalid memory address: ${finalAddr}`, this.ip);
-                    }
                     const val = this.pop();
-                    this.memory[finalAddr] = val;
+                    if (addr < 0) {
+                        const finalAddr = ~addr;
+                        if (finalAddr < 0 || finalAddr >= this.globals.length) {
+                            throw new RuntimeError(`Invalid global address: ${finalAddr}`, this.ip);
+                        }
+                        this.globals[finalAddr] = val;
+                    } else {
+                        const finalAddr = this.bp + addr;
+                        if (finalAddr < 0 || finalAddr >= this.memory.length) {
+                            throw new RuntimeError(`Invalid memory address: ${finalAddr}`, this.ip);
+                        }
+                        this.memory[finalAddr] = val;
 
-                    // Update memory stack pointer if we stored a local or top-level var
-                    // Globals (addr < 0) should not update the memoryStackPointer
-                    if (addr >= 0 && finalAddr >= this.memoryStackPointer) {
-                        this.memoryStackPointer = finalAddr + 1;
+                        if (finalAddr >= this.memoryStackPointer) {
+                            this.memoryStackPointer = finalAddr + 1;
+                        }
                     }
                     break;
                 }

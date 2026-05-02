@@ -111,6 +111,10 @@ export class Compiler {
                 
                 this.scopes.pop();
                 this.functionStartScopeIndex = oldStartScope;
+                
+                // Ensure every function returns a value (even null)
+                this.emit(Opcode.PUSH);
+                this.emit(0); // literal null = 0
                 this.emit(Opcode.RET);
 
                 this.bytecode[jumpOverIdx] = this.bytecode.length;
