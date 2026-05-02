@@ -25,6 +25,13 @@ For detailed rules, architectural deep-dives, and coding patterns, refer to:
 - [AI Development Workflow](docs/WORKFLOW.md): Detailed planning, research, and verification protocols.
 - [Engineering Standards](docs/STANDARDS.md): TDD requirements, error reporting, and styling.
 - [Syntax Guide](docs/syntax.md): Comprehensive hybrid JS/Python syntax documentation.
+- [Agent Skills](docs/SKILLS.md): Standardized capabilities for repository-specific workflows.
+
+## Agent Skills
+This repository supports **Agent Skills**, a lightweight format for extending AI agent capabilities.
+- **Discovery:** Skills are located in the `packages/cli/builtin-skills/` or a global `skills/` directory.
+- **Activation:** Use specialized skills to handle complex procedures like adding new Opcodes or refactoring VM logic.
+- **Creation:** Agents should create new skills for repeatable, high-stakes workflows following the [Best Practices](docs/SKILLS.md).
 
 Refer to [CONTRIBUTING.md](CONTRIBUTING.md) for branching and security guidelines.
 Refer to [AGENTS_LOG.md](AGENTS_LOG.md) for the AI contribution history.
