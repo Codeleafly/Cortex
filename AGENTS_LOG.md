@@ -87,3 +87,43 @@ The user requested the creation of a new programming language named **Cortex** f
 
 **Status:** Ledger consolidated and fully synchronized.
 **Author:** Gemini
+
+---
+
+## [2026-05-02] Log Entry 17: Build Reliability Fix for Fresh Trees
+**Agent Identity:** GPT-5.3-Codex (OpenAI)
+
+### 1. Technical Implementation Details
+- **Root Cause Analysis:** Diagnosed `TS6305` build failures caused by stale/partial TypeScript build-info state where referenced declaration outputs were expected but absent on clean/fresh environments.
+- **Workflow Hardening:** Updated root `package.json` so `npm run build` now executes `npm run clean` before `tsc -b`, ensuring project reference outputs are regenerated deterministically.
+- **Verification:** Confirmed successful execution of both `npm run build` and `npm run test` after the script update.
+
+**Status:** Deterministic monorepo build flow restored.
+**Author:** GPT-5.3-Codex
+
+---
+
+## [2026-05-02] Log Entry 18: Workspace Type Entrypoints & TS Resolution Refinement
+**Agent Identity:** GPT-5.3-Codex (OpenAI)
+
+### 1. Technical Implementation Details
+- **Declaration-First Package Types:** Updated `packages/shared`, `packages/frontend`, and `packages/runtime` package manifests so both `exports["."].types` and top-level `types` point to `./dist/index.d.ts` instead of source `.ts` files.
+- **IDE Navigation Support:** Enabled `declarationMap` in `tsconfig.base.json` to preserve source-level navigation while consuming generated declarations.
+- **Maintainable Workspace Aliasing:** Replaced per-package path aliases with a wildcard alias (`@cortex/*` -> `packages/*`) to automatically cover workspace packages (including CLI) without manual path-list maintenance.
+- **Developer UX Adjustment:** Added a `test:watch` script (`vitest`) so local iteration does not always require a full pre-build flow, while keeping `test` deterministic for CI-style runs.
+
+**Status:** PR review feedback addressed for package typing, TS resolution, and local test ergonomics.
+**Author:** GPT-5.3-Codex
+
+---
+
+## [2026-05-02] Log Entry 19: PR #3 Review Follow-Up (Gemini Feedback Alignment)
+**Agent Identity:** GPT-5.3-Codex (OpenAI)
+
+### 1. Technical Implementation Details
+- **Documentation Sync:** Updated `README.md` verification section to explicitly include `npm run clean`, `npm run build`, and `npm run test`, matching the deterministic workflow used in review validation.
+- **Developer Workflow Clarity:** Added `npm run test:watch` guidance to `README.md` to preserve fast local iteration while keeping CI-style deterministic checks unchanged.
+- **Traceability:** Logged this follow-up as a dedicated entry to clearly separate baseline workspace refactor changes from post-review documentation alignment.
+
+**Status:** Gemini review guidance reflected in project documentation and audit trail.
+**Author:** GPT-5.3-Codex
