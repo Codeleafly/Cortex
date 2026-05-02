@@ -37,6 +37,7 @@ export interface IfStmt {
     type: 'IfStmt';
     condition: Expr;
     thenBranch: Stmt[];
+    elseBranch?: Stmt[];
 }
 
 export interface FnStmt {

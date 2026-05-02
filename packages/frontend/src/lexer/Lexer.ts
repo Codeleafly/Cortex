@@ -82,6 +82,7 @@ export class Lexer {
                     'let': TokenType.LET,
                     'print': TokenType.PRINT,
                     'if': TokenType.IF,
+                    'else': TokenType.ELSE,
                     'while': TokenType.WHILE,
                     'fn': TokenType.FN,
                     'return': TokenType.RETURN,
@@ -90,7 +91,12 @@ export class Lexer {
                     'null': TokenType.NULL,
                     'arg_count': TokenType.ARG_COUNT,
                     'get_arg': TokenType.GET_ARG,
-                    'to_number': TokenType.TO_NUMBER
+                    'to_number': TokenType.TO_NUMBER,
+                    'read_file': TokenType.READ_FILE,
+                    'write_file': TokenType.WRITE_FILE,
+                    'file_exists': TokenType.FILE_EXISTS,
+                    'str_upper': TokenType.STR_UPPER,
+                    'str_words': TokenType.STR_WORDS
                 };
                 tokens.push({ type: keywords[val] ?? TokenType.IDENTIFIER, value: val, line: this.line, col: startCol });
                 continue;

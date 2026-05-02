@@ -1,5 +1,5 @@
 import { describe, test, expect, beforeEach } from 'vitest';
-import { VM } from '../src/vm/VM';
+import { VM } from '@cortex/runtime';
 import { Opcode } from '@cortex/shared';
 
 describe('VM Vulnerabilities', () => {
