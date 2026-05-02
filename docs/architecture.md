@@ -15,5 +15,17 @@ Cortex is a programming language built from scratch in TypeScript, designed for 
 - `packages/shared`: Common types, tokens, and opcodes.
 - `packages/cli`: Interactive Ink-based REPL and executable entry point.
 
+## VM Technical Specifications
+- **Operand Stack:** 1024 slots (StackValue union).
+- **Call Stack:** 256 frames (for return addresses and base pointers).
+- **Memory Segment:** 1024 slots (unified global/local storage).
+- **Addressing:**
+  - **Local:** Frame-relative addressing via Base Pointer (`bp`).
+  - **Global:** Absolute addressing (bitwise tagged by the Compiler).
+- **Safety Features:** 
+  - Mandatory bounds checking for all memory and bytecode access.
+  - Stack overflow/underflow protection.
+  - Typed numeric bytecode execution via `Int32Array`.
+
 For syntax details, see [syntax.md](syntax.md).
 For CLI usage, see [cli.md](cli.md).

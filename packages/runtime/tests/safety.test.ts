@@ -93,4 +93,73 @@ describe('VM Vulnerabilities', () => {
         vm.run(bytecode);
         expect(vm.logs).toEqual(['120']);
     });
+
+    test('VULN-VM-DoS-01: Call Stack Overflow', () => {
+        // [0] CALL 0, 0
+        const bytecode = new Int32Array([
+            Opcode.CALL, 0, 0,
+            Opcode.HALT
+        ]);
+        expect(() => vm.run(bytecode)).toThrow('Call Stack Overflow');
+    });
+
+    test('VULN-VM-DATA-01: Truncated Bytecode', () => {
+        const bytecode = new Int32Array([
+            Opcode.PUSH // Missing operand
+        ]);
+        expect(() => vm.run(bytecode)).toThrow('Unexpected end of bytecode: missing operand');
+    });
+
+    test('VULN-VM-LOGIC-01: Global Memory Pointer Isolation', () => {
+        // Corrected Indices:
+        // [0] JMP 9
+        // [2] test start:
+        // [2] STORE 0 (y)
+        // [4] LOAD 0 (y)
+        // [6] PRINT
+        // [7] RET
+        // [8] HALT
+        // [9] PUSH 100
+        // [11] STORE -1 (global x)
+        // [13] PUSH 200
+        // [15] CALL 2, 0
+        // [18] HALT
+        
+        const bytecode = new Int32Array([
+            Opcode.JMP, 9,
+            Opcode.STORE, 0,
+            Opcode.LOAD, 0,
+            Opcode.PRINT,
+            Opcode.RET,
+            Opcode.HALT,
+            Opcode.PUSH, 100,
+            Opcode.STORE, -1, // Global 0 (~0)
+            Opcode.PUSH, 200,
+            Opcode.CALL, 2, 0,
+            Opcode.HALT
+        ]);
+
+        vm.run(bytecode);
+        expect(vm.logs).toEqual(['200']);
+
+        // Now test high global
+        // [0] JMP 9
+        // [2] test: STORE 0, LOAD 0, PRINT, RET, HALT
+        // [9] PUSH 100, STORE ~500, PUSH 200, CALL 2, 0, HALT
+        const bytecodeHigh = new Int32Array([
+            Opcode.JMP, 9,
+            Opcode.STORE, 0,
+            Opcode.LOAD, 0,
+            Opcode.PRINT,
+            Opcode.RET,
+            Opcode.HALT,
+            Opcode.PUSH, 100,
+            Opcode.STORE, ~500, // Global 500
+            Opcode.PUSH, 200,
+            Opcode.CALL, 2, 0,
+            Opcode.HALT
+        ]);
+        vm.run(bytecodeHigh);
+        expect(vm.logs).toEqual(['200']);
+    });
 });

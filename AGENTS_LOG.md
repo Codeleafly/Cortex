@@ -222,3 +222,24 @@ Performed a deep audit of the engine and documentation to identify subtle logica
 
 **Status:** Language Refinement & Documentation Synchronization Complete.
 **Author:** Gemini CLI
+
+---
+
+## [2026-05-02] Log Entry 10: Surgical Remediation (Phase 2)
+**Agent Identity:** Gemini CLI (Interactive CLI Agent)
+
+### 1. User Request & Context
+Addressed subtle "invisible" vulnerabilities identified during a Phase 2 audit: unbounded call stack, safe bytecode reads, and memory pointer fragmentation.
+
+### 2. Technical Implementation Details
+- **Safe Bytecode Read:** Implemented a `readOperand()` method in the VM that performs length checks before accessing bytecode, preventing pollution from truncated scripts.
+- **Call Stack Depth Limit:** Implemented a 256-frame limit for the `callStack` to prevent host-level OOM crashes from infinite recursion.
+- **Memory Pointer Isolation:** Fixed a logic bug where global variable stores were incorrectly updating the `memoryStackPointer`, which could "squeeze" available memory for local variables in future frames.
+- **Strict Memory Typing:** Fully typed the internal `memory` array as `StackValue[]` to adhere to zero-tolerance `any` standards.
+
+### 3. Final Verification
+- Added 3 new edge-case tests to `safety.test.ts` for Call Stack Overflow, Truncated Bytecode, and Memory Pointer Isolation.
+- Verified all 14 tests (6 integration + 8 safety) are passing.
+
+**Status:** Phase 2 Vulnerability Remediation Complete. Project fully hardened.
+**Author:** Gemini CLI

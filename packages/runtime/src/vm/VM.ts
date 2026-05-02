@@ -8,7 +8,7 @@ type StackValue = number | string | boolean | null;
  */
 export class VM {
     private stack: StackValue[] = []; 
-    private memory = new Array(1024).fill(0); 
+    private memory: StackValue[] = new Array(1024).fill(0); 
     private ip = 0; 
     private bp = 0; 
     private memoryStackPointer = 0; 
@@ -20,6 +20,13 @@ export class VM {
     private args: string[] = [];
 
     constructor() {}
+
+    private readOperand(): number {
+        if (this.ip >= this.bytecode.length) {
+            throw new RuntimeError('Unexpected end of bytecode: missing operand', this.ip);
+        }
+        return this.bytecode[this.ip++];
+    }
 
     private push(val: StackValue) {
         if (this.stack.length >= 1024) {
@@ -73,10 +80,10 @@ export class VM {
                 case Opcode.HALT:
                     return;
                 case Opcode.PUSH:
-                    this.push(this.bytecode[this.ip++]);
+                    this.push(this.readOperand());
                     break;
                 case Opcode.PUSH_STR: {
-                    const idx = this.bytecode[this.ip++];
+                    const idx = this.readOperand();
                     this.push(this.stringPool[idx]);
                     break;
                 }
@@ -121,7 +128,7 @@ export class VM {
                     break;
                 }
                 case Opcode.LOAD: {
-                    const addr = this.bytecode[this.ip++];
+                    const addr = this.readOperand();
                     let finalAddr: number;
                     if (addr < 0) {
                         finalAddr = ~addr; // Global (absolute)
@@ -136,7 +143,7 @@ export class VM {
                     break;
                 }
                 case Opcode.STORE: {
-                    const addr = this.bytecode[this.ip++];
+                    const addr = this.readOperand();
                     let finalAddr: number;
                     if (addr < 0) {
                         finalAddr = ~addr; // Global (absolute)
@@ -151,7 +158,8 @@ export class VM {
                     this.memory[finalAddr] = val;
 
                     // Update memory stack pointer if we stored a local or top-level var
-                    if (finalAddr >= this.memoryStackPointer) {
+                    // Globals (addr < 0) should not update the memoryStackPointer
+                    if (addr >= 0 && finalAddr >= this.memoryStackPointer) {
                         this.memoryStackPointer = finalAddr + 1;
                     }
                     break;
@@ -163,10 +171,10 @@ export class VM {
                     break;
                 }
                 case Opcode.JMP:
-                    this.ip = this.bytecode[this.ip];
+                    this.ip = this.readOperand();
                     break;
                 case Opcode.JMP_IF_FALSE: {
-                    const target = this.bytecode[this.ip++];
+                    const target = this.readOperand();
                     const condition = this.pop();
                     if (!condition) this.ip = target;
                     break;
@@ -213,9 +221,13 @@ export class VM {
                     break;
                 }
                 case Opcode.CALL: {
-                    const address = this.bytecode[this.ip++];
-                    const argCount = this.bytecode[this.ip++];
+                    const address = this.readOperand();
+                    const argCount = this.readOperand();
                     
+                    if (this.callStack.length >= 256) {
+                        throw new RuntimeError('Call Stack Overflow', this.ip);
+                    }
+
                     // Verify enough arguments on stack
                     if (this.stack.length < argCount) {
                         throw new RuntimeError('Stack Underflow in CALL', this.ip);
