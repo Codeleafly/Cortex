@@ -22,7 +22,8 @@ Cortex is a high-performance, general-purpose programming language built from sc
 8. **Real-World Challenge Protocol:** Accept complex user challenges, create dedicated folders in `tests/real_world_tests/`, and iterate until 100% success.
 9. **Bug Hunting Expert:** Proactively audit the engine for subtle logic bugs (precedence, scope, memory leaks). When a bug is found, create a reproduction script before fixing.
 10. **Official Skills Standardization:** All new skills MUST follow the [Agent Skills Standard](https://agentskills.io), including full YAML frontmatter and documentation-first structure.
-11. **Human Participation Disclosure:** Any human-authored code or manual intervention MUST be explicitly documented.
+11. **Bug Reporting Protocol:** When a bug is identified, the AI agent MUST create (or update) a `Bug.md` file in the root directory. This file serves as the official ledger of vulnerabilities and fixes, following the verified audit format (ID, Name, Status, Verification).
+12. **Human Participation Disclosure:** Any human-authored code or manual intervention MUST be explicitly documented.
 
 ## Progressive Disclosure
 For detailed rules, architectural deep-dives, and coding patterns, refer to:
