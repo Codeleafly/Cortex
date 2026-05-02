@@ -14,6 +14,7 @@ cortex
 ### REPL Commands (Dot Commands)
 - `.help`: Displays available commands and syntax.
 - `.reset`: Clears the VM memory and compiler state, resetting the environment.
+- `.editor`: Toggles multi-line editor mode (manually enables continuation prompt).
 - `.exit`: Gracefully exits the REPL.
 
 ### Advanced Multi-line Detection
