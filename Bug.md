@@ -20,8 +20,10 @@
 | **VULN-VM-DATA-01** | Truncated Bytecode Read | **FIXED** ✅ | `readOperand()` with length safety added to VM. |
 | **VULN-CTX-01** | Global/Local Collision | **FIXED** ✅ | Dedicated `globals` array isolation implemented in VM. |
 | **VULN-CTX-02** | Stack Desynchronization | **FIXED** ✅ | Implicit `PUSH null` added to all functions in Compiler. |
+| **VULN-VM-SEC-01** | Path Traversal Escape | **FIXED** ✅ | `safeResolve` sandbox isolation implemented in VM. |
+| **OPT-COMP-01** | Memory Fragmentation | **FIXED** ✅ | Block-level memory reclamation implemented in Compiler. |
 
 ## 2. Conclusion
-The Cortex programming language engine has undergone three phases of rigorous logic forensics and vulnerability remediation. Every identified flaw—from architectural gaps to subtle memory collisions—has been surgically resolved and verified with unit tests.
+The Cortex programming language engine has undergone four phases of rigorous logic forensics and vulnerability remediation. Every identified flaw—from architectural gaps to sandbox escapes—has been surgically resolved and verified with unit tests.
 
 **Final Audit Verdict:** 🟢 **STAINLESS & PRODUCTION READY**
