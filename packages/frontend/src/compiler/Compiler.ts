@@ -123,7 +123,7 @@ export class Compiler {
             case 'IfStmt': {
                 this.expression(stmt.condition);
                 this.emit(Opcode.JMP_IF_FALSE);
-                const jumpOffsetIdx = this.bytecode.length;
+                const jumpToElseIdx = this.bytecode.length;
                 this.emit(0); 
 
                 this.scopes.push(new Map());
@@ -132,7 +132,23 @@ export class Compiler {
                 }
                 this.scopes.pop();
 
-                this.bytecode[jumpOffsetIdx] = this.bytecode.length;
+                if (stmt.elseBranch) {
+                    this.emit(Opcode.JMP);
+                    const jumpToEndIdx = this.bytecode.length;
+                    this.emit(0);
+
+                    this.bytecode[jumpToElseIdx] = this.bytecode.length;
+
+                    this.scopes.push(new Map());
+                    for (const elseStmt of stmt.elseBranch) {
+                        this.statement(elseStmt);
+                    }
+                    this.scopes.pop();
+
+                    this.bytecode[jumpToEndIdx] = this.bytecode.length;
+                } else {
+                    this.bytecode[jumpToElseIdx] = this.bytecode.length;
+                }
                 break;
             }
             case 'WhileStmt': {

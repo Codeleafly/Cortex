@@ -21,10 +21,12 @@ x = 20; // Re-assignment
 - **Logical:** `&&` (AND), `||` (OR), `!` (NOT)
 
 ## Control Flow
-### If Statements
+### If/Else Statements
 ```javascript
 if (x > 10) {
     print "High";
+} else {
+    print "Low";
 }
 ```
 

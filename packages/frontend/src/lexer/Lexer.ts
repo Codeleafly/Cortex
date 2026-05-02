@@ -82,6 +82,7 @@ export class Lexer {
                     'let': TokenType.LET,
                     'print': TokenType.PRINT,
                     'if': TokenType.IF,
+                    'else': TokenType.ELSE,
                     'while': TokenType.WHILE,
                     'fn': TokenType.FN,
                     'return': TokenType.RETURN,
