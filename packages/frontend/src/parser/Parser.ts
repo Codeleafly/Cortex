@@ -144,7 +144,7 @@ export class Parser {
 
     private comparison(): Expr {
         let expr = this.term();
-        while (this.match(TokenType.GT, TokenType.LT, TokenType.EQ_EQ)) {
+        while (this.match(TokenType.GT, TokenType.LT, TokenType.EQ_EQ, TokenType.BANG_EQ)) {
             const operator = this.previous();
             const right = this.term();
             expr = { type: 'BinaryExpr', left: expr, operator, right };
@@ -265,6 +265,36 @@ export class Parser {
             const arg = this.expression();
             this.consume(TokenType.RPAREN, "Expect ')' after argument.");
             return { type: 'CallExpr', callee: 'str_words', args: [arg] };
+        }
+
+        if (this.match(TokenType.READ_LINE)) {
+            if (this.match(TokenType.LPAREN)) {
+                this.consume(TokenType.RPAREN, "Expect ')' after 'read_line'.");
+            }
+            return { type: 'CallExpr', callee: 'read_line', args: [] };
+        }
+
+        if (this.match(TokenType.STR_AT)) {
+            this.consume(TokenType.LPAREN, "Expect '(' after 'str_at'.");
+            const str = this.expression();
+            this.consume(TokenType.COMMA, "Expect ',' after string.");
+            const idx = this.expression();
+            this.consume(TokenType.RPAREN, "Expect ')' after arguments.");
+            return { type: 'CallExpr', callee: 'str_at', args: [str, idx] };
+        }
+
+        if (this.match(TokenType.STR_LEN)) {
+            this.consume(TokenType.LPAREN, "Expect '(' after 'str_len'.");
+            const str = this.expression();
+            this.consume(TokenType.RPAREN, "Expect ')' after argument.");
+            return { type: 'CallExpr', callee: 'str_len', args: [str] };
+        }
+
+        if (this.match(TokenType.RUN_CMD)) {
+            this.consume(TokenType.LPAREN, "Expect '(' after 'run_command'.");
+            const cmd = this.expression();
+            this.consume(TokenType.RPAREN, "Expect ')' after argument.");
+            return { type: 'CallExpr', callee: 'run_command', args: [cmd] };
         }
 
         if (this.match(TokenType.LPAREN)) {

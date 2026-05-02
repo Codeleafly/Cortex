@@ -218,6 +218,7 @@ export class Compiler {
                     case TokenType.GT: this.emit(Opcode.CMP_GT); break;
                     case TokenType.LT: this.emit(Opcode.CMP_LT); break;
                     case TokenType.EQ_EQ: this.emit(Opcode.CMP_EQ); break;
+                    case TokenType.BANG_EQ: this.emit(Opcode.CMP_NEQ); break;
                     case TokenType.AND_AND: this.emit(Opcode.AND); break;
                     case TokenType.OR_OR: this.emit(Opcode.OR); break;
                 }
@@ -271,6 +272,14 @@ export class Compiler {
                     this.emit(Opcode.STR_UPPER);
                 } else if (expr.callee === 'str_words') {
                     this.emit(Opcode.STR_WORDS);
+                } else if (expr.callee === 'read_line') {
+                    this.emit(Opcode.READ_LINE);
+                } else if (expr.callee === 'str_at') {
+                    this.emit(Opcode.STR_AT);
+                } else if (expr.callee === 'str_len') {
+                    this.emit(Opcode.STR_LEN);
+                } else if (expr.callee === 'run_command') {
+                    this.emit(Opcode.RUN_CMD);
                 } else {
                     const fn = this.functions.get(expr.callee);
                     if (!fn) throw new Error(`Undefined function: ${expr.callee}`);

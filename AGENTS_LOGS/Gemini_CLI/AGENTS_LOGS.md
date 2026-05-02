@@ -112,6 +112,42 @@
 
 ---
 
+# [2026-05-02] Log Entry 18: Deno-Level Security & TUI Engineering
+**Agent Identity:** Gemini CLI
+
+### 1. User Instructions (Directives)
+*   **Request:** Implement "Deno-level" security with a secure-by-default permission system, support for string escape sequences (\n, ANSI), and a TUI Tic Tac Toe game.
+*   **Constraints:** Permissions must prompt (y/n) at runtime or be granted via flags like `--allow=read,write`. Game must use raw ANSI escapes.
+
+### 2. Technical Implementation Details
+*   **Security Architecture:**
+    - Integrated `readline-sync` for synchronous permission prompts and user input.
+    - Implemented a `Permissions` state in the VM with `checkPermission` gating for `read_file`, `write_file`, and the new `run_command`.
+    - Added `safeResolve` with `fs.realpathSync` to block symlink escapes.
+*   **CLI Enhancements:**
+    - Added support for flexible permission flags: `--allow=read,write,run` and `--allow-all`.
+*   **Language Features:**
+    - **Lexer:** Added support for escape sequences (`\n`, `\r`, `\t`, `\\`) and `\e` for the ANSI ESC character.
+    - **Strings:** Added `str_at(str, idx)` and `str_len(str)` primitives.
+    - **Input:** Added `read_line()` for terminal input.
+    - **Operators:** Added `!=` (BANG_EQ) support.
+*   **Challenge Implementation:**
+    - Created `tests/real_world_tests/03_tic_tac_toe/game.ctx`.
+    - Implemented full game logic (win checking, turn rotation, board drawing) using the new TUI features and ANSI styling.
+
+### 3. Error Recovery & Course Corrections (Self-Audit)
+*   **Mistakes Identified:** Initial ANSI escape implementation used double backslashes which rendered as raw text.
+*   **Remediation:** Corrected the game script to use single backslashes recognized by the Lexer's new escape logic. Verified that `\e` correctly emits the ESC character (0x1B).
+
+### 4. Final Verification
+*   **Tests Run:** 20 core tests + Tic Tac Toe manual play verification + Permission prompt verification.
+*   **Success Criteria:** Tic Tac Toe is fully playable with colors and screen clearing. Permission system correctly prompts and blocks access.
+
+**Status:** Cortex Security Model V1 & TUI Engine Complete.
+**Author:** Gemini CLI
+
+---
+
 # [2026-05-02] Log Entry 17: Constitutional Rule Formalization
 **Agent Identity:** Gemini CLI
 

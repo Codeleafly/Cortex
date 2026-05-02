@@ -17,6 +17,7 @@ export enum Opcode {
     CMP_GT = 11,
     CMP_LT = 12,
     CMP_EQ = 13,
+    CMP_NEQ = 32,
     POP = 14,
     PUSH_STR = 15,
     AND = 16,
@@ -32,4 +33,8 @@ export enum Opcode {
     FILE_EXISTS = 26,
     STR_UPPER = 27,
     STR_WORDS = 28,
+    READ_LINE = 29,
+    STR_AT = 30,
+    STR_LEN = 31,
+    RUN_CMD = 33,
 }

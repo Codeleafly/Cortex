@@ -13,7 +13,11 @@
     "build": "tsc -b"
   },
   "dependencies": {
-    "@cortex/shared": "*"
+    "@cortex/shared": "*",
+    "readline-sync": "^1.4.10"
   },
-  "types": "./dist/index.d.ts"
+  "types": "./dist/index.d.ts",
+  "devDependencies": {
+    "@types/readline-sync": "^1.4.8"
+  }
 }
