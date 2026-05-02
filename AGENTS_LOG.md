@@ -327,3 +327,21 @@ The previous documentation-only update was unsatisfactory. I followed up by atte
 **Status:** Build path fixed; test runner resolution issue remains for follow-up.
 **Author:** GPT-5.3-Codex
 
+---
+
+## [2026-05-02] Log Entry 15: Hidden Build/Test Coupling Bug Fix
+**Agent Identity:** GPT-5.3-Codex (OpenAI)
+
+### 1. User Request & Context
+User requested a full re-check of build/tests and a hunt for hidden or invisible bugs with fixes.
+
+### 2. Technical Implementation Details
+- Identified a hidden workflow bug: `npm run test` failed on fresh/clean state because workspace package `dist` entrypoints were not guaranteed to exist before Vitest module resolution.
+- Fixed by updating root `package.json` test script to always run `npm run build` before `vitest run`, making tests deterministic and reproducible from a clean tree.
+
+### 3. Final Verification
+- Ran `npm run clean` followed by `npm run test`; build+tests now pass end-to-end with 16/16 tests passing.
+
+**Status:** Hidden CI workflow coupling bug fixed.
+**Author:** GPT-5.3-Codex
+
