@@ -1,5 +1,7 @@
 import { Opcode } from '@cortex/shared';
 import { RuntimeError } from './RuntimeError.js';
+import fs from 'fs';
+import path from 'path';
 
 type StackValue = number | string | boolean | null;
 
@@ -48,6 +50,14 @@ export class VM {
             throw new RuntimeError('Stack Underflow (peek)', this.ip);
         }
         return this.stack[this.stack.length - 1];
+    }
+
+    private safeResolve(userPath: string): string {
+        const resolved = path.resolve(userPath);
+        if (!resolved.startsWith(process.cwd())) {
+            throw new RuntimeError(`Security Error: Sandbox escape attempt for path: ${userPath}`, this.ip);
+        }
+        return resolved;
     }
 
     public run(bytecode: Int32Array, stringPool: string[] = [], args: string[] = []) {
@@ -272,6 +282,50 @@ export class VM {
                 case Opcode.TO_NUMBER: {
                     const val = this.pop();
                     this.push(parseInt(String(val), 10));
+                    break;
+                }
+                case Opcode.READ_FILE: {
+                    const userPath = this.pop();
+                    if (typeof userPath !== 'string') throw new RuntimeError('read_file requires string path', this.ip);
+                    const safePath = this.safeResolve(userPath);
+                    try {
+                        this.push(fs.readFileSync(safePath, 'utf-8'));
+                    } catch (e) {
+                        this.push(null);
+                    }
+                    break;
+                }
+                case Opcode.WRITE_FILE: {
+                    const content = this.pop();
+                    const userPath = this.pop();
+                    if (typeof userPath !== 'string' || typeof content !== 'string') throw new RuntimeError('write_file requires string path and content', this.ip);
+                    const safePath = this.safeResolve(userPath);
+                    try {
+                        fs.writeFileSync(safePath, content, 'utf-8');
+                        this.push(1);
+                    } catch (e) {
+                        this.push(0);
+                    }
+                    break;
+                }
+                case Opcode.FILE_EXISTS: {
+                    const userPath = this.pop();
+                    if (typeof userPath !== 'string') throw new RuntimeError('file_exists requires string path', this.ip);
+                    const safePath = this.safeResolve(userPath);
+                    this.push(fs.existsSync(safePath) ? 1 : 0);
+                    break;
+                }
+                case Opcode.STR_UPPER: {
+                    const str = this.pop();
+                    if (typeof str !== 'string') throw new RuntimeError('str_upper requires string', this.ip);
+                    this.push(str.toUpperCase());
+                    break;
+                }
+                case Opcode.STR_WORDS: {
+                    const str = this.pop();
+                    if (typeof str !== 'string') throw new RuntimeError('str_words requires string', this.ip);
+                    const words = str.trim().split(/\s+/);
+                    this.push(words[0] === '' ? 0 : words.length);
                     break;
                 }
                 default:

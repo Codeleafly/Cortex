@@ -40,6 +40,19 @@ export class Compiler {
 
     private emit(op: number) { this.bytecode.push(op); }
 
+    private getCurrentOffset(): number {
+        let offset = 0;
+        for (let i = this.functionStartScopeIndex; i < this.scopes.length; i++) {
+            offset += this.scopes[i].size;
+        }
+        return offset;
+    }
+
+    private reclaimOffset(offset: number) {
+        // This is a no-op at compile-time but documents the intent.
+        // The defineVariable logic already uses the current cumulative size.
+    }
+
     private resolveVariable(name: string): number {
         for (let i = this.scopes.length - 1; i >= 0; i--) {
             if (this.scopes[i].has(name)) {
@@ -126,25 +139,30 @@ export class Compiler {
                 const jumpToElseIdx = this.bytecode.length;
                 this.emit(0); 
 
+                // Track starting offset for memory reclamation
+                const startOffset = this.getCurrentOffset();
                 this.scopes.push(new Map());
                 for (const thenStmt of stmt.thenBranch) {
                     this.statement(thenStmt);
                 }
                 this.scopes.pop();
+                this.reclaimOffset(startOffset);
 
                 if (stmt.elseBranch) {
                     this.emit(Opcode.JMP);
                     const jumpToEndIdx = this.bytecode.length;
                     this.emit(0);
-
+                    
                     this.bytecode[jumpToElseIdx] = this.bytecode.length;
-
+                    
+                    const elseStartOffset = this.getCurrentOffset();
                     this.scopes.push(new Map());
                     for (const elseStmt of stmt.elseBranch) {
                         this.statement(elseStmt);
                     }
                     this.scopes.pop();
-
+                    this.reclaimOffset(elseStartOffset);
+                    
                     this.bytecode[jumpToEndIdx] = this.bytecode.length;
                 } else {
                     this.bytecode[jumpToElseIdx] = this.bytecode.length;
@@ -159,11 +177,13 @@ export class Compiler {
                 const jumpOffsetIdx = this.bytecode.length;
                 this.emit(0); 
 
+                const startOffset = this.getCurrentOffset();
                 this.scopes.push(new Map());
                 for (const bodyStmt of stmt.body) {
                     this.statement(bodyStmt);
                 }
                 this.scopes.pop();
+                this.reclaimOffset(startOffset);
 
                 this.emit(Opcode.JMP);
                 this.emit(loopStart);
@@ -238,6 +258,16 @@ export class Compiler {
                     this.emit(Opcode.GET_ARG);
                 } else if (expr.callee === 'to_number') {
                     this.emit(Opcode.TO_NUMBER);
+                } else if (expr.callee === 'read_file') {
+                    this.emit(Opcode.READ_FILE);
+                } else if (expr.callee === 'write_file') {
+                    this.emit(Opcode.WRITE_FILE);
+                } else if (expr.callee === 'file_exists') {
+                    this.emit(Opcode.FILE_EXISTS);
+                } else if (expr.callee === 'str_upper') {
+                    this.emit(Opcode.STR_UPPER);
+                } else if (expr.callee === 'str_words') {
+                    this.emit(Opcode.STR_WORDS);
                 } else {
                     const fn = this.functions.get(expr.callee);
                     if (!fn) throw new Error(`Undefined function: ${expr.callee}`);

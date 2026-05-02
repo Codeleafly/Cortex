@@ -27,4 +27,9 @@ export enum Opcode {
     ARG_COUNT = 21,
     GET_ARG = 22,
     TO_NUMBER = 23,
+    READ_FILE = 24,
+    WRITE_FILE = 25,
+    FILE_EXISTS = 26,
+    STR_UPPER = 27,
+    STR_WORDS = 28,
 }

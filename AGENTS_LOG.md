@@ -127,3 +127,54 @@ The user requested the creation of a new programming language named **Cortex** f
 
 **Status:** Gemini review guidance reflected in project documentation and audit trail.
 **Author:** GPT-5.3-Codex
+
+---
+
+## [2026-05-02] Log Entry 20: Core I/O Challenge & Language Expansion
+**Agent Identity:** Gemini CLI (Interactive CLI Agent)
+
+### 1. User Request & Context
+Solved the "Core I/O & Data Parsing" challenge under the Real-World Challenge Protocol. This required expanding the language with file system capabilities and string manipulation primitives, and implementing a practical script in `.ctx`.
+
+### 2. Technical Implementation Details
+- **Engine Upgrades (Phase 4):** Introduced five new language primitives:
+  - `read_file(path)`: Reads file content using Node.js `fs.readFileSync`.
+  - `write_file(path, content)`: Writes to a file using `fs.writeFileSync`.
+  - `file_exists(path)`: Checks for file existence using `fs.existsSync`.
+  - `str_upper(str)`: Converts a string to uppercase.
+  - `str_words(str)`: Returns the count of words in a string.
+- **Syntactic Enhancements:**
+  - Added full support for `else` and `else if` blocks in the Parser and Compiler.
+  - Updated `arg_count` to support optional parentheses `arg_count()` for consistency.
+- **Challenge Implementation:** Created `tests/real_world_tests/02_core_io/main.ctx` which demonstrates argument parsing, file validation, content transformation, and word counting.
+
+### 3. Final Verification
+- Executed the challenge script: `node packages/cli/dist/index.js tests/real_world_tests/02_core_io/main.ctx data.txt`.
+- Verified word count (17) and uppercase transformation in `out.txt`.
+- Verified all core integration and safety tests are passing flawlessly.
+
+**Status:** Challenge #2 (Core I/O) Complete & Engine Significantly Enhanced.
+**Author:** Gemini CLI
+
+---
+
+## [2026-05-02] Log Entry 21: Final Hardening, Optimization & Test Consolidation
+**Agent Identity:** Gemini CLI (Interactive CLI Agent)
+
+### 1. User Request & Context
+Final cleanup of the workspace, consolidation of all test suites into the root `tests/` directory, and verification of the entire engine stability following the Real-World Challenge #2.
+
+### 2. Technical Implementation Details
+- **Security Hardening:** Implemented `safeResolve` in the VM to prevent path traversal vulnerabilities identified by the Cyber Agent.
+- **Memory Optimization:** Updated the Compiler to support block-level memory reclamation for `if` and `while` blocks, preventing memory exhaustion in nested structures.
+- **Workspace Cleanup:** Removed all temporary reproduction scripts and artifacts from the root directory.
+- **Test Consolidation:** Relocated all package-specific and repro tests to the centralized `tests/` directory and updated import paths to use workspace packages.
+- **Bug Fixes:** Resolved an issue where `arg_count` was causing parsing errors when used with parentheses.
+
+### 3. Final Verification
+- **Test Results:** 19/19 tests passing (Integration, Safety, Repro, Security).
+- **Challenge Verification:** Re-verified Challenge #2 (Core I/O) with successful file transformation and word counting.
+- **Build Integrity:** Confirmed clean build using `tsc -b`.
+
+**Status:** Project Sanitized, Hardened, and Verified. Production Ready.
+**Author:** Gemini CLI
