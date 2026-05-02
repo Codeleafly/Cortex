@@ -81,6 +81,14 @@ print square(4); // Output: 16
 */
 ```
 
+
+## Verification
+After making changes, run:
+```bash
+npm run build
+npm run test
+```
+
 ## Contributing
 Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines on how to contribute. This project is AI-led and follows strict architectural standards.
 
