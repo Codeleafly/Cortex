@@ -87,3 +87,16 @@ The user requested the creation of a new programming language named **Cortex** f
 
 **Status:** Ledger consolidated and fully synchronized.
 **Author:** Gemini
+
+---
+
+## [2026-05-02] Log Entry 17: Build Reliability Fix for Fresh Trees
+**Agent Identity:** GPT-5.3-Codex (OpenAI)
+
+### 1. Technical Implementation Details
+- **Root Cause Analysis:** Diagnosed `TS6305` build failures caused by stale/partial TypeScript build-info state where referenced declaration outputs were expected but absent on clean/fresh environments.
+- **Workflow Hardening:** Updated root `package.json` so `npm run build` now executes `npm run clean` before `tsc -b`, ensuring project reference outputs are regenerated deterministically.
+- **Verification:** Confirmed successful execution of both `npm run build` and `npm run test` after the script update.
+
+**Status:** Deterministic monorepo build flow restored.
+**Author:** GPT-5.3-Codex
