@@ -8,6 +8,7 @@ export enum TokenType {
     LET,
     PRINT,
     IF,
+    ELSE,
     WHILE,
     FN,
     RETURN,

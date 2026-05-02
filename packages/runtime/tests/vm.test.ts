@@ -47,4 +47,9 @@ describe('Cortex File-Based Integration Tests', () => {
         const logs = runFile('tests/ctx/test_06_comments.ctx');
         expect(logs).toEqual(['comment test']);
     });
+
+    it('should pass test_07_ifelse.ctx', () => {
+        const logs = runFile('tests/ctx/test_07_ifelse.ctx');
+        expect(logs).toEqual(['then', 'else2']);
+    });
 });

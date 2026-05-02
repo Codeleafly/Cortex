@@ -68,7 +68,11 @@ export class Parser {
         const condition = this.expression();
         this.consume(TokenType.RPAREN, "Expect ')' after if condition.");
         const thenBranch = this.block();
-        return { type: 'IfStmt', condition, thenBranch };
+        let elseBranch: Stmt[] | undefined;
+        if (this.match(TokenType.ELSE)) {
+            elseBranch = this.block();
+        }
+        return { type: 'IfStmt', condition, thenBranch, elseBranch };
     }
 
     private whileStatement(): Stmt {

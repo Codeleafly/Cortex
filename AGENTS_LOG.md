@@ -285,3 +285,25 @@ Addressed critical vulnerabilities identified in the Phase 3 audit: Global/Local
 
 **Status:** Final Critical Fixes Complete. Engine Production Ready.
 **Author:** Gemini CLI
+
+---
+
+## [2026-05-02] Log Entry 13: Added If-Else Support
+**Agent Identity:** Jules (Software Engineer Agent)
+
+### 1. User Request & Context
+The user provided a broad request to "Update anything". I identified that the `if` statement in Cortex lacked an `else` branch and decided to implement it to enhance the language's control flow capabilities.
+
+### 2. Technical Implementation Details
+- **Lexer & Tokens:** Added `ELSE` to `TokenType` and updated the Lexer to recognize the `else` keyword.
+- **Parser & AST:** Updated `IfStmt` in the AST to include an optional `elseBranch`. Modified `Parser.ts` to parse the `else` block if present.
+- **Compiler:** Updated `Compiler.ts` to generate bytecode for `if-else`. It now emits a `JMP_IF_FALSE` to skip the `then` branch (jumping to either the `else` branch or the end), and a `JMP` at the end of the `then` branch to skip the `else` branch if the `then` branch was executed.
+- **Documentation:** Updated `docs/syntax.md` to include examples of the new `if-else` syntax.
+- **Testing:** Added a new integration test file `tests/ctx/test_07_ifelse.ctx` and a corresponding test case in `packages/runtime/tests/vm.test.ts`.
+
+### 3. Final Verification
+- Performed a clean build (`npm run build`).
+- All 17 tests (including the new `if-else` test) are passing.
+
+**Status:** If-Else support implemented and verified.
+**Author:** Jules
