@@ -37,4 +37,5 @@ export enum Opcode {
     STR_AT = 30,
     STR_LEN = 31,
     RUN_CMD = 33,
+    JMP_IF_TRUE = 34,
 }

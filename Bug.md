@@ -23,6 +23,8 @@
 | **VULN-VM-SEC-01** | Path Traversal Escape | **FIXED** ✅ | `safeResolve` sandbox isolation implemented in VM. |
 | **VULN-VM-SEC-02** | Symlink Sandbox Escape | **FIXED** ✅ | Added `fs.realpathSync` check to `safeResolve`. |
 | **VULN-COMP-02** | Scope Resolution Mismatch | **FIXED** ✅ | Corrected `resolveVariable` to handle globals in top-level blocks. |
+| **VULN-LOGIC-01** | Non-Short-Circuiting | **FIXED** ✅ | Implemented `JMP_IF_TRUE` and conditional logic jumps. |
+| **VULN-LOGIC-02** | Operator Precedence | **FIXED** ✅ | Refactored Parser to separate equality from comparison. |
 | **OPT-COMP-01** | Memory Fragmentation | **FIXED** ✅ | Block-level memory reclamation implemented in Compiler. |
 
 ## 2. Conclusion

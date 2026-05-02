@@ -17,8 +17,8 @@ x = 20; // Re-assignment
 
 ## Math & Operators
 - **Arithmetic:** `+`, `-`, `*`, `/`
-- **Comparison:** `>`, `<`, `==`
-- **Logical:** `&&` (AND), `||` (OR), `!` (NOT)
+- **Comparison:** `>`, `<`, `==`, `!=`
+- **Logical:** `&&` (AND), `||` (OR), `!` (NOT) - *Supports short-circuiting.*
 
 ## Control Flow
 ### If/Else Statements
@@ -63,11 +63,15 @@ Cortex provides built-in primitives for building CLI applications.
 - `arg_count()`: Number of arguments passed to the script.
 - `get_arg(index)`: Returns the argument at the specified index as a string.
 - `to_number(string)`: Converts a string to a numeric integer.
+- `read_line()`: Reads a line of input from the user (blocks until Enter is pressed).
 - `read_file(path)`: Reads the content of a file. Returns `null` if the file doesn't exist or cannot be read.
 - `write_file(path, content)`: Writes content to a file. Returns `1` on success, `0` on failure.
 - `file_exists(path)`: Returns `1` if the file exists within the workspace, `0` otherwise.
 - `str_upper(string)`: Returns the uppercase version of the string.
 - `str_words(string)`: Returns the number of words in the string.
+- `str_at(string, index)`: Returns the character at the given index, or `null` if out of bounds.
+- `str_len(string)`: Returns the length of the string.
+- `run_command(command)`: Executes a shell command and returns its stdout. Requires `run` permission.
 
 ```javascript
 if (arg_count() > 0) {
@@ -79,3 +83,8 @@ if (arg_count() > 0) {
     }
 }
 ```
+
+## Security & Permissions
+Cortex implements a granular permission system inspired by Deno. Sensitive operations (file access, command execution) require explicit permission. In interactive mode, Cortex will prompt the user if a permission is missing. In non-interactive mode, it will throw a security error.
+
+See the [CLI Guide](cli.md) for more details on permission flags.

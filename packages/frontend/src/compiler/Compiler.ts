@@ -208,19 +208,51 @@ export class Compiler {
     private expression(expr: Expr) {
         switch (expr.type) {
             case 'BinaryExpr':
-                this.expression(expr.left);
-                this.expression(expr.right);
-                switch (expr.operator.type) {
-                    case TokenType.PLUS: this.emit(Opcode.ADD); break;
-                    case TokenType.MINUS: this.emit(Opcode.SUB); break;
-                    case TokenType.STAR: this.emit(Opcode.MUL); break;
-                    case TokenType.SLASH: this.emit(Opcode.DIV); break;
-                    case TokenType.GT: this.emit(Opcode.CMP_GT); break;
-                    case TokenType.LT: this.emit(Opcode.CMP_LT); break;
-                    case TokenType.EQ_EQ: this.emit(Opcode.CMP_EQ); break;
-                    case TokenType.BANG_EQ: this.emit(Opcode.CMP_NEQ); break;
-                    case TokenType.AND_AND: this.emit(Opcode.AND); break;
-                    case TokenType.OR_OR: this.emit(Opcode.OR); break;
+                if (expr.operator.type === TokenType.AND_AND) {
+                    this.expression(expr.left);
+                    this.emit(Opcode.JMP_IF_FALSE);
+                    const jumpToFalseIdx = this.bytecode.length;
+                    this.emit(0);
+                    
+                    this.expression(expr.right);
+                    this.emit(Opcode.JMP);
+                    const jumpToEndIdx = this.bytecode.length;
+                    this.emit(0);
+                    
+                    this.bytecode[jumpToFalseIdx] = this.bytecode.length;
+                    this.emit(Opcode.PUSH);
+                    this.emit(0);
+                    
+                    this.bytecode[jumpToEndIdx] = this.bytecode.length;
+                } else if (expr.operator.type === TokenType.OR_OR) {
+                    this.expression(expr.left);
+                    this.emit(Opcode.JMP_IF_TRUE);
+                    const jumpToTrueIdx = this.bytecode.length;
+                    this.emit(0);
+                    
+                    this.expression(expr.right);
+                    this.emit(Opcode.JMP);
+                    const jumpToEndIdx = this.bytecode.length;
+                    this.emit(0);
+                    
+                    this.bytecode[jumpToTrueIdx] = this.bytecode.length;
+                    this.emit(Opcode.PUSH);
+                    this.emit(1);
+                    
+                    this.bytecode[jumpToEndIdx] = this.bytecode.length;
+                } else {
+                    this.expression(expr.left);
+                    this.expression(expr.right);
+                    switch (expr.operator.type) {
+                        case TokenType.PLUS: this.emit(Opcode.ADD); break;
+                        case TokenType.MINUS: this.emit(Opcode.SUB); break;
+                        case TokenType.STAR: this.emit(Opcode.MUL); break;
+                        case TokenType.SLASH: this.emit(Opcode.DIV); break;
+                        case TokenType.GT: this.emit(Opcode.CMP_GT); break;
+                        case TokenType.LT: this.emit(Opcode.CMP_LT); break;
+                        case TokenType.EQ_EQ: this.emit(Opcode.CMP_EQ); break;
+                        case TokenType.BANG_EQ: this.emit(Opcode.CMP_NEQ); break;
+                    }
                 }
                 break;
             case 'UnaryExpr':

@@ -133,8 +133,18 @@ export class Parser {
     }
 
     private logicalAnd(): Expr {
-        let expr = this.comparison();
+        let expr = this.equality();
         while (this.match(TokenType.AND_AND)) {
+            const operator = this.previous();
+            const right = this.equality();
+            expr = { type: 'BinaryExpr', left: expr, operator, right };
+        }
+        return expr;
+    }
+
+    private equality(): Expr {
+        let expr = this.comparison();
+        while (this.match(TokenType.EQ_EQ, TokenType.BANG_EQ)) {
             const operator = this.previous();
             const right = this.comparison();
             expr = { type: 'BinaryExpr', left: expr, operator, right };
@@ -144,7 +154,7 @@ export class Parser {
 
     private comparison(): Expr {
         let expr = this.term();
-        while (this.match(TokenType.GT, TokenType.LT, TokenType.EQ_EQ, TokenType.BANG_EQ)) {
+        while (this.match(TokenType.GT, TokenType.LT)) {
             const operator = this.previous();
             const right = this.term();
             expr = { type: 'BinaryExpr', left: expr, operator, right };

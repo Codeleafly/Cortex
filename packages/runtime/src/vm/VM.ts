@@ -247,6 +247,12 @@ export class VM {
                     if (!condition) this.ip = target;
                     break;
                 }
+                case Opcode.JMP_IF_TRUE: {
+                    const target = this.readOperand();
+                    const condition = this.pop();
+                    if (condition) this.ip = target;
+                    break;
+                }
                 case Opcode.CMP_GT: {
                     const b = this.pop();
                     const a = this.pop();

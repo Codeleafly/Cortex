@@ -26,3 +26,17 @@ To execute a Cortex script, pass the file path as an argument.
 cortex my_script.ctx
 ```
 *Note: While any extension works, `.ctx` is the recommended standard.*
+
+### Permission Flags
+By default, Cortex scripts run in a sandbox with no access to the filesystem or shell. Use the following flags to grant permissions:
+
+- `--allow-read`: Allow reading files.
+- `--allow-write`: Allow writing files.
+- `--allow-run`: Allow executing shell commands.
+- `--allow-all`: Grant all permissions.
+- `--allow=read,write`: Grant specific comma-separated permissions.
+
+**Example:**
+```bash
+cortex --allow-read --allow-write log_processor.ctx
+```
