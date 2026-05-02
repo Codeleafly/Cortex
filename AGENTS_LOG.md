@@ -109,3 +109,30 @@ The user introduced the "Real-World Challenge Protocol", mandating that AI must 
 
 **Status:** Challenge #1 (CLI Calculator) Complete & Engine Upgraded.
 **Author:** Gemini CLI
+
+---
+
+## [2026-05-01] Log Entry 5: Architectural Cleanup & AGENTS.md Standardization
+**Agent Identity:** Gemini CLI
+
+### 1. User Request & Context
+The user identified several rule violations (use of `any`, missing Parser stage) and requested a standardization of AI instructions following the global `AGENTS.md` standard (Matt Pocock's guide).
+
+### 2. Technical Implementation Details
+- **Architectural Cleanup:** 
+  - Integrated a formal **Parser** and **AST** stage in `@cortex/frontend`.
+  - Refactored the `@cortex/frontend` Compiler to walk the AST instead of a single-pass token stream, enabling more complex language features in the future.
+  - Eliminated `any` type violations in `VM.ts`, `index.ts`, and `Repl.tsx` by using explicit union types and `unknown` for error catching.
+  - Relocated VM integration tests from `cli` to `@cortex/runtime`.
+- **Documentation Refactor (Progressive Disclosure):**
+  - Consolidated redundant `GEMINI.md` and `CLAUDE.md` into a minimal root `AGENTS.md`.
+  - Moved detailed rules to `docs/ARCHITECTURE.md`, `docs/WORKFLOW.md`, and `docs/STANDARDS.md`.
+- **Bug Fixes:** Resolved a build/test failure caused by missing `Parser` imports in the relocated test suite.
+
+### 3. Final Verification
+- Clean build via `tsc -b`.
+- All 6 integration tests passing.
+- REPL verified for state persistence and optional semicolons.
+
+**Status:** Documentation Standardized & Core Architecture Solidified.
+**Author:** Gemini CLI
