@@ -243,3 +243,25 @@ Addressed subtle "invisible" vulnerabilities identified during a Phase 2 audit: 
 
 **Status:** Phase 2 Vulnerability Remediation Complete. Project fully hardened.
 **Author:** Gemini CLI
+
+---
+
+## [2026-05-02] Log Entry 11: Agent Skills Standardization & Expert Expansion
+**Agent Identity:** Gemini CLI (Interactive CLI Agent)
+
+### 1. User Request & Context
+Standardized the AI governance and Agent Skills framework to comply with official industry standards (agentskills.io and MCP). Expanded the capabilities with expert-level skills for bug hunting and skill creation.
+
+### 2. Technical Implementation Details
+- **Governance Update:** Updated `AGENTS.md` with mandates for "Bug Hunting Expert" and "Official Skills Standardization".
+- **Agent Skills Migration:** Refactored all skills in `skills/` to use the official YAML frontmatter (name, description, license, metadata).
+- **New Meta-Skill:** Created `skill-creator` to guide AI agents in designing high-fidelity capabilities for the Cortex ecosystem.
+- **Expert Audit Skill:** Created `bug-hunter` to formalize deep logic forensics and engine auditing protocols.
+- **Documentation Sync:** Updated `docs/SKILLS.md` to reflect the new standardized structure and available expertise.
+
+### 3. Final Verification
+- Verified all `SKILL.md` files follow the required format.
+- Confirmed that the build graph and test suite remain unaffected.
+
+**Status:** AI Governance & Skills Ecosystem Standardized.
+**Author:** Gemini CLI

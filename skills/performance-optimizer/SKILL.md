@@ -1,34 +1,29 @@
 ---
 name: performance-optimizer
-description: Rules and patterns for maintaining Cortex's high-performance 'Bytecode-First' architecture. Activate this when refactoring the VM, Compiler, or performing system audits.
+description: Guardrails and techniques for maintaining the 'Bytecode-First' purity and execution speed of the Cortex engine. Use this when refactoring core VM logic or adding high-impact opcodes.
+license: MIT
+metadata:
+  version: "1.1.0"
 ---
 
 # Performance Optimizer Skill
 
-This skill enforces engineering standards that keep the Cortex VM fast and lightweight.
+This skill ensures that Cortex remains a high-performance engine by adhering to strict numeric bytecode standards.
 
-## Core Rules
+## Optimization Guardrails
 
-### 1. Bytecode Purity
-- Avoid generating intermediate objects or ASTs during execution.
-- Only execute numeric `Int32Array` bytecode.
-- If a high-level structure is needed, store it in the `stringPool` or a similar pre-allocated heap and reference it by index.
+### 1. Bytecode Locality
+- Always use `Int32Array` for bytecode storage.
+- Prefer inline numeric values over object-based structures in the execution loop.
 
-### 2. Dispatcher Optimization
-- The `switch-case` in `VM.execute()` is the heart of the language. Keep it clean.
-- Minimize property lookups inside the hot loop.
-- Use local variables within the `execute` method for frequently accessed state.
+### 2. VM Dispatcher Speed
+- Keep the `execute()` method's `switch-case` lean. 
+- Avoid allocating objects inside the main loop; reuse buffers where possible.
 
-### 3. Type Safety as Performance
-- Adhere to the **Zero-Tolerance for `any`** mandate.
-- Use explicit union types for the stack (`(number | string | boolean | null)[]`).
-- Types allow the TypeScript compiler to optimize better and prevent runtime "type-guessing" overhead.
+### 3. Type Safety without Overhead
+- Use TypeScript's narrowing (Type Guards) to handle the `StackValue` union efficiently.
+- Never use `as any`, as it bypasses the safety checks that help the V8 engine optimize the code.
 
-### 4. Memory Locality
-- Use `Int32Array` for memory and bytecode.
-- Contiguous memory buffers are significantly faster than standard JS arrays for numeric operations.
-
-## Audit Checklist
-- [ ] Is there any `any` usage?
-- [ ] Are we generating ASTs during `VM.run()`? (Should be forbidden).
-- [ ] Can an operation be converted from a string-lookup to a numeric-index lookup?
+## Verification
+- Run the `fib.ctx` benchmark script.
+- Ensure no significant regressions in execution time for large loops.

@@ -1,6 +1,9 @@
 ---
 name: monorepo-package-generator
-description: Procedure for adding new packages to the Cortex monorepo. Use this when the architecture needs to be expanded with new decoupled components.
+description: A standardized procedure for scaling the Cortex monorepo. Use this when the project needs a new decoupled package (e.g., @cortex/stdlib, @cortex/optimizer) following the modern ESM and TypeScript project references architecture.
+license: MIT
+metadata:
+  version: "1.1.0"
 ---
 
 # Monorepo Package Generator Skill

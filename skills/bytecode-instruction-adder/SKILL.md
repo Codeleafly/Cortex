@@ -1,6 +1,9 @@
 ---
 name: bytecode-instruction-adder
 description: A standardized procedure for adding new language features or opcodes to Cortex. Use this when the user requests a new language capability (e.g., bitwise operators, new built-ins) that requires an engine upgrade.
+license: MIT
+metadata:
+  version: "1.1.0"
 ---
 
 # Bytecode Instruction Adder Skill
