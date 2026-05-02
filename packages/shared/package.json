@@ -11,5 +11,6 @@
   },
   "scripts": {
     "build": "tsc -b"
-  }
+  },
+  "types": "./dist/index.d.ts"
 }

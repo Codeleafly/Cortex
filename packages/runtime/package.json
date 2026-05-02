@@ -14,5 +14,6 @@
   },
   "dependencies": {
     "@cortex/shared": "*"
-  }
+  },
+  "types": "./dist/index.d.ts"
 }

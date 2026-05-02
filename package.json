@@ -9,7 +9,7 @@
   ],
   "scripts": {
     "build": "tsc -b",
-    "test": "vitest run",
+    "test": "npm run build && vitest run",
     "start": "npm run start --workspace=@cortex/cli",
     "clean": "tsc -b --clean"
   },

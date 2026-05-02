@@ -9,6 +9,18 @@
     "forceConsistentCasingInFileNames": true,
     "declaration": true,
     "composite": true,
-    "jsx": "react-jsx"
+    "jsx": "react-jsx",
+    "baseUrl": ".",
+    "paths": {
+      "@cortex/shared": [
+        "packages/shared"
+      ],
+      "@cortex/frontend": [
+        "packages/frontend"
+      ],
+      "@cortex/runtime": [
+        "packages/runtime"
+      ]
+    }
   }
 }
