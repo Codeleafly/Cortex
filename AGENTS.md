@@ -13,11 +13,14 @@ Cortex is a high-performance, general-purpose programming language built from sc
 
 ## Core Mandates (Mandatory for all AI Agents)
 1. **Plan First:** Always enter Plan Mode and get user approval before modifying code.
-2. **AI Identification:** State your agent name in every major commit/doc update.
-3. **Transparency Logging:** Append your work details to `AGENTS_LOG.md` after completion.
-4. **Zero-Tolerance for `any`:** Strict TypeScript typing is required. Never use `any`.
-5. **Bytecode-First:** Prioritize numeric `Int32Array` bytecode over AST interpretation for execution.
-6. **Real-World Challenge Protocol:** AI MUST accept user-issued challenges and iterate in `tests/real_world_tests/` until 100% success.
+2. **AI Identification:** State your agent name in every major commit, PR, and documentation update.
+3. **Transparency Logging:** Append technical details, rationale, and implementation steps to `AGENTS_LOG.md` after completion.
+4. **Mandatory Rule Maintenance:** AI agents MUST update `AGENTS.md` and related modular documentation whenever core rules, project structure, or workflows change.
+5. **Zero-Tolerance for `any`:** Strict TypeScript typing is required. `any` is strictly prohibited to maintain architectural integrity.
+6. **Bytecode-First:** Prioritize numeric `Int32Array` bytecode and a stack-based VM for maximum performance.
+7. **Verification Loop:** It is **compulsory** to run `npm run build` and execute all `.ctx` integration tests after every update to ensure zero regressions.
+8. **Real-World Challenge Protocol:** Accept complex user challenges, create dedicated folders in `tests/real_world_tests/`, and iterate until 100% success.
+9. **Human Participation Disclosure:** Any human-authored code or manual intervention MUST be explicitly documented in comments or docs.
 
 ## Progressive Disclosure
 For detailed rules, architectural deep-dives, and coding patterns, refer to:

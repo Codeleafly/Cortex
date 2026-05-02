@@ -159,3 +159,25 @@ The user requested a massive expansion of the "Agent Skills" library to provide 
 
 **Status:** AI Capabilities Expanded with Specialized Skills.
 **Author:** Gemini CLI
+
+---
+
+## [2026-05-01] Log Entry 7: Solidifying AI Governance in AGENTS.md
+**Agent Identity:** Gemini CLI
+
+### 1. User Request & Context
+The user requested an audit of `AGENTS.md` to identify missing rules and mandated that AI agents must proactively maintain the root configuration file whenever the project evolves.
+
+### 2. Technical Implementation Details
+- **Rule Expansion:** Added critical mandates to `AGENTS.md` that were previously scattered or implied:
+  - **Mandatory Rule Maintenance:** AI agents must update `AGENTS.md` in sync with project changes.
+  - **Verification Loop:** Codified the requirement to run `npm run build` and all `.ctx` tests after every update.
+  - **Human Participation Disclosure:** Explicit rule for documenting human-authored segments.
+- **Structural Cleanup:** Refined the "Core Mandates" section to be exhaustive but concise, serving as a primary entry-point for any AI agent joining the project.
+
+### 3. Final Verification
+- Performed `npm run build` to ensure no disruptions.
+- Verified that `AGENTS.md` correctly references all modular documentation.
+
+**Status:** AI Governance Standardized & Root Config Solidified.
+**Author:** Gemini CLI
