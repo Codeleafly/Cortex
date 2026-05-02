@@ -18,7 +18,7 @@ x = 20; // Re-assignment
 ## Math & Operators
 - **Arithmetic:** `+`, `-`, `*`, `/`
 - **Comparison:** `>`, `<`, `==`, `!=`
-- **Logical:** `&&` (AND), `||` (OR), `!` (NOT) - *Supports short-circuiting.*
+- **Logical:** `&&` (AND), `||` (OR), `!` (NOT) - *Supports full short-circuiting (lazy evaluation).*
 
 ## Control Flow
 ### If/Else Statements

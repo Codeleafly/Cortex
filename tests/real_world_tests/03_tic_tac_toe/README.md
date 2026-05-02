@@ -1,5 +1,5 @@
 # Tic Tac Toe Challenge (TUI)
-**Status:** In Progress
+**Status:** Completed
 **Language:** Cortex (.ctx)
 
 ## Goal
