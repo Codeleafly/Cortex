@@ -9,6 +9,7 @@ export class Compiler {
     private stringPool: string[] = [];
     private scopes: Map<string, number>[] = [new Map()]; 
     private functions = new Map<string, { address: number, argCount: number }>();
+    private functionStartScopeIndex = 0;
 
     constructor() {}
 
@@ -41,7 +42,11 @@ export class Compiler {
 
     private resolveVariable(name: string): number {
         for (let i = this.scopes.length - 1; i >= 0; i--) {
-            if (this.scopes[i].has(name)) return this.scopes[i].get(name)!;
+            if (this.scopes[i].has(name)) {
+                const addr = this.scopes[i].get(name)!;
+                if (i === 0) return ~addr; // Global
+                return addr; // Local
+            }
         }
         throw new Error(`Undefined variable: ${name}`);
     }
@@ -49,11 +54,17 @@ export class Compiler {
     private defineVariable(name: string) {
         const currentScope = this.scopes[this.scopes.length - 1];
         if (!currentScope.has(name)) {
-            let totalVars = 0;
-            this.scopes.forEach(s => totalVars += s.size);
-            currentScope.set(name, totalVars);
+            let offset = 0;
+            // Count variables in scopes belonging to the current function
+            for (let i = this.functionStartScopeIndex; i < this.scopes.length; i++) {
+                offset += this.scopes[i].size;
+            }
+            currentScope.set(name, offset);
         }
-        return currentScope.get(name)!;
+        
+        const addr = currentScope.get(name)!;
+        if (this.functionStartScopeIndex === 0) return ~addr; // Global
+        return addr; // Local
     }
 
     private statement(stmt: Stmt) {
@@ -84,6 +95,9 @@ export class Compiler {
                 const fnStart = this.bytecode.length;
                 this.functions.set(stmt.name, { address: fnStart, argCount: stmt.params.length });
 
+                const oldStartScope = this.functionStartScopeIndex;
+                this.functionStartScopeIndex = this.scopes.length;
+
                 this.scopes.push(new Map());
                 for (let i = stmt.params.length - 1; i >= 0; i--) {
                     const addr = this.defineVariable(stmt.params[i]);
@@ -96,6 +110,7 @@ export class Compiler {
                 }
                 
                 this.scopes.pop();
+                this.functionStartScopeIndex = oldStartScope;
                 this.emit(Opcode.RET);
 
                 this.bytecode[jumpOverIdx] = this.bytecode.length;
@@ -107,9 +122,11 @@ export class Compiler {
                 const jumpOffsetIdx = this.bytecode.length;
                 this.emit(0); 
 
+                this.scopes.push(new Map());
                 for (const thenStmt of stmt.thenBranch) {
                     this.statement(thenStmt);
                 }
+                this.scopes.pop();
 
                 this.bytecode[jumpOffsetIdx] = this.bytecode.length;
                 break;
@@ -122,9 +139,11 @@ export class Compiler {
                 const jumpOffsetIdx = this.bytecode.length;
                 this.emit(0); 
 
+                this.scopes.push(new Map());
                 for (const bodyStmt of stmt.body) {
                     this.statement(bodyStmt);
                 }
+                this.scopes.pop();
 
                 this.emit(Opcode.JMP);
                 this.emit(loopStart);
@@ -162,7 +181,13 @@ export class Compiler {
                 break;
             case 'UnaryExpr':
                 this.expression(expr.right);
-                if (expr.operator.type === TokenType.BANG) this.emit(Opcode.NOT);
+                if (expr.operator.type === TokenType.BANG) {
+                    this.emit(Opcode.NOT);
+                } else if (expr.operator.type === TokenType.MINUS) {
+                    this.emit(Opcode.PUSH);
+                    this.emit(-1);
+                    this.emit(Opcode.MUL);
+                }
                 break;
             case 'LiteralExpr':
                 if (typeof expr.value === 'number') {

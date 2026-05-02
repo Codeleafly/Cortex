@@ -73,6 +73,13 @@ const REPL = () => {
             return;
         }
 
+        if (!editorMode && trimmed === '.editor') {
+            setHistory(prev => [...prev, { type: 'input', text: val }, { type: 'info', text: 'Multi-line editor mode enabled. Submit an empty line or matching braces to execute.' }]);
+            setEditorMode(true);
+            setInput('');
+            return;
+        }
+
         // Advanced Multi-line Detection
         const openBraces = (fullInput.match(/\{/g) || []).length;
         const closeBraces = (fullInput.match(/\}/g) || []).length;

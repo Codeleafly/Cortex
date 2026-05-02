@@ -1,13 +1,18 @@
 import { Opcode } from '@cortex/shared';
+import { RuntimeError } from './RuntimeError.js';
+
+type StackValue = number | string | boolean | null;
 
 /**
  * Virtual Machine: Executes the numeric bytecode.
  */
 export class VM {
-    private stack: (number | string | boolean | null)[] = []; 
+    private stack: StackValue[] = []; 
     private memory = new Array(1024).fill(0); 
     private ip = 0; 
-    private callStack: number[] = []; // Stack for return addresses
+    private bp = 0; 
+    private memoryStackPointer = 0; 
+    private callStack: { returnAddr: number, oldBp: number }[] = []; 
     public logs: string[] = [];
     
     private bytecode: Int32Array = new Int32Array(0);
@@ -16,12 +21,37 @@ export class VM {
 
     constructor() {}
 
+    private push(val: StackValue) {
+        if (this.stack.length >= 1024) {
+            throw new RuntimeError('Stack Overflow', this.ip);
+        }
+        this.stack.push(val);
+    }
+
+    private pop(): StackValue {
+        if (this.stack.length === 0) {
+            throw new RuntimeError('Stack Underflow', this.ip);
+        }
+        return this.stack.pop()!;
+    }
+
+    private peek(): StackValue {
+        if (this.stack.length === 0) {
+            throw new RuntimeError('Stack Underflow (peek)', this.ip);
+        }
+        return this.stack[this.stack.length - 1];
+    }
+
     public run(bytecode: Int32Array, stringPool: string[] = [], args: string[] = []) {
         this.bytecode = bytecode;
         this.stringPool = stringPool;
         this.args = args;
         this.ip = 0;
+        this.bp = 0;
+        this.memoryStackPointer = 0;
         this.logs = [];
+        this.stack = [];
+        this.callStack = [];
         this.execute();
     }
 
@@ -31,6 +61,7 @@ export class VM {
         this.args = args;
         this.ip = startIp;
         this.logs = [];
+        // Note: we don't reset stack/callStack for snippets in REPL to maintain state
         this.execute();
     }
 
@@ -42,50 +73,91 @@ export class VM {
                 case Opcode.HALT:
                     return;
                 case Opcode.PUSH:
-                    this.stack.push(this.bytecode[this.ip++]);
+                    this.push(this.bytecode[this.ip++]);
                     break;
                 case Opcode.PUSH_STR: {
                     const idx = this.bytecode[this.ip++];
-                    this.stack.push(this.stringPool[idx]);
+                    this.push(this.stringPool[idx]);
                     break;
                 }
                 case Opcode.ADD: {
-                    const b = this.stack.pop() as any;
-                    const a = this.stack.pop() as any;
-                    this.stack.push(a + b);
+                    const b = this.pop();
+                    const a = this.pop();
+                    if (typeof a === 'number' && typeof b === 'number') {
+                        this.push(a + b);
+                    } else if (typeof a === 'string' || typeof b === 'string') {
+                        this.push(String(a) + String(b));
+                    } else {
+                        throw new RuntimeError(`Invalid types for ADD: ${typeof a} and ${typeof b}`, this.ip);
+                    }
                     break;
                 }
                 case Opcode.SUB: {
-                    const b = this.stack.pop() as number;
-                    const a = this.stack.pop() as number;
-                    this.stack.push(a - b);
+                    const b = this.pop();
+                    const a = this.pop();
+                    if (typeof a !== 'number' || typeof b !== 'number') {
+                        throw new RuntimeError('SUB requires numeric operands', this.ip);
+                    }
+                    this.push(a - b);
                     break;
                 }
                 case Opcode.MUL: {
-                    const b = this.stack.pop() as number;
-                    const a = this.stack.pop() as number;
-                    this.stack.push(a * b);
+                    const b = this.pop();
+                    const a = this.pop();
+                    if (typeof a !== 'number' || typeof b !== 'number') {
+                        throw new RuntimeError('MUL requires numeric operands', this.ip);
+                    }
+                    this.push(a * b);
                     break;
                 }
                 case Opcode.DIV: {
-                    const b = this.stack.pop() as number;
-                    const a = this.stack.pop() as number;
-                    this.stack.push(Math.floor(a / b));
+                    const b = this.pop();
+                    const a = this.pop();
+                    if (typeof a !== 'number' || typeof b !== 'number') {
+                        throw new RuntimeError('DIV requires numeric operands', this.ip);
+                    }
+                    if (b === 0) throw new RuntimeError('Division by zero', this.ip);
+                    this.push(Math.floor(a / b));
                     break;
                 }
                 case Opcode.LOAD: {
                     const addr = this.bytecode[this.ip++];
-                    this.stack.push(this.memory[addr]);
+                    let finalAddr: number;
+                    if (addr < 0) {
+                        finalAddr = ~addr; // Global (absolute)
+                    } else {
+                        finalAddr = this.bp + addr; // Local (relative)
+                    }
+
+                    if (finalAddr < 0 || finalAddr >= this.memory.length) {
+                        throw new RuntimeError(`Invalid memory address: ${finalAddr} (raw: ${addr}, bp: ${this.bp})`, this.ip);
+                    }
+                    this.push(this.memory[finalAddr]);
                     break;
                 }
                 case Opcode.STORE: {
                     const addr = this.bytecode[this.ip++];
-                    const val = this.stack.pop() as any;
-                    this.memory[addr] = val;
+                    let finalAddr: number;
+                    if (addr < 0) {
+                        finalAddr = ~addr; // Global (absolute)
+                    } else {
+                        finalAddr = this.bp + addr; // Local (relative)
+                    }
+
+                    if (finalAddr < 0 || finalAddr >= this.memory.length) {
+                        throw new RuntimeError(`Invalid memory address: ${finalAddr}`, this.ip);
+                    }
+                    const val = this.pop();
+                    this.memory[finalAddr] = val;
+
+                    // Update memory stack pointer if we stored a local or top-level var
+                    if (finalAddr >= this.memoryStackPointer) {
+                        this.memoryStackPointer = finalAddr + 1;
+                    }
                     break;
                 }
                 case Opcode.PRINT: {
-                    const val = this.stack.pop();
+                    const val = this.pop();
                     this.logs.push(String(val));
                     console.log(val);
                     break;
@@ -95,76 +167,95 @@ export class VM {
                     break;
                 case Opcode.JMP_IF_FALSE: {
                     const target = this.bytecode[this.ip++];
-                    const condition = this.stack.pop();
+                    const condition = this.pop();
                     if (!condition) this.ip = target;
                     break;
                 }
                 case Opcode.CMP_GT: {
-                    const b = this.stack.pop() as number;
-                    const a = this.stack.pop() as number;
-                    this.stack.push(a > b ? 1 : 0);
+                    const b = this.pop();
+                    const a = this.pop();
+                    if (typeof a !== 'number' || typeof b !== 'number') {
+                        throw new RuntimeError('CMP_GT requires numeric operands', this.ip);
+                    }
+                    this.push(a > b ? 1 : 0);
                     break;
                 }
                 case Opcode.CMP_LT: {
-                    const b = this.stack.pop() as number;
-                    const a = this.stack.pop() as number;
-                    this.stack.push(a < b ? 1 : 0);
+                    const b = this.pop();
+                    const a = this.pop();
+                    if (typeof a !== 'number' || typeof b !== 'number') {
+                        throw new RuntimeError('CMP_LT requires numeric operands', this.ip);
+                    }
+                    this.push(a < b ? 1 : 0);
                     break;
                 }
                 case Opcode.CMP_EQ: {
-                    const b = this.stack.pop();
-                    const a = this.stack.pop();
-                    this.stack.push(a === b ? 1 : 0);
+                    const b = this.pop();
+                    const a = this.pop();
+                    this.push(a === b ? 1 : 0);
                     break;
                 }
                 case Opcode.AND: {
-                    const b = this.stack.pop();
-                    const a = this.stack.pop();
-                    this.stack.push(a && b ? 1 : 0);
+                    const b = this.pop();
+                    const a = this.pop();
+                    this.push(a && b ? 1 : 0);
                     break;
                 }
                 case Opcode.OR: {
-                    const b = this.stack.pop();
-                    const a = this.stack.pop();
-                    this.stack.push(a || b ? 1 : 0);
+                    const b = this.pop();
+                    const a = this.pop();
+                    this.push(a || b ? 1 : 0);
                     break;
                 }
                 case Opcode.NOT: {
-                    const a = this.stack.pop();
-                    this.stack.push(!a ? 1 : 0);
+                    const a = this.pop();
+                    this.push(!a ? 1 : 0);
                     break;
                 }
                 case Opcode.CALL: {
                     const address = this.bytecode[this.ip++];
                     const argCount = this.bytecode[this.ip++];
                     
+                    // Verify enough arguments on stack
+                    if (this.stack.length < argCount) {
+                        throw new RuntimeError('Stack Underflow in CALL', this.ip);
+                    }
+
                     const args = [];
-                    for(let i=0; i<argCount; i++) args.push(this.stack.pop());
-                    for(let i=argCount-1; i>=0; i--) this.stack.push(args[i] as (number | string | boolean | null));
+                    for(let i=0; i<argCount; i++) args.push(this.pop());
+                    for(let i=argCount-1; i>=0; i--) this.push(args[i]);
                     
-                    this.callStack.push(this.ip);
+                    this.callStack.push({ returnAddr: this.ip, oldBp: this.bp });
+                    this.bp = this.memoryStackPointer;
                     this.ip = address;
                     break;
                 }
                 case Opcode.RET: {
-                    this.ip = this.callStack.pop()!;
+                    const frame = this.callStack.pop();
+                    if (!frame) {
+                        throw new RuntimeError('Top-level return', this.ip);
+                    }
+                    this.memoryStackPointer = this.bp; // Free the frame's memory
+                    this.bp = frame.oldBp;
+                    this.ip = frame.returnAddr;
                     break;
                 }
                 case Opcode.POP:
-                    this.stack.pop();
+                    this.pop();
                     break;
                 case Opcode.ARG_COUNT: {
-                    this.stack.push(this.args.length);
+                    this.push(this.args.length);
                     break;
                 }
                 case Opcode.GET_ARG: {
-                    const idx = this.stack.pop() as number;
-                    this.stack.push(this.args[idx] ?? null);
+                    const idx = this.pop();
+                    if (typeof idx !== 'number') throw new RuntimeError('GET_ARG requires numeric index', this.ip);
+                    this.push(this.args[idx] ?? null);
                     break;
                 }
                 case Opcode.TO_NUMBER: {
-                    const val = this.stack.pop() as string;
-                    this.stack.push(parseInt(val, 10));
+                    const val = this.pop();
+                    this.push(parseInt(String(val), 10));
                     break;
                 }
                 default:

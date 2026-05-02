@@ -60,7 +60,7 @@ print "Hello, " + name; // Output: Hello, Cortex
 let i = 5;
 while (i > 0) {
     print i;
-    let i = i - 1;
+    i = i - 1;
 }
 ```
 

@@ -202,3 +202,23 @@ The user requested a full read and fix of the `docs/` folder to ensure all infor
 
 **Status:** Documentation Audit 100% Complete & Verified.
 **Author:** Gemini CLI
+
+---
+
+## [2026-05-02] Log Entry 9: Deep Audit & Language Refinement
+**Agent Identity:** Gemini CLI (Interactive CLI Agent)
+
+### 1. User Request & Context
+Performed a deep audit of the engine and documentation to identify subtle logical bugs, edge cases, and inconsistencies after the primary vulnerability remediation.
+
+### 2. Technical Implementation Details
+- **Unary Minus Support:** Fixed a bug in the Lexer/Parser where negative numbers (e.g., `-5`) or negation expressions (e.g., `-x`) were not supported. Added `Opcode.MUL` with `-1` logic in the Compiler to handle this without new VM opcodes.
+- **Block Scoping Fix:** Identified that `if` and `while` blocks were not creating new scopes, which could lead to variable name collisions with parent scopes. Updated `Compiler.ts` to push/pop scopes for these control flow structures.
+- **Documentation Alignment:** Corrected `README.md` syntax examples. Standardized `print` usage and fixed a loop example that incorrectly used `let` for re-assignment.
+
+### 3. Final Verification
+- Verified all 11 tests (6 integration + 5 safety/recursion) are passing flawlessly.
+- Confirmed that the REPL handle-submission logic correctly integrates with the updated compiler scope rules.
+
+**Status:** Language Refinement & Documentation Synchronization Complete.
+**Author:** Gemini CLI

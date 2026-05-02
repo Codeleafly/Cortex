@@ -162,7 +162,7 @@ export class Parser {
     }
 
     private unary(): Expr {
-        if (this.match(TokenType.BANG)) {
+        if (this.match(TokenType.BANG, TokenType.MINUS)) {
             const operator = this.previous();
             const right = this.unary();
             return { type: 'UnaryExpr', operator, right };
