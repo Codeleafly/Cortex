@@ -56,6 +56,18 @@ async function createSymlink(srcName, destPath) {
 }
 
 async function main() {
+    // Policy enforcement: Ensure we are not on the main branch per Mandate 16
+    try {
+        const { execSync } = await import('node:child_process');
+        const branch = execSync('git rev-parse --abbrev-ref HEAD', { encoding: 'utf8' }).trim();
+        if (branch === 'main') {
+            console.error('Error: Direct development on main branch is prohibited by Mandate 16.');
+            process.exit(1);
+        }
+    } catch (e) {
+        // Ignore if git is not available or not a git repo
+    }
+
     console.log('--- Setting up Agent Compatibility Symlinks ---');
     
     for (const link of fileLinks) {
@@ -70,3 +82,4 @@ async function main() {
 }
 
 main().catch(console.error);
+// Policy enforcement trigger
