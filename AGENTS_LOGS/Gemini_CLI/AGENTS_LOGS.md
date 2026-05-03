@@ -183,3 +183,60 @@
 
 **Status:** System Verified & Sanitized. Production Ready.
 **Author:** Gemini CLI
+
+---
+
+# [2026-05-03] Log Entry 20: Universal Agent Compatibility & Conflict Resolution
+**Agent Identity:** Gemini CLI
+
+### 1. User Instructions (Directives)
+*   **Request:** Expand the agent compatibility layer to support multiple AI agents including OpenAI Codex, Gemini CLI, Claude Code, Cursor, and Open Code.
+*   **Goal:** Create universal symlinks for instruction files (`GEMINI.md`, `CLAUDE.md`, `CODEX.md`, `OPENCODE.md`, `.cursorrules`) and skill directories.
+*   **Validation:** Use `cli_help` to verify Gemini CLI conventions and Google Search for others.
+
+### 2. Technical Implementation Details
+*   **Research Phase:**
+    - Verified OpenAI Codex uses `AGENTS.md` or `CODEX.md` and `.codex/` config.
+    - Verified Gemini CLI uses `GEMINI.md`, `.gemini/settings.json`, and `.geminiignore`.
+    - Verified Cursor IDE uses `.cursorrules` for project-level instructions.
+    - Implemented `OPENCODE.md` and `.opencode/` as the standard for Open Code agents.
+*   **Architecture Changes:** 
+    - Updated `scripts/setup-agent-links.mjs` to automate symlink creation for 8+ agent interfaces.
+    - Expanded `.geminiignore` to prevent skill conflicts across all agent directories.
+*   **Conflict Resolution:** 
+    - Excluded `.claude/`, `.codex/`, `.agents/`, `.cursor/`, and `.opencode/` from Gemini's scan path to prevent "Skill conflict detected" errors caused by redundant symlinks.
+*   **Files Modified:** `scripts/setup-agent-links.mjs`, `.geminiignore`, `AGENTS.md`.
+
+### 3. Final Verification
+- **Instruction Symlinks:** `GEMINI.md`, `CLAUDE.md`, `CODEX.md`, `OPENCODE.md`, `.cursorrules`, `.claude/CLAUDE.md`, `.agents/AGENTS.md`, `.codex/CODEX.md` all point to root `AGENTS.md`.
+- **Skill Symlinks:** `.gemini/skills`, `.claude/skills`, `.codex/skills`, `.agents/skills`, `.cursor/skills`, `.opencode/skills` all point to root `skills/`.
+
+**Status:** Universal Compatibility Layer Active.
+**Author:** Gemini CLI
+
+---
+
+# [2026-05-03] Log Entry 21: Branch Safety Protocol Implementation
+**Agent Identity:** Gemini CLI
+
+### 1. User Instructions (Directives)
+*   **Request:** Implement a mandatory rule that AI agents must not work directly on the `main` branch.
+*   **Goal:** Enforce branch safety by requiring agents to check `git status` and create a new branch if on `main`.
+
+### 2. Technical Implementation Details
+*   **Architecture Changes:** 
+    - Added **Mandate 16 (Branch Safety Protocol)** to `AGENTS.md`.
+*   **Action Taken:** 
+    - Checked `git status` and identified I was on `main`.
+    - Immediately created and switched to `feat/branch-safety-protocol` to comply with the new rule before applying the changes.
+*   **Files Modified:** `AGENTS.md`.
+
+### 3. Final Verification
+- Verified current branch is `feat/branch-safety-protocol`.
+- Verified `AGENTS.md` contains the new mandate.
+
+**Status:** Branch Safety Protocol Active & Compliant.
+**Author:** Gemini CLI
+
+
+

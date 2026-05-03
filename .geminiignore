@@ -1,0 +1,8 @@
+.claude/
+.codex/
+.agents/
+.cursor/
+.opencode/
+node_modules/
+dist/
+*.tsbuildinfo

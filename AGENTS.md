@@ -26,6 +26,8 @@ Cortex is a high-performance, general-purpose programming language built from sc
 12. **Human Participation Disclosure:** Any human-authored code or manual intervention MUST be explicitly documented.
 13. **Zero-Litter Policy:** AI agents MUST NOT create temporary, reproduction, or garbage files in the root directory. All such files MUST reside within the `tests/` directory or package-specific subdirectories to maintain workspace cleanliness.
 14. **Git Protocol Integrity:** AI agents MUST NEVER use `git push --force` or overwrite remote history unless explicitly directed by the user. Always prioritize `git pull` and manual conflict resolution to preserve the collaborative audit trail.
+15. **Multi-Agent Compatibility Layer:** AI agents MUST maintain cross-platform symlinks for instruction files and skills to support various AI interfaces (Gemini, Claude, Codex, etc.). This ensures that any agent accessing the repository can find its specific instructions and shared capabilities. Use the `scripts/setup-agent-links.mjs` script to maintain these links.
+16. **Branch Safety Protocol:** AI agents MUST check `git status` at the beginning of any task to ensure they are not working directly on the `main` branch. If the current branch is `main`, the agent MUST create a new feature or fix branch (e.g., `feat/...` or `fix/...`) before making any modifications. Direct development on `main` is strictly prohibited to maintain repository integrity.
 
 ## Progressive Disclosure
 For detailed rules, architectural deep-dives, and coding patterns, refer to:
