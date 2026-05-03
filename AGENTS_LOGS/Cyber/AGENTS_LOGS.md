@@ -30,3 +30,27 @@
 
 **Status:** Complete, Hardened
 **Author:** Cyber
+
+---
+
+# [2026-05-03] Log Entry 02: Phase 5 Deep Security & Logic Audit
+**Agent Identity:** Cyber
+
+### 1. User Instructions (Directives)
+*   **Request:** Perform a deep-level security, logic, architectural, and standard-compliance audit.
+*   **Constraints:** No modification of code or general documentation (only `Bug.md`), zero-litter policy, empirical verification in `tests/`.
+
+### 2. Technical Implementation Details
+*   **Logic Forensics & Vulnerability Discovery:**
+    - **Sandbox Security:** Identified a path traversal vulnerability (VULN-NEW-01) where `startsWith` validation could be bypassed using sibling directories.
+    - **Permission Model:** Identified a global escalation bug (VULN-NEW-02) where a single granted permission persists for the lifetime of the VM.
+    - **Language Semantics:** Identified a fundamental scoping failure in nested functions (VULN-NEW-03) due to lack of closure support (upvalues).
+    - **Data Integrity:** Identified an integer wrap-around vulnerability (VULN-NEW-04) in the bytecode's `Int32Array` storage for large numeric literals.
+*   **Files Modified:** `Bug.md`.
+*   **Verification:** Created and executed reproduction scripts in `tests/repro/` (verified and cleaned up).
+
+### 3. Conclusion
+The audit reveals critical gaps in the security sandbox and the core scoping model. The project status has been downgraded to reflect these findings.
+
+**Status:** VULNERABLE - RE-AUDIT REQUIRED
+**Author:** Cyber
