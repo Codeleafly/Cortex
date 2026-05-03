@@ -265,6 +265,28 @@
 **Status:** Repository Finalized & Ready for Push.
 **Author:** Gemini CLI
 
+---
+
+# [2026-05-03] Log Entry 23: Honest Sub-Agent Attribution Mandate
+**Agent Identity:** Gemini CLI
+
+### 1. User Instructions (Directives)
+*   **Request:** Implement a new rule (Mandate 17) to ensure primary agents give full credit to sub-agents for their work.
+*   **Goal:** Formalize honest attribution and ethical logging within the AI-led development process.
+
+### 2. Technical Implementation Details
+*   **Architecture Changes:** Added **Mandate 17 (Honest Sub-Agent Attribution)** to `AGENTS.md`.
+*   **Compliance:** Verified that the Phase 5 Deep Audit was correctly documented in `AGENTS_LOGS/Cyber/AGENTS_LOGS.md` with "Author: Cyber", ensuring no misattribution occurred.
+*   **Branch Management:** Developed on `feat/honest-attribution-mandate` to maintain branch safety.
+
+### 4. Final Verification
+*   **Files Modified:** `AGENTS.md`.
+*   **Policy Audit:** Confirmed all existing logs follow this new ethical standard.
+
+**Status:** Ethical Attribution Standard Officially Implemented.
+**Author:** Gemini CLI
+
+
 
 
 

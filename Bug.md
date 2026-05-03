@@ -25,9 +25,33 @@
 | **VULN-COMP-02** | Scope Resolution Mismatch | **FIXED** ✅ | Corrected `resolveVariable` to handle globals in top-level blocks. |
 | **VULN-LOGIC-01** | Non-Short-Circuiting | **FIXED** ✅ | Implemented `JMP_IF_TRUE` and conditional logic jumps. |
 | **VULN-LOGIC-02** | Operator Precedence | **FIXED** ✅ | Refactored Parser to separate equality from comparison. |
-| **OPT-COMP-01** | Memory Fragmentation | **FIXED** ✅ | Block-level memory reclamation implemented in Compiler. |
+| OPT-COMP-01 | Memory Fragmentation | **FIXED** ✅ | Block-level memory reclamation implemented in Compiler. |
+| **VULN-NEW-01** | Sandbox Escape via Prefix Bug | **PENDING** 🔴 | `startsWith` check in `safeResolve` is bypassable with sibling dirs. |
+| **VULN-NEW-02** | Permanent Permission Escalation | **PENDING** 🔴 | Permissions persist globally for the VM after first grant. |
+| **VULN-NEW-03** | Broken Nested Function Scope | **PENDING** 🔴 | Nested functions access incorrect stack offsets for outer variables. |
+| **VULN-NEW-04** | Integer Overflow in Bytecode | **PENDING** 🔴 | Large numbers wrap around due to 32-bit signed storage. |
 
-## 2. Conclusion
-The Cortex programming language engine has undergone four phases of rigorous logic forensics and vulnerability remediation. Every identified flaw—from architectural gaps to sandbox escapes—has been surgically resolved and verified with unit tests.
+## 2. Phase 5 Audit Findings (Deep Logic & Security)
+Audited by **Cyber Subagent**. The following vulnerabilities were identified and verified empirically in `tests/repro/verify_vulnerabilities.ts`.
 
-**Final Audit Verdict:** 🟢 **STAINLESS & PRODUCTION READY**
+### [VULN-NEW-01] Sandbox Escape via Prefix Matching Bug
+- **Description:** The `safeResolve` function uses `resolved.startsWith(process.cwd())` to validate paths. This is insufficient if a directory exists with the same prefix as the current working directory (e.g., if CWD is `/home/Cortex`, an attacker can access `/home/Cortex-secrets`).
+- **Proposed Solution:** Ensure the prefix check includes a trailing path separator or use `path.relative` to verify the path is not escaping the root.
+
+### [VULN-NEW-02] Global Permission Persistence
+- **Description:** When a user grants permission for a specific operation (e.g., reading a file), the VM sets `this.permissions[type] = true`. This grants access to *all* future operations of that type for the lifetime of the VM instance.
+- **Proposed Solution:** Implement granular permission tracking (e.g., a whitelist of approved paths) or re-prompt for different targets.
+
+### [VULN-NEW-03] Broken Nested Function Scope (Closure Failure)
+- **Description:** The compiler allows nesting functions, but does not implement closures or upvalues. When a nested function accesses a variable from an outer function, it uses a local offset that points to its own stack frame instead of the outer one.
+- **Proposed Solution:** Either implement a proper closure mechanism (e.g., an environment chain) or have the compiler throw an error when accessing non-global outer variables.
+
+### [VULN-NEW-04] Integer Wrap-around in Bytecode
+- **Description:** The VM stores bytecode and operands in an `Int32Array`. Numeric literals in the source are parsed as JS numbers but cast to 32-bit signed integers when stored. Large values (e.g., 3,000,000,000) wrap around to negative numbers.
+- **Proposed Solution:** Add validation in the Compiler or Lexer to ensure numeric literals fit within the supported range of the VM's storage format.
+
+## 3. Conclusion
+The Phase 5 audit has revealed critical security and logic flaws that were missed by previous "Stainless" audits. The sandbox can be bypassed, permissions are too broad, and the scoping model is fundamentally broken for nested functions.
+
+**Final Audit Verdict:** 🔴 **VULNERABLE - RE-AUDIT REQUIRED**
+
