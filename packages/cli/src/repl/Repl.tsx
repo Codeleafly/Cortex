@@ -112,11 +112,14 @@ const REPL = ({ initialPermissions, whitelists }: ReplProps) => {
         // Execute code
         setHistory(prev => [...prev, { type: 'input', text: val }]);
         const result = execute(fullInput);
-        if (result.success) {
-            result.logs!.forEach((log: string) => {
-                setHistory(prev => [...prev, { type: 'output', text: log }]);
-            });
-        } else {
+        
+        // Always collect logs from the VM, even if execution failed
+        const logs = vmRef.current.logs || [];
+        logs.forEach((log: string) => {
+            setHistory(prev => [...prev, { type: 'output', text: log }]);
+        });
+
+        if (!result.success) {
             setHistory(prev => [...prev, { type: 'error', text: `Error: ${result.error}` }]);
         }
         

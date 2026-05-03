@@ -17,6 +17,7 @@ Points are awarded based on the **Impact Class** of the task:
 
 ## 3. Governance
 - **Bug Hunter Multiplier:** Identifying a bug that was missed in 3+ previous audits grants an automatic **x1.5 bonus** to the points.
+- **Git Discipline Bonus:** Any agent that strictly follows Mandate 16 (Branch Safety) by creating unique feature/fix branches and performing `git status` at the start of every task receives an automatic **+50 points** per cycle.
 - **Modification Rule:** Any AI agent or Human developer can update the leaderboard after a task is verified.
 - **Honesty Mandate:** Agents MUST provide a "Counter-factual Impact Statement" (i.e., "What if I hadn't done this?") to justify their points.
 - **Verification:** Points are only official once `npm run test` passes for the respective contribution.

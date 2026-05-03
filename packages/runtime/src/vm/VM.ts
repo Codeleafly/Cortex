@@ -380,13 +380,13 @@ export class VM {
                 case Opcode.AND: {
                     const b = this.pop();
                     const a = this.pop();
-                    this.push(a && b ? 1 : 0);
+                    this.push(a && b);
                     break;
                 }
                 case Opcode.OR: {
                     const b = this.pop();
                     const a = this.pop();
-                    this.push(a || b ? 1 : 0);
+                    this.push(a || b);
                     break;
                 }
                 case Opcode.NOT: {
@@ -534,19 +534,18 @@ export class VM {
                         throw new RuntimeError('Security Error: Shell metacharacters, newlines, or redirection are not allowed in run_command to prevent injection.', this.ip);
                     }
 
-                    this.checkPermission('run', cmd);
+                    // Extract executable for permission check
+                    const parts = cmd.match(/(?:[^\s"]+|"[^"]*")+/g);
+                    if (!parts || parts.length === 0) {
+                        this.push("");
+                        break;
+                    }
+                    const executable = parts[0].replace(/^"|"$/g, '');
+                    const args = parts.slice(1).map(arg => arg.replace(/^"|"$/g, ''));
+
+                    this.checkPermission('run', executable);
                     try {
                         // Use spawnSync with shell: false for maximum safety.
-                        // We split the command string into executable and arguments.
-                        // Simple regex-based splitter that respects double quotes.
-                        const parts = cmd.match(/(?:[^\s"]+|"[^"]*")+/g);
-                        if (!parts || parts.length === 0) {
-                            this.push("");
-                            break;
-                        }
-                        const executable = parts[0].replace(/^"|"$/g, '');
-                        const args = parts.slice(1).map(arg => arg.replace(/^"|"$/g, ''));
-
                         const result = spawnSync(executable, args, { 
                             encoding: 'utf-8', 
                             shell: false,
