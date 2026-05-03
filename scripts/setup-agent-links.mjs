@@ -23,22 +23,33 @@ const folderLinks = [
     { src: 'skills', dest: '.agents/skills' },
     { src: 'skills', dest: '.cursor/skills' },
     { src: 'skills', dest: '.opencode/skills' },
+
+    // 🔥 MASTER AGENTS MIRROR
+    { src: '.gemini/agents', dest: '.codex/agents' },
+    { src: '.gemini/agents', dest: '.claude/agents' },
 ];
+
+function safeExists(filePath) {
+    try {
+        fs.lstatSync(filePath);
+        return true;
+    } catch {
+        return false;
+    }
+}
 
 async function createSymlink(srcName, destPath) {
     const fullSrc = path.join(root, srcName);
     const fullDest = path.join(root, destPath);
     const destDir = path.dirname(fullDest);
 
-    // Create parent directory if it doesn't exist
+    // ensure parent folder exists (but NEVER touch .gemini root itself)
     if (!fs.existsSync(destDir)) {
-        console.log(`Creating directory: ${destDir}`);
         fs.mkdirSync(destDir, { recursive: true });
     }
 
-    // Remove existing if it's a file or symlink
-    if (fs.existsSync(fullDest) || fs.lstatSync(fullDest, { throwIfNoEntry: false })) {
-        console.log(`Removing existing: ${destPath}`);
+    // remove existing target (file/symlink only)
+    if (safeExists(fullDest)) {
         fs.rmSync(fullDest, { recursive: true, force: true });
     }
 
@@ -46,30 +57,27 @@ async function createSymlink(srcName, destPath) {
     const type = process.platform === 'win32' && isDir ? 'junction' : 'file';
 
     try {
-        // We use relative paths for symlinks to keep them portable
         const relativeSrc = path.relative(destDir, fullSrc);
         await fs.promises.symlink(relativeSrc, fullDest, type);
-        console.log(`Created symlink: ${destPath} -> ${srcName}`);
+        console.log(`✔ ${destPath} → ${srcName}`);
     } catch (err) {
-        console.error(`Failed to create symlink ${destPath}:`, err.message);
+        console.error(`✖ Failed ${destPath}:`, err.message);
     }
 }
 
 async function main() {
-    // Policy enforcement: Ensure we are not on the main branch per Mandate 16
     try {
         const { execSync } = await import('node:child_process');
         const branch = execSync('git rev-parse --abbrev-ref HEAD', { encoding: 'utf8' }).trim();
+
         if (branch === 'main') {
-            console.error('Error: Direct development on main branch is prohibited by Mandate 16.');
+            console.error('Blocked: main branch protected');
             process.exit(1);
         }
-    } catch (e) {
-        // Ignore if git is not available or not a git repo
-    }
+    } catch {}
 
-    console.log('--- Setting up Agent Compatibility Symlinks ---');
-    
+    console.log('\n🚀 Sync Starting...\n');
+
     for (const link of fileLinks) {
         await createSymlink(link.src, link.dest);
     }
@@ -78,8 +86,7 @@ async function main() {
         await createSymlink(link.src, link.dest);
     }
 
-    console.log('--- Setup Complete ---');
+    console.log('\n✅ Sync Complete');
 }
 
 main().catch(console.error);
-// Policy enforcement trigger
