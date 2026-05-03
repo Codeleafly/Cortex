@@ -35,6 +35,11 @@ export class VM {
         write: false,
         run: false
     };
+    private whitelists = {
+        read: new Set<string>(),
+        write: new Set<string>(),
+        run: new Set<string>()
+    };
     private isInteractive = true;
 
     constructor(initialPermissions?: Partial<Permissions>, interactive = true) {
@@ -47,6 +52,11 @@ export class VM {
     private checkPermission(type: keyof Permissions, target?: string): void {
         if (this.permissions[type]) return;
 
+        if (target) {
+            const resolvedTarget = path.resolve(target);
+            if (this.whitelists[type].has(resolvedTarget)) return;
+        }
+
         if (!this.isInteractive) {
             throw new RuntimeError(`Security Error: ${type.toUpperCase()} permission denied (Non-interactive mode)`, this.ip);
         }
@@ -57,7 +67,11 @@ export class VM {
         
         const answer = readline.question(`Allow this operation? (y/n): `);
         if (answer.toLowerCase() === 'y') {
-            this.permissions[type] = true;
+            if (target) {
+                this.whitelists[type].add(path.resolve(target));
+            } else {
+                this.permissions[type] = true;
+            }
             console.log(`\x1b[32mPermission granted.\x1b[0m`);
         } else {
             throw new RuntimeError(`Security Error: ${type.toUpperCase()} permission denied by user.`, this.ip);
@@ -93,8 +107,14 @@ export class VM {
     }
 
     private safeResolve(userPath: string): string {
+        const root = path.resolve(process.cwd());
         const resolved = path.resolve(userPath);
-        if (!resolved.startsWith(process.cwd())) {
+        
+        // Ensure the resolved path is either the root or a subdirectory of the root
+        const relative = path.relative(root, resolved);
+        const isOutside = relative.startsWith('..') || path.isAbsolute(relative);
+
+        if (isOutside) {
             throw new RuntimeError(`Security Error: Sandbox escape attempt for path: ${userPath}`, this.ip);
         }
 
@@ -102,7 +122,10 @@ export class VM {
         try {
             if (fs.existsSync(resolved)) {
                 const real = fs.realpathSync(resolved);
-                if (!real.startsWith(process.cwd())) {
+                const realRelative = path.relative(root, real);
+                const isRealOutside = realRelative.startsWith('..') || path.isAbsolute(realRelative);
+
+                if (isRealOutside) {
                     throw new RuntimeError(`Security Error: Symlink sandbox escape attempt for path: ${userPath}`, this.ip);
                 }
             }

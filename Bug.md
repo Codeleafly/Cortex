@@ -26,10 +26,10 @@
 | **VULN-LOGIC-01** | Non-Short-Circuiting | **FIXED** ✅ | Implemented `JMP_IF_TRUE` and conditional logic jumps. |
 | **VULN-LOGIC-02** | Operator Precedence | **FIXED** ✅ | Refactored Parser to separate equality from comparison. |
 | OPT-COMP-01 | Memory Fragmentation | **FIXED** ✅ | Block-level memory reclamation implemented in Compiler. |
-| **VULN-NEW-01** | Sandbox Escape via Prefix Bug | **PENDING** 🔴 | `startsWith` check in `safeResolve` is bypassable with sibling dirs. |
-| **VULN-NEW-02** | Permanent Permission Escalation | **PENDING** 🔴 | Permissions persist globally for the VM after first grant. |
-| **VULN-NEW-03** | Broken Nested Function Scope | **PENDING** 🔴 | Nested functions access incorrect stack offsets for outer variables. |
-| **VULN-NEW-04** | Integer Overflow in Bytecode | **PENDING** 🔴 | Large numbers wrap around due to 32-bit signed storage. |
+| **VULN-NEW-01** | Sandbox Escape via Prefix Bug | **FIXED** ✅ | Fixed `safeResolve` using `path.relative` to ensure path containment. |
+| **VULN-NEW-02** | Permanent Permission Escalation | **FIXED** ✅ | Implemented granular path-based whitelisting for permissions. |
+| **VULN-NEW-03** | Broken Nested Function Scope | **FIXED** ✅ | Compiler now throws error on closure access to prevent corruption. |
+| **VULN-NEW-04** | Integer Overflow in Bytecode | **FIXED** ✅ | Added 32-bit signed range validation for numeric literals in Compiler. |
 
 ## 2. Phase 5 Audit Findings (Deep Logic & Security)
 Audited by **Cyber Subagent**. The following vulnerabilities were identified and verified empirically in `tests/repro/verify_vulnerabilities.ts`.

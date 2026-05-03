@@ -61,6 +61,12 @@ export class Compiler {
                 if (this.functionStartScopeIndex === 0) return ~addr;
                 // If we are in a function, only scope 0 is global
                 if (i === 0) return ~addr;
+                
+                // If the variable is in an outer function's scope, we can't access it (no closures yet)
+                if (i < this.functionStartScopeIndex) {
+                    throw new Error(`Closure Error: Cannot access non-global variable '${name}' from nested function. Closures are not yet supported.`);
+                }
+
                 return addr; // Local
             }
         }
@@ -267,6 +273,9 @@ export class Compiler {
                 break;
             case 'LiteralExpr':
                 if (typeof expr.value === 'number') {
+                    if (expr.value > 2147483647 || expr.value < -2147483648) {
+                        throw new Error(`Integer Overflow: Numeric literal ${expr.value} exceeds 32-bit signed integer range.`);
+                    }
                     this.emit(Opcode.PUSH);
                     this.emit(expr.value);
                 } else if (typeof expr.value === 'string') {
