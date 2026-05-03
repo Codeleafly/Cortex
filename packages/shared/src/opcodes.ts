@@ -38,4 +38,6 @@ export enum Opcode {
     STR_LEN = 31,
     RUN_CMD = 33,
     JMP_IF_TRUE = 34,
+    DUP = 35,
+    RUN_CMD_ARGS = 36,
 }

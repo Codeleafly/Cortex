@@ -11,20 +11,20 @@ describe('VM Vulnerabilities', () => {
 
     test('VULN-VM-01: Unbounded Memory Access (LOAD)', () => {
         const bytecode = new Int32Array([
-            Opcode.LOAD, 2000, // Address beyond 1024
+            Opcode.LOAD, 2000000, // Address beyond 1,048,576 (MAX_MEMORY_SIZE)
             Opcode.HALT
         ]);
-        // Currently it might just return undefined and not crash Node, but it's undefined behavior in the VM
-        expect(() => vm.run(bytecode)).toThrow(); 
+        // Should throw due to MAX_MEMORY_SIZE limit
+        expect(() => vm.run(bytecode)).toThrow(/Memory Error/); 
     });
 
     test('VULN-VM-01: Unbounded Memory Access (STORE)', () => {
         const bytecode = new Int32Array([
             Opcode.PUSH, 42,
-            Opcode.STORE, 2000, // Address beyond 1024
+            Opcode.STORE, 2000000, // Address beyond 1,048,576
             Opcode.HALT
         ]);
-        expect(() => vm.run(bytecode)).toThrow();
+        expect(() => vm.run(bytecode)).toThrow(/Memory Error/);
     });
 
     test('VULN-VM-03: Stack Underflow', () => {
@@ -107,7 +107,7 @@ describe('VM Vulnerabilities', () => {
         const bytecode = new Int32Array([
             Opcode.PUSH // Missing operand
         ]);
-        expect(() => vm.run(bytecode)).toThrow('Unexpected end of bytecode: missing operand');
+        expect(() => vm.run(bytecode)).toThrow('Unexpected end of bytecode: missing or invalid operand');
     });
 
     test('VULN-VM-LOGIC-01: Global Memory Pointer Isolation', () => {

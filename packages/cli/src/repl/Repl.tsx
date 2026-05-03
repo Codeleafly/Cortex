@@ -17,7 +17,12 @@ Syntax Examples:
   while (x > 0) { print x; x = x - 1 }
 `;
 
-const REPL = () => {
+interface ReplProps {
+    initialPermissions?: { read: boolean, write: boolean, run: boolean };
+    whitelists?: { read: string[], write: string[], run: string[] };
+}
+
+const REPL = ({ initialPermissions, whitelists }: ReplProps) => {
     const { exit } = useApp();
     const [input, setInput] = useState('');
     const [history, setHistory] = useState<{ type: 'input' | 'output' | 'error' | 'info', text: string }[]>([
@@ -26,9 +31,19 @@ const REPL = () => {
     const [editorMode, setEditorMode] = useState(false);
     const [multiLineInput, setMultiLineInput] = useState('');
 
+    const createVM = () => {
+        const vm = new VM(initialPermissions, true);
+        if (whitelists) {
+            for (const path of whitelists.read) vm.addWhitelist('read', path);
+            for (const path of whitelists.write) vm.addWhitelist('write', path);
+            for (const path of whitelists.run) vm.addWhitelist('run', path);
+        }
+        return vm;
+    };
+
     // Persist Compiler and VM across the session
     const compilerRef = useRef(new Compiler());
-    const vmRef = useRef(new VM());
+    const vmRef = useRef(createVM());
 
     const execute = (code: string) => {
         try {
@@ -67,7 +82,7 @@ const REPL = () => {
 
         if (!editorMode && trimmed === '.reset') {
             compilerRef.current = new Compiler();
-            vmRef.current = new VM();
+            vmRef.current = createVM();
             setHistory([{ type: 'info', text: 'Environment reset.' }]);
             setInput('');
             return;
@@ -135,6 +150,6 @@ const REPL = () => {
     );
 };
 
-export function startRepl() {
-    render(<REPL />);
+export function startRepl(initialPermissions?: ReplProps['initialPermissions'], whitelists?: ReplProps['whitelists']) {
+    render(<REPL initialPermissions={initialPermissions} whitelists={whitelists} />);
 }

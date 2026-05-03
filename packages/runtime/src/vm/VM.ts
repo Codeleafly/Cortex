@@ -3,7 +3,7 @@ import { RuntimeError } from './RuntimeError.js';
 import fs from 'fs';
 import path from 'path';
 import readline from 'readline-sync';
-import { execSync } from 'child_process';
+import { execSync, spawnSync } from 'child_process';
 
 type StackValue = number | string | boolean | null;
 
@@ -18,8 +18,8 @@ interface Permissions {
  */
 export class VM {
     private stack: StackValue[] = []; 
-    private memory: StackValue[] = new Array(1024).fill(null); 
-    private globals: StackValue[] = new Array(512).fill(null); 
+    private memory: StackValue[] = []; 
+    private globals: StackValue[] = []; 
     private ip = 0; 
     private bp = 0; 
     private memoryStackPointer = 0; 
@@ -41,12 +41,29 @@ export class VM {
         run: new Set<string>()
     };
     private isInteractive = true;
+    private printHandler: (msg: string) => void = console.log;
+    private instructionCount = 0;
+    private readonly MAX_INSTRUCTIONS = 1_000_000;
+    private readonly MAX_STRING_LENGTH = 1_024 * 1_024; // 1MB
+    private readonly MAX_MEMORY_SIZE = 1_048_576; // 1M slots
 
-    constructor(initialPermissions?: Partial<Permissions>, interactive = true) {
+    constructor(initialPermissions?: Partial<Permissions>, interactive = false) {
+        // Initialize memory with a reasonable default size, it grows dynamically
+        this.memory = new Array(1024).fill(null);
+        this.globals = new Array(512).fill(null);
+
         if (initialPermissions) {
             this.permissions = { ...this.permissions, ...initialPermissions };
         }
         this.isInteractive = interactive;
+    }
+
+    public setPrintHandler(handler: (msg: string) => void) {
+        this.printHandler = handler;
+    }
+
+    public addWhitelist(type: keyof Permissions, target: string) {
+        this.whitelists[type].add(path.resolve(target));
     }
 
     private checkPermission(type: keyof Permissions, target?: string): void {
@@ -58,7 +75,7 @@ export class VM {
         }
 
         if (!this.isInteractive) {
-            throw new RuntimeError(`Security Error: ${type.toUpperCase()} permission denied (Non-interactive mode)`, this.ip);
+            throw new RuntimeError(`Security Error: ${type.toUpperCase()} permission denied (Non-interactive mode: target=${target || 'unknown'})`, this.ip);
         }
 
         console.warn(`\x1b[33m╔════ Security Alert ════════════════════════════════════════════════════╗\x1b[0m`);
@@ -78,9 +95,33 @@ export class VM {
         }
     }
 
+    private ensureMemory(addr: number) {
+        if (addr < 0 || addr >= this.MAX_MEMORY_SIZE) {
+            throw new RuntimeError(`Memory Error: Address ${addr} out of bounds (max ${this.MAX_MEMORY_SIZE})`, this.ip);
+        }
+        if (addr >= this.memory.length) {
+            const newSize = Math.min(this.MAX_MEMORY_SIZE, Math.max(this.memory.length * 2, addr + 1));
+            const oldLength = this.memory.length;
+            this.memory.length = newSize;
+            this.memory.fill(null, oldLength);
+        }
+    }
+
+    private ensureGlobals(addr: number) {
+        if (addr < 0 || addr >= this.MAX_MEMORY_SIZE) {
+            throw new RuntimeError(`Memory Error: Global address ${addr} out of bounds (max ${this.MAX_MEMORY_SIZE})`, this.ip);
+        }
+        if (addr >= this.globals.length) {
+            const newSize = Math.min(this.MAX_MEMORY_SIZE, Math.max(this.globals.length * 2, addr + 1));
+            const oldLength = this.globals.length;
+            this.globals.length = newSize;
+            this.globals.fill(null, oldLength);
+        }
+    }
+
     private readOperand(): number {
-        if (this.ip >= this.bytecode.length) {
-            throw new RuntimeError('Unexpected end of bytecode: missing operand', this.ip);
+        if (this.ip >= this.bytecode.length || this.ip < 0) {
+            throw new RuntimeError('Unexpected end of bytecode: missing or invalid operand', this.ip);
         }
         return this.bytecode[this.ip++];
     }
@@ -88,6 +129,9 @@ export class VM {
     private push(val: StackValue) {
         if (this.stack.length >= 1024) {
             throw new RuntimeError('Stack Overflow', this.ip);
+        }
+        if (typeof val === 'string' && val.length > this.MAX_STRING_LENGTH) {
+            throw new RuntimeError(`Resource Exhaustion: String length exceeds limit (${this.MAX_STRING_LENGTH})`, this.ip);
         }
         this.stack.push(val);
     }
@@ -106,35 +150,34 @@ export class VM {
         return this.stack[this.stack.length - 1];
     }
 
-    private safeResolve(userPath: string): string {
-        const root = path.resolve(process.cwd());
-        const resolved = path.resolve(userPath);
-        
-        // Ensure the resolved path is either the root or a subdirectory of the root
-        const relative = path.relative(root, resolved);
-        const isOutside = relative.startsWith('..') || path.isAbsolute(relative);
+    private checkSafeInteger(val: number, op: string) {
+        if (!Number.isSafeInteger(val)) {
+            throw new RuntimeError(`Numeric Precision Error: Result of ${op} is not a safe integer (${val})`, this.ip);
+        }
+    }
 
-        if (isOutside) {
+    private safeResolve(userPath: string): string {
+        const getReal = (p: string): string => {
+            try {
+                return fs.realpathSync(p);
+            } catch {
+                const parent = path.dirname(p);
+                if (parent === p) return p;
+                return path.join(getReal(parent), path.basename(p));
+            }
+        };
+
+        const root = getReal(path.resolve(process.cwd()));
+        const resolved = getReal(path.resolve(userPath));
+
+        const rel = path.relative(root, resolved);
+        const isInside = rel === "" || (!rel.startsWith('..') && !path.isAbsolute(rel));
+
+        if (!isInside) {
             throw new RuntimeError(`Security Error: Sandbox escape attempt for path: ${userPath}`, this.ip);
         }
 
-        // Deep check for symlink escapes if the path exists
-        try {
-            if (fs.existsSync(resolved)) {
-                const real = fs.realpathSync(resolved);
-                const realRelative = path.relative(root, real);
-                const isRealOutside = realRelative.startsWith('..') || path.isAbsolute(realRelative);
-
-                if (isRealOutside) {
-                    throw new RuntimeError(`Security Error: Symlink sandbox escape attempt for path: ${userPath}`, this.ip);
-                }
-            }
-        } catch (e) {
-            // Handle cases where permissions or other fs issues occur
-            throw new RuntimeError(`Security Error: Failed to verify path safety: ${userPath}`, this.ip);
-        }
-
-        return resolved;
+        return path.resolve(userPath);
     }
 
     public run(bytecode: Int32Array, stringPool: string[] = [], args: string[] = []) {
@@ -147,6 +190,7 @@ export class VM {
         this.logs = [];
         this.stack = [];
         this.callStack = [];
+        this.instructionCount = 0;
         this.globals.fill(null);
         this.execute();
     }
@@ -157,22 +201,37 @@ export class VM {
         this.args = args;
         this.ip = startIp;
         this.logs = [];
-        // Note: we don't reset stack/callStack for snippets in REPL to maintain state
-        this.execute();
+        this.instructionCount = 0;
+        try {
+            this.execute();
+        } catch (e) {
+            this.stack = []; // Clear stack on error in REPL to prevent memory/state leaks
+            throw e;
+        }
     }
 
     private execute() {
         while (this.ip < this.bytecode.length) {
+            if (++this.instructionCount > this.MAX_INSTRUCTIONS) {
+                throw new RuntimeError(`Resource Exhaustion: Maximum instruction limit reached (${this.MAX_INSTRUCTIONS})`, this.ip);
+            }
+            
             const opcode = this.bytecode[this.ip++] as Opcode;
 
             switch (opcode) {
                 case Opcode.HALT:
                     return;
+                case Opcode.DUP:
+                    this.push(this.peek());
+                    break;
                 case Opcode.PUSH:
                     this.push(this.readOperand());
                     break;
                 case Opcode.PUSH_STR: {
                     const idx = this.readOperand();
+                    if (idx < 0 || idx >= this.stringPool.length) {
+                        throw new RuntimeError(`Invalid string pool index: ${idx}`, this.ip);
+                    }
                     this.push(this.stringPool[idx]);
                     break;
                 }
@@ -180,7 +239,9 @@ export class VM {
                     const b = this.pop();
                     const a = this.pop();
                     if (typeof a === 'number' && typeof b === 'number') {
-                        this.push(a + b);
+                        const res = a + b;
+                        this.checkSafeInteger(res, 'ADD');
+                        this.push(res);
                     } else if (typeof a === 'string' || typeof b === 'string') {
                         this.push(String(a) + String(b));
                     } else {
@@ -194,7 +255,9 @@ export class VM {
                     if (typeof a !== 'number' || typeof b !== 'number') {
                         throw new RuntimeError('SUB requires numeric operands', this.ip);
                     }
-                    this.push(a - b);
+                    const res = a - b;
+                    this.checkSafeInteger(res, 'SUB');
+                    this.push(res);
                     break;
                 }
                 case Opcode.MUL: {
@@ -203,7 +266,9 @@ export class VM {
                     if (typeof a !== 'number' || typeof b !== 'number') {
                         throw new RuntimeError('MUL requires numeric operands', this.ip);
                     }
-                    this.push(a * b);
+                    const res = a * b;
+                    this.checkSafeInteger(res, 'MUL');
+                    this.push(res);
                     break;
                 }
                 case Opcode.DIV: {
@@ -213,22 +278,20 @@ export class VM {
                         throw new RuntimeError('DIV requires numeric operands', this.ip);
                     }
                     if (b === 0) throw new RuntimeError('Division by zero', this.ip);
-                    this.push(Math.floor(a / b));
+                    const res = Math.floor(a / b);
+                    this.checkSafeInteger(res, 'DIV');
+                    this.push(res);
                     break;
                 }
                 case Opcode.LOAD: {
                     const addr = this.readOperand();
                     if (addr < 0) {
                         const finalAddr = ~addr;
-                        if (finalAddr < 0 || finalAddr >= this.globals.length) {
-                            throw new RuntimeError(`Invalid global address: ${finalAddr}`, this.ip);
-                        }
+                        this.ensureGlobals(finalAddr);
                         this.push(this.globals[finalAddr]);
                     } else {
                         const finalAddr = this.bp + addr;
-                        if (finalAddr < 0 || finalAddr >= this.memory.length) {
-                            throw new RuntimeError(`Invalid memory address: ${finalAddr} (bp: ${this.bp})`, this.ip);
-                        }
+                        this.ensureMemory(finalAddr);
                         this.push(this.memory[finalAddr]);
                     }
                     break;
@@ -238,15 +301,11 @@ export class VM {
                     const val = this.pop();
                     if (addr < 0) {
                         const finalAddr = ~addr;
-                        if (finalAddr < 0 || finalAddr >= this.globals.length) {
-                            throw new RuntimeError(`Invalid global address: ${finalAddr}`, this.ip);
-                        }
+                        this.ensureGlobals(finalAddr);
                         this.globals[finalAddr] = val;
                     } else {
                         const finalAddr = this.bp + addr;
-                        if (finalAddr < 0 || finalAddr >= this.memory.length) {
-                            throw new RuntimeError(`Invalid memory address: ${finalAddr}`, this.ip);
-                        }
+                        this.ensureMemory(finalAddr);
                         this.memory[finalAddr] = val;
 
                         if (finalAddr >= this.memoryStackPointer) {
@@ -257,21 +316,33 @@ export class VM {
                 }
                 case Opcode.PRINT: {
                     const val = this.pop();
-                    this.logs.push(String(val));
-                    console.log(val);
+                    const msg = String(val);
+                    this.logs.push(msg);
+                    this.printHandler(msg);
                     break;
                 }
-                case Opcode.JMP:
-                    this.ip = this.readOperand();
+                case Opcode.JMP: {
+                    const target = this.readOperand();
+                    if (target < 0 || target >= this.bytecode.length) {
+                        throw new RuntimeError(`Invalid jump target: ${target}`, this.ip);
+                    }
+                    this.ip = target;
                     break;
+                }
                 case Opcode.JMP_IF_FALSE: {
                     const target = this.readOperand();
+                    if (target < 0 || target >= this.bytecode.length) {
+                        throw new RuntimeError(`Invalid jump target: ${target}`, this.ip);
+                    }
                     const condition = this.pop();
                     if (!condition) this.ip = target;
                     break;
                 }
                 case Opcode.JMP_IF_TRUE: {
                     const target = this.readOperand();
+                    if (target < 0 || target >= this.bytecode.length) {
+                        throw new RuntimeError(`Invalid jump target: ${target}`, this.ip);
+                    }
                     const condition = this.pop();
                     if (condition) this.ip = target;
                     break;
@@ -370,7 +441,13 @@ export class VM {
                 }
                 case Opcode.TO_NUMBER: {
                     const val = this.pop();
-                    this.push(parseInt(String(val), 10));
+                    const num = parseInt(String(val), 10);
+                    if (isNaN(num)) {
+                         this.push(null);
+                    } else {
+                        this.checkSafeInteger(num, 'TO_NUMBER');
+                        this.push(num);
+                    }
                     break;
                 }
                 case Opcode.READ_FILE: {
@@ -421,6 +498,9 @@ export class VM {
                     break;
                 }
                 case Opcode.READ_LINE: {
+                    if (!this.isInteractive) {
+                        throw new RuntimeError('Security Error: READ_LINE denied (Non-interactive mode)', this.ip);
+                    }
                     const val = readline.question('');
                     this.push(val);
                     break;
@@ -447,10 +527,37 @@ export class VM {
                     if (typeof cmd !== 'string') {
                         throw new RuntimeError('run_command requires string command', this.ip);
                     }
+
+                    // Strict hardening against shell injection
+                    // Blacklist: ; & | ` $ \n \r > < ( ) { } * ? [ ] ! # ~ \
+                    if (/[;&|`$\n\r><()\{}*?\[\]!#~\\]/.test(cmd)) {
+                        throw new RuntimeError('Security Error: Shell metacharacters, newlines, or redirection are not allowed in run_command to prevent injection.', this.ip);
+                    }
+
                     this.checkPermission('run', cmd);
                     try {
-                        const output = execSync(cmd, { encoding: 'utf-8' });
-                        this.push(output);
+                        // Use spawnSync with shell: false for maximum safety.
+                        // We split the command string into executable and arguments.
+                        // Simple regex-based splitter that respects double quotes.
+                        const parts = cmd.match(/(?:[^\s"]+|"[^"]*")+/g);
+                        if (!parts || parts.length === 0) {
+                            this.push("");
+                            break;
+                        }
+                        const executable = parts[0].replace(/^"|"$/g, '');
+                        const args = parts.slice(1).map(arg => arg.replace(/^"|"$/g, ''));
+
+                        const result = spawnSync(executable, args, { 
+                            encoding: 'utf-8', 
+                            shell: false,
+                            timeout: 10000 // 10 second timeout
+                        });
+
+                        if (result.error) {
+                             this.push(null);
+                        } else {
+                             this.push(result.stdout || result.stderr || "");
+                        }
                     } catch (e) {
                         this.push(null);
                     }

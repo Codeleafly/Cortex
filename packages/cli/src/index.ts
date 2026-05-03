@@ -16,6 +16,11 @@ async function main() {
         write: false,
         run: false
     };
+    const whitelists: { read: string[], write: string[], run: string[] } = {
+        read: [],
+        write: [],
+        run: []
+    };
     const args: string[] = [];
 
     for (const arg of rawArgs) {
@@ -31,10 +36,16 @@ async function main() {
                     flags.run = true;
                 }
             }
+        } else if (arg.startsWith('--allow-read=')) {
+            whitelists.read.push(arg.split('=')[1]);
         } else if (arg === '--allow-read') {
             flags.read = true;
+        } else if (arg.startsWith('--allow-write=')) {
+            whitelists.write.push(arg.split('=')[1]);
         } else if (arg === '--allow-write') {
             flags.write = true;
+        } else if (arg.startsWith('--allow-run=')) {
+            whitelists.run.push(arg.split('=')[1]);
         } else if (arg === '--allow-run') {
             flags.run = true;
         } else if (arg === '--allow-all') {
@@ -48,7 +59,7 @@ async function main() {
 
     if (args.length === 0) {
         // Start REPL
-        startRepl();
+        startRepl(flags, whitelists);
     } else {
         const filePath = args[0];
         if (!filePath.endsWith('.ctx')) {
@@ -70,6 +81,12 @@ async function main() {
             const compiler = new Compiler();
             const { bytecode, stringPool } = compiler.compile(statements);
             const vm = new VM(flags);
+            
+            // Apply granular whitelists
+            for (const path of whitelists.read) vm.addWhitelist('read', path);
+            for (const path of whitelists.write) vm.addWhitelist('write', path);
+            for (const path of whitelists.run) vm.addWhitelist('run', path);
+
             vm.run(bytecode, stringPool, scriptArgs);
         } catch (err: unknown) {
             const message = err instanceof Error ? err.message : String(err);

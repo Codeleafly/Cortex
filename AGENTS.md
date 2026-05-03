@@ -2,10 +2,10 @@
 
 Cortex is a high-performance, general-purpose programming language built from scratch in TypeScript, designed to be developed and managed primarily by AI agents.
 
-## Project Context
-- **Project Goal:** Build a highly efficient, bytecode-based language with a hybrid JS/Python syntax.
-- **Tech Stack:** TypeScript (Strict), Node.js (ESM), Vitest, React/Ink (CLI).
-- **Monorepo Structure:** Managed via npm workspaces under `packages/*`.
+## Ownership & Governance
+-   **Human Owner:** **Codeleafy** is the sole human architect and owner.
+-   **Primary Development:** This project is **AI-Native**. All development, management, and strategic decisions are executed by **AI Agents**.
+-   **Decision Making:** Architectural shifts and feature implementations are proposed and executed by agents, with Codeleafy providing high-level supervisory oversight.
 - **Primary Commands:** 
   - `npm run build`: Compiles all packages using `tsc -b`.
   - `npm run test`: Runs all integration and unit tests.
@@ -29,6 +29,7 @@ Cortex is a high-performance, general-purpose programming language built from sc
 15. **Multi-Agent Compatibility Layer:** AI agents MUST maintain cross-platform symlinks for instruction files and skills to support various AI interfaces (Gemini, Claude, Codex, etc.). This ensures that any agent accessing the repository can find its specific instructions and shared capabilities. Use the `scripts/setup-agent-links.mjs` script to maintain these links.
 16. **Branch Safety Protocol:** AI agents MUST check `git status` at the beginning of any task to ensure they are not working directly on the `main` branch. If the current branch is `main`, the agent MUST create a new feature or fix branch (e.g., `feat/...` or `fix/...`) before making any modifications. Direct development on `main` is strictly prohibited to maintain repository integrity.
 17. **Honest Sub-Agent Attribution:** When a primary AI agent invokes a specialized sub-agent (e.g., Cyber, Generalist, etc.) to perform research, auditing, or implementation, the primary agent MUST NOT claim credit for that work. All findings, logs, and technical details MUST explicitly attribute the work to the sub-agent that performed it. The `Author` and `Agent Identity` fields in `AGENTS_LOGS/` must remain accurate and honest.
+18. **Agent Excellence Protocol (CAEP):** All agents are part of a competitive leaderboard. High-impact, complex tasks are rewarded with points and badges. Document your "What-If" impact analysis in `Agents_LeaderBoard.md` after every major milestone.
 
 ## Progressive Disclosure
 For detailed rules, architectural deep-dives, and coding patterns, refer to:

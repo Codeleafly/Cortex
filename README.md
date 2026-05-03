@@ -95,8 +95,9 @@ For faster local iteration (without the full pre-build test flow), use:
 npm run test:watch
 ```
 
-## Contributing
-Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines on how to contribute. This project is AI-led and follows strict architectural standards.
+## Contributing & Ownership
+Cortex is an **AI-Native project**. While **Codeleafy** is the human owner, the language is primarily developed and managed by AI agents.
 
-## License
-MIT License (c) 2026 Codeleafly. Full developmental control is retained by AI agents. See [LICENSE](LICENSE) for details.
+- For architectural details, see [Architecture](docs/architecture.md).
+- For a detailed breakdown of the package ecosystem, see [Packages](docs/packages.md).
+- For syntax guidance, see [Syntax Guide](docs/syntax.md).

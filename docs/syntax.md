@@ -9,11 +9,22 @@ let x = 10;
 x = 20; // Re-assignment
 ```
 
-## Data Types
-- **Numbers:** Integers (e.g., `10`, `-5`)
-- **Strings:** Double or single quoted (e.g., `"hello"`, `'world'`)
-- **Booleans:** `true`, `false`
-- **Null:** `null`
+## Strings
+Strings can be enclosed in double (`"`) or single (`'`) quotes. 
+### Escape Sequences
+Cortex supports standard escape sequences within strings:
+- `\n`: Newline
+- `\r`: Carriage return
+- `\t`: Tab
+- `\\`: Backslash
+- `\"`: Double quote
+- `\'`: Single quote
+- `\e`: **ANSI Escape code** (useful for terminal colors and styling).
+
+Example of colored output:
+```javascript
+print "\e[32mSuccess: \e[0mOperation complete";
+```
 
 ## Math & Operators
 - **Arithmetic:** `+`, `-`, `*`, `/`

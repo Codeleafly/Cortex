@@ -216,36 +216,26 @@ export class Compiler {
             case 'BinaryExpr':
                 if (expr.operator.type === TokenType.AND_AND) {
                     this.expression(expr.left);
+                    this.emit(Opcode.DUP);
                     this.emit(Opcode.JMP_IF_FALSE);
                     const jumpToFalseIdx = this.bytecode.length;
                     this.emit(0);
                     
+                    this.emit(Opcode.POP);
                     this.expression(expr.right);
-                    this.emit(Opcode.JMP);
-                    const jumpToEndIdx = this.bytecode.length;
-                    this.emit(0);
                     
                     this.bytecode[jumpToFalseIdx] = this.bytecode.length;
-                    this.emit(Opcode.PUSH);
-                    this.emit(0);
-                    
-                    this.bytecode[jumpToEndIdx] = this.bytecode.length;
                 } else if (expr.operator.type === TokenType.OR_OR) {
                     this.expression(expr.left);
+                    this.emit(Opcode.DUP);
                     this.emit(Opcode.JMP_IF_TRUE);
                     const jumpToTrueIdx = this.bytecode.length;
                     this.emit(0);
                     
+                    this.emit(Opcode.POP);
                     this.expression(expr.right);
-                    this.emit(Opcode.JMP);
-                    const jumpToEndIdx = this.bytecode.length;
-                    this.emit(0);
                     
                     this.bytecode[jumpToTrueIdx] = this.bytecode.length;
-                    this.emit(Opcode.PUSH);
-                    this.emit(1);
-                    
-                    this.bytecode[jumpToEndIdx] = this.bytecode.length;
                 } else {
                     this.expression(expr.left);
                     this.expression(expr.right);
@@ -296,32 +286,33 @@ export class Compiler {
                 this.emit(this.resolveVariable(expr.name));
                 break;
             case 'CallExpr': {
-                for (const arg of expr.args) {
-                    this.expression(arg);
-                }
-                if (expr.callee === 'get_arg') {
-                    this.emit(Opcode.GET_ARG);
-                } else if (expr.callee === 'to_number') {
-                    this.emit(Opcode.TO_NUMBER);
-                } else if (expr.callee === 'read_file') {
-                    this.emit(Opcode.READ_FILE);
-                } else if (expr.callee === 'write_file') {
-                    this.emit(Opcode.WRITE_FILE);
-                } else if (expr.callee === 'file_exists') {
-                    this.emit(Opcode.FILE_EXISTS);
-                } else if (expr.callee === 'str_upper') {
-                    this.emit(Opcode.STR_UPPER);
-                } else if (expr.callee === 'str_words') {
-                    this.emit(Opcode.STR_WORDS);
-                } else if (expr.callee === 'read_line') {
-                    this.emit(Opcode.READ_LINE);
-                } else if (expr.callee === 'str_at') {
-                    this.emit(Opcode.STR_AT);
-                } else if (expr.callee === 'str_len') {
-                    this.emit(Opcode.STR_LEN);
-                } else if (expr.callee === 'run_command') {
-                    this.emit(Opcode.RUN_CMD);
+                const builtins: Record<string, { opcode: Opcode, args: number }> = {
+                    'get_arg': { opcode: Opcode.GET_ARG, args: 1 },
+                    'to_number': { opcode: Opcode.TO_NUMBER, args: 1 },
+                    'read_file': { opcode: Opcode.READ_FILE, args: 1 },
+                    'write_file': { opcode: Opcode.WRITE_FILE, args: 2 },
+                    'file_exists': { opcode: Opcode.FILE_EXISTS, args: 1 },
+                    'str_upper': { opcode: Opcode.STR_UPPER, args: 1 },
+                    'str_words': { opcode: Opcode.STR_WORDS, args: 1 },
+                    'read_line': { opcode: Opcode.READ_LINE, args: 0 },
+                    'str_at': { opcode: Opcode.STR_AT, args: 2 },
+                    'str_len': { opcode: Opcode.STR_LEN, args: 1 },
+                    'run_command': { opcode: Opcode.RUN_CMD, args: 1 }
+                };
+
+                if (expr.callee in builtins) {
+                    const info = builtins[expr.callee];
+                    if (expr.args.length !== info.args) {
+                        throw new Error(`Compiler Error: Built-in function '${expr.callee}' expects ${info.args} arguments, but got ${expr.args.length}.`);
+                    }
+                    for (const arg of expr.args) {
+                        this.expression(arg);
+                    }
+                    this.emit(info.opcode);
                 } else {
+                    for (const arg of expr.args) {
+                        this.expression(arg);
+                    }
                     const fn = this.functions.get(expr.callee);
                     if (!fn) throw new Error(`Undefined function: ${expr.callee}`);
                     if (fn.argCount !== expr.args.length) throw new Error(`Function ${expr.callee} expects ${fn.argCount} arguments, got ${expr.args.length}`);
