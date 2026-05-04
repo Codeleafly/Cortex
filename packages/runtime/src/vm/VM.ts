@@ -1,4 +1,4 @@
-import { Opcode } from '@cortex/shared';
+import { Opcode } from '@nox/shared';
 import { RuntimeError } from './RuntimeError.js';
 import fs from 'fs';
 import path from 'path';
@@ -79,7 +79,7 @@ export class VM {
         }
 
         console.warn(`\x1b[33m╔════ Security Alert ════════════════════════════════════════════════════╗\x1b[0m`);
-        console.warn(`\x1b[33m║\x1b[0m Cortex script is requesting \x1b[1m${type.toUpperCase()}\x1b[0m access${target ? ' to: ' + target : ''}`);
+        console.warn(`\x1b[33m║\x1b[0m Nox script is requesting \x1b[1m${type.toUpperCase()}\x1b[0m access${target ? ' to: ' + target : ''}`);
         console.warn(`\x1b[33m╚════════════════════════════════════════════════════════════════════════╝\x1b[0m`);
         
         const answer = readline.question(`Allow this operation? (y/n): `);

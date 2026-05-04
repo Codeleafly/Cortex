@@ -1,10 +1,10 @@
-# Cortex Architecture
+# Nox Architecture
 
-Cortex is a programming language built from scratch in TypeScript, designed for high performance and AI-first development.
+Nox is a programming language built from scratch in TypeScript, designed for high performance and AI-first development.
 
 ## Core Decisions
 - **Monorepo Structure:** The project follows a professional monorepo architecture. Code is divided into isolated packages under `packages/` (`shared`, `frontend`, `runtime`, `cli`).
-- **Bytecode-First:** Cortex prioritizes numeric bytecode execution (`Int32Array`) over AST interpretation for maximum performance.
+- **Bytecode-First:** Nox prioritizes numeric bytecode execution (`Int32Array`) over AST interpretation for maximum performance.
 - **Strict Separation of Concerns:** Lexer, Parser, Compiler, and VM are strictly decoupled into their respective packages.
 - **Two-Stage Frontend:** The language uses a formal Parser and Abstract Syntax Tree (AST) stage between the Lexer and Compiler. This allows for complex optimizations and better semantic analysis.
 - **AST-to-Bytecode:** The compiler walks the AST to generate numeric opcodes, maintaining a decoupling between syntax and execution.

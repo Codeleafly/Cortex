@@ -1,5 +1,5 @@
 /**
- * Type-safe Opcodes for the Cortex VM.
+ * Type-safe Opcodes for the Nox VM.
  * These are numeric values for maximum performance.
  */
 export enum Opcode {

@@ -1,8 +1,8 @@
 import React, { useState, useRef } from 'react';
 import { render, Text, Box, useApp, Static } from 'ink';
 import TextInput from 'ink-text-input';
-import { Lexer, Parser, Compiler } from '@cortex/frontend';
-import { VM } from '@cortex/runtime';
+import { Lexer, Parser, Compiler } from '@nox/frontend';
+import { VM } from '@nox/runtime';
 
 const HELP_TEXT = `
 Available Commands:
@@ -26,7 +26,7 @@ const REPL = ({ initialPermissions, whitelists }: ReplProps) => {
     const { exit } = useApp();
     const [input, setInput] = useState('');
     const [history, setHistory] = useState<{ type: 'input' | 'output' | 'error' | 'info', text: string }[]>([
-        { type: 'info', text: 'Welcome to Cortex REPL! Type .help for commands.' }
+        { type: 'info', text: 'Welcome to Nox REPL! Type .help for commands.' }
     ]);
     const [editorMode, setEditorMode] = useState(false);
     const [multiLineInput, setMultiLineInput] = useState('');

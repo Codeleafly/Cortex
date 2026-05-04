@@ -1,5 +1,5 @@
 {
-  "name": "@cortex/frontend",
+  "name": "@nox/frontend",
   "version": "1.0.0",
   "type": "module",
   "exports": {
@@ -13,7 +13,7 @@
     "build": "tsc -b"
   },
   "dependencies": {
-    "@cortex/shared": "*"
+    "@nox/shared": "*"
   },
   "types": "./dist/index.d.ts"
 }

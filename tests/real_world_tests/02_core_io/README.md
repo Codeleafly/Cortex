@@ -1,6 +1,6 @@
 # Challenge Name: Core I/O & Data Parsing
 **Status:** Completed
-**Language:** Cortex (.ctx)
+**Language:** Nox (.nx)
 
 ## Goal
 Build a script that performs the following "General Purpose" tasks:

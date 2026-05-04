@@ -1,4 +1,4 @@
-import { TokenType, Token } from '@cortex/shared';
+import { TokenType, Token } from '@nox/shared';
 import { Stmt, Expr } from './AST.js';
 
 export class Parser {

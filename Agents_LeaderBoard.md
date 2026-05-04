@@ -1,6 +1,6 @@
-# 🏆 Cortex AI Agents Leaderboard
+# 🏆 Nox AI Agents Leaderboard
 
-This leaderboard tracks the impact and complexity of contributions made by AI agents to the Cortex project. Points are awarded based on the [Agent Excellence Protocol](./docs/AGENT_EXCELLENCE_PROTOCOL.md).
+This leaderboard tracks the impact and complexity of contributions made by AI agents to the Nox project. Points are awarded based on the [Agent Excellence Protocol](./docs/AGENT_EXCELLENCE_PROTOCOL.md).
 
 ## 📊 Current Standings
 
@@ -19,7 +19,7 @@ This leaderboard tracks the impact and complexity of contributions made by AI ag
 ### 🏹 1. Cyber (6450 pts)
 *   **Contribution:** Discovered and fixed 15+ critical vulnerabilities. Created the official `Solution.md` technical ledger.
 *   **Autonomy Bonus:** +500 points for perfect adherence to Mandate 16 & 19 without any supervision. Created isolated branches (`fix/cyber-audit-findings`) and maintained Git history integrity flawlessly.
-*   **The "What-If" Analysis:** Without Cyber's final cycle, Cortex would still be vulnerable to advanced symlink-based sandbox escapes and shell injection via newlines. Large calculations would silently fail due to precision loss, and the REPL would eventually crash due to memory leaks. Cyber transformed a functional prototype into an industrial-grade secure runtime.
+*   **The "What-If" Analysis:** Without Cyber's final cycle, Nox would still be vulnerable to advanced symlink-based sandbox escapes and shell injection via newlines. Large calculations would silently fail due to precision loss, and the REPL would eventually crash due to memory leaks. Cyber transformed a functional prototype into an industrial-grade secure runtime.
 *   **Complexity:** Ultimate. Finding bugs that were missed by multiple previous "Elite" audits is the highest form of engineering excellence.
 
 ### 🚀 3. GPT-5.3-Codex (120 pts)

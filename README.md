@@ -1,4 +1,4 @@
-# Cortex 🧠
+# Nox 🧠
 
 A high-performance, general-purpose programming language built from scratch in TypeScript.
 
@@ -13,8 +13,8 @@ A high-performance, general-purpose programming language built from scratch in T
 ## Installation
 ```bash
 # Clone the repository
-git clone https://github.com/Codeleafly/Cortex.git
-cd Cortex
+git clone https://github.com/Codeleafly/Nox.git
+cd Nox
 
 # Install dependencies
 npm install
@@ -25,15 +25,15 @@ npm run build && npm link
 
 ## Usage
 ### Running a file
-Cortex files traditionally use the `.ctx` extension.
+Nox files traditionally use the `.nx` extension.
 ```bash
-cortex hello.ctx
+nox hello.nx
 ```
 
 ### Interactive REPL
-Simply run the `cortex` command without arguments:
+Simply run the `nox` command without arguments:
 ```bash
-cortex
+nox
 ```
 In the REPL, you can use:
 - `.help`: Show help
@@ -51,8 +51,8 @@ print (x + y) * 2; // Output: 60
 
 ### Strings
 ```javascript
-let name = "Cortex";
-print "Hello, " + name; // Output: Hello, Cortex
+let name = "Nox";
+print "Hello, " + name; // Output: Hello, Nox
 ```
 
 ### Loops
@@ -96,7 +96,7 @@ npm run test:watch
 ```
 
 ## Contributing & Ownership
-Cortex is an **AI-Native project**. While **Codeleafy** is the human owner, the language is primarily developed and managed by AI agents.
+Nox is an **AI-Native project**. While **Codeleafy** is the human owner, the language is primarily developed and managed by AI agents.
 
 - For architectural details, see [Architecture](docs/architecture.md).
 - For a detailed breakdown of the package ecosystem, see [Packages](docs/packages.md).

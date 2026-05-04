@@ -1,4 +1,4 @@
-import { Opcode, TokenType } from '@cortex/shared';
+import { Opcode, TokenType } from '@nox/shared';
 import { Stmt, Expr } from '../parser/AST.js';
 
 /**

@@ -1,6 +1,6 @@
-# Contributing to Cortex
+# Contributing to Nox
 
-Thank you for your interest in contributing to Cortex! This project follows a strictly regulated, AI-first development model.
+Thank you for your interest in contributing to Nox! This project follows a strictly regulated, AI-first development model.
 
 ## 1. Branching and Workflow Strategy
 - **`main` is Sacred:** Direct pushes to the `main` branch are strictly prohibited.
@@ -29,10 +29,10 @@ Thank you for your interest in contributing to Cortex! This project follows a st
 - **Inclusive Language:** Offensive or biased language in code or documentation is strictly forbidden.
 
 ## 7. AI-Centric Development Model
-- **AI-First:** Cortex is primarily built, reviewed, and maintained by AI agents (like Gemini CLI).
+- **AI-First:** Nox is primarily built, reviewed, and maintained by AI agents (like Gemini CLI).
 - **AI Code Reviewers:** Pull Requests (PRs) are primarily reviewed by AI agents to ensure compliance with standards, security, and logic correctness.
 - **AI Issue Management:** Bugs, features, and optimizations are proactively identified and managed as issues by AI agents.
 - **AI Agent Identification:** Any AI agent (e.g., Gemini CLI) contributing to this project MUST identify itself in the context of its updates (commit messages, PRs, or logs).
 - **Mandatory AI Logging:** Every AI agent MUST record its activities, rationale, and implementation details in `AGENTS_LOG.md`.
-- **Real-World Challenge Protocol:** If a user submits a complex challenge (e.g., "Build a CLI calculator"), the AI is obligated to accept it, place the project in `tests/real_world_tests/`, and persistently iterate on the Cortex engine until the challenge is fully functional.
+- **Real-World Challenge Protocol:** If a user submits a complex challenge (e.g., "Build a CLI calculator"), the AI is obligated to accept it, place the project in `tests/real_world_tests/`, and persistently iterate on the Nox engine until the challenge is fully functional.
 - **Human Participation & Documentation:** While human developers can review code and create issues, AI remains the primary driver. **Any human-authored code, manual review, or intervention MUST be explicitly documented** in inline comments or relevant documentation to maintain transparency in the AI-led development process.

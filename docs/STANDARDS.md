@@ -1,4 +1,4 @@
-# Cortex Engineering Standards
+# Nox Engineering Standards
 
 ## Coding Standards
 - **Modern TypeScript:** Adhere to ESM and modern TypeScript best practices. Avoid outdated patterns.

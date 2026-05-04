@@ -1,6 +1,6 @@
-# Agent Skills in Cortex
+# Agent Skills in Nox
 
-Agent Skills provide a standardized way to give AI agents new capabilities and expertise within the Cortex ecosystem. This project follows the [Agent Skills Open Standard](https://agentskills.io).
+Agent Skills provide a standardized way to give AI agents new capabilities and expertise within the Nox ecosystem. This project follows the [Agent Skills Open Standard](https://agentskills.io).
 
 ## Overview
 A skill is a portable, version-controlled package containing a `SKILL.md` file with metadata and instructions. Skills allow agents to capture specialized knowledge into discoverable capabilities.

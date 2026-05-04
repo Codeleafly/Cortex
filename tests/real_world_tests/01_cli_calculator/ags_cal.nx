@@ -1,7 +1,7 @@
-// Cortex CLI Calculator
+// Nox CLI Calculator
 
 if (arg_count == 0) {
-    print "Usage: cortex calc.ctx <flag> <num1> <num2>";
+    print "Usage: nox calc.nx <flag> <num1> <num2>";
     print "Flags: --add, --sub, --mul, --div";
 }
 

@@ -1,4 +1,4 @@
-# Cortex Solution Ledger
+# Nox Solution Ledger
 **Official Ledger for Technical Fixes**
 
 This document tracks the solutions implemented for every bug identified in `Bug.md`.
@@ -9,7 +9,7 @@ This document tracks the solutions implemented for every bug identified in `Bug.
 | :--- | :--- | :--- | :--- |
 | **BUILD-01** | Broken Internal Imports | [x] | Fixed `tsconfig` path mapping and `index.ts` exports. |
 | **ARCH-01** | Missing Parser Stage | [x] | Formal `Parser.ts` and `AST.ts` implemented in Frontend. |
-| **TEST-01** | Misplaced VM Tests | [x] | Tests moved from `cli` to `@cortex/runtime` package. |
+| **TEST-01** | Misplaced VM Tests | [x] | Tests moved from `cli` to `@nox/runtime` package. |
 | **VULN-COMP-01** | Missing Stack Frames | [x] | VM now uses Base Pointer (`bp`) for local relative addressing. |
 | **VULN-VM-01** | Unbounded Memory Access | [x] | Explicit checks added to `LOAD` and `STORE` opcodes. |
 | **VULN-RULE-01** | `any` Type Violation | [x] | Replaced with `StackValue` union and Type Guards. |

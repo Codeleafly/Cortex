@@ -1,4 +1,4 @@
-import { TokenType, Token } from '@cortex/shared';
+import { TokenType, Token } from '@nox/shared';
 
 /**
  * Lexer: Breaks source code into tokens.

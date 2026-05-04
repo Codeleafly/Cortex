@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { Lexer, Parser, Compiler } from '@cortex/frontend';
-import { VM } from '@cortex/runtime';
+import { Lexer, Parser, Compiler } from '@nox/frontend';
+import { VM } from '@nox/runtime';
 
 function run(source: string) {
     const lexer = new Lexer(source);
@@ -14,7 +14,7 @@ function run(source: string) {
     return vm.logs;
 }
 
-describe('Cortex Built-ins Audit', () => {
+describe('Nox Built-ins Audit', () => {
     it('should handle str_at correctly', () => {
         const logs = run(`print str_at("hello", 1)`);
         expect(logs).toEqual(['e']);

@@ -1,7 +1,7 @@
-# Cortex Agent Logging Standard (AGENTS_LOGS_RULE.md)
+# Nox Agent Logging Standard (AGENTS_LOGS_RULE.md)
 
 ## Overview
-To maintain a professional, scalable, and traceable audit trail of AI contributions, Cortex uses a decentralized logging system. Every agent MUST follow this format to ensure accountability and clarity for both humans and other AI agents.
+To maintain a professional, scalable, and traceable audit trail of AI contributions, Nox uses a decentralized logging system. Every agent MUST follow this format to ensure accountability and clarity for both humans and other AI agents.
 
 ## Directory Structure
 Logs are no longer stored in a single root file. They are organized by agent identity:

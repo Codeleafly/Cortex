@@ -1,11 +1,11 @@
 
 // In standard JS: 1 == 2 < 3  =>  1 == (2 < 3) => 1 == true => 1
-// In current Cortex: (1 == 2) < 3 => 0 < 3 => 1
+// In current Nox: (1 == 2) < 3 => 0 < 3 => 1
 // Wait, that example gives same result.
 
 // Let's try: 0 == 1 < 2
 // Standard JS: 0 == (1 < 2) => 0 == 1 => 0
-// Current Cortex: (0 == 1) < 2 => 0 < 2 => 1
+// Current Nox: (0 == 1) < 2 => 0 < 2 => 1
 
 print "Testing operator precedence (0 == 1 < 2):";
 let result = 0 == 1 < 2;

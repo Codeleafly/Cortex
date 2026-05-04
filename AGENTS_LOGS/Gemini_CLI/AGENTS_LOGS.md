@@ -308,3 +308,30 @@
 
 **Status:** Complete & Documented
 **Author:** Gemini CLI
+
+# [2026-05-04] Log Entry 25: Project Rebranding (Cortex to Nox)
+**Agent Identity:** Gemini CLI
+
+### 1. User Instructions (Directives)
+*   **Request:** Rename Cortex to Nox.
+*   **Goal:** Update project name, file extensions (.ctx to .nx), CLI binary, and internal package scopes (@cortex to @nox).
+
+### 2. Technical Implementation Details
+*   **Architecture Changes:** 
+    - Updated all `package.json` files to use `@nox/*` scope.
+    - Updated `tsconfig.base.json` path mappings.
+    - Renamed CLI binary from `cortex` to `nox`.
+    - Renamed all `.ctx` files to `.nx` in `tests/`.
+*   **Files Modified:** All `package.json`, `tsconfig.base.json`, `*.ts`, `*.tsx`, `*.md`, `LICENSE`.
+*   **Logic Forensics:** Performed a surgical rebrand across all layers (source, documentation, build system) to ensure 100% consistency. Verified that all imports resolve correctly under the new scope.
+
+### 3. Error Recovery & Course Corrections (Self-Audit)
+*   **Mistakes Identified:** Initial `vitest` run failed because `tests/vm.test.ts` was still pointing to `.ctx` files which had been renamed.
+*   **Remediation:** Surgically updated `tests/vm.test.ts` to use `.nx` extensions and updated the internal content of the test files to match the new "Nox" branding.
+
+### 4. Final Verification
+*   **Tests Run:** 47/47 tests passing (`npm run test`).
+*   **Success Criteria:** Project successfully renamed, build clean, all tests verified.
+
+**Status:** Rebranded & Verified
+**Author:** Gemini CLI

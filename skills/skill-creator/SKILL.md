@@ -1,6 +1,6 @@
 ---
 name: skill-creator
-description: A meta-skill that teaches AI agents how to design and implement new Agent Skills for the Cortex ecosystem. Use this when the project needs a new repeatable workflow or specialized capability.
+description: A meta-skill that teaches AI agents how to design and implement new Agent Skills for the Nox ecosystem. Use this when the project needs a new repeatable workflow or specialized capability.
 license: MIT
 compatibility: Gemini CLI, Claude Code, Cursor
 metadata:

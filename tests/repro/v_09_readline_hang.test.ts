@@ -1,7 +1,7 @@
 
 import { describe, it, expect } from 'vitest';
 import { VM } from '../../packages/runtime/src/vm/VM';
-import { Opcode } from '@cortex/shared';
+import { Opcode } from '@nox/shared';
 
 describe('VULN-09: Non-Interactive READ_LINE Hang', () => {
     it('should throw error on READ_LINE in non-interactive mode', () => {

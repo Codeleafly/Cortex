@@ -1,18 +1,18 @@
 {
-  "name": "@cortex/cli",
+  "name": "@nox/cli",
   "version": "1.0.0",
   "type": "module",
   "bin": {
-    "cortex": "./dist/index.js"
+    "nox": "./dist/index.js"
   },
   "scripts": {
     "build": "tsc -b",
     "start": "tsx src/index.ts"
   },
   "dependencies": {
-    "@cortex/shared": "*",
-    "@cortex/frontend": "*",
-    "@cortex/runtime": "*",
+    "@nox/shared": "*",
+    "@nox/frontend": "*",
+    "@nox/runtime": "*",
     "ink": "^5.0.0",
     "ink-text-input": "^6.0.0",
     "react": "^18.2.0"

@@ -1,4 +1,4 @@
-# Cortex Vulnerability & Bug Report (FINAL AUDIT - VERIFIED)
+# Nox Vulnerability & Bug Report (FINAL AUDIT - VERIFIED)
 **Date:** 2026-05-02
 **Auditor:** Cyber Expert Agent (via Gemini CLI)
 
@@ -8,7 +8,7 @@
 | :--- | :--- | :--- | :--- |
 | **BUILD-01** | Broken Internal Imports | **FIXED** ✅ | Fixed `tsconfig` path mapping and `index.ts` exports. |
 | **ARCH-01** | Missing Parser Stage | **FIXED** ✅ | Formal `Parser.ts` and `AST.ts` implemented in Frontend. |
-| **TEST-01** | Misplaced VM Tests | **FIXED** ✅ | Tests moved from `cli` to `@cortex/runtime` package. |
+| **TEST-01** | Misplaced VM Tests | **FIXED** ✅ | Tests moved from `cli` to `@nox/runtime` package. |
 | **VULN-COMP-01** | Missing Stack Frames | **FIXED** ✅ | VM now uses Base Pointer (`bp`) for local relative addressing. |
 | **VULN-VM-01** | Unbounded Memory Access | **FIXED** ✅ | Explicit checks added to `LOAD` and `STORE` opcodes. |
 | **VULN-RULE-01** | `any` Type Violation | **FIXED** ✅ | Replaced with `StackValue` union and Type Guards. |
@@ -42,7 +42,7 @@
 Audited by **Cyber Subagent**. The following vulnerabilities were identified and verified empirically in `tests/repro/verify_vulnerabilities.ts`.
 
 ### [VULN-NEW-01] Sandbox Escape via Prefix Matching Bug
-- **Description:** The `safeResolve` function uses `resolved.startsWith(process.cwd())` to validate paths. This is insufficient if a directory exists with the same prefix as the current working directory (e.g., if CWD is `/home/Cortex`, an attacker can access `/home/Cortex-secrets`).
+- **Description:** The `safeResolve` function uses `resolved.startsWith(process.cwd())` to validate paths. This is insufficient if a directory exists with the same prefix as the current working directory (e.g., if CWD is `/home/Nox`, an attacker can access `/home/Nox-secrets`).
 - **Proposed Solution:** Ensure the prefix check includes a trailing path separator or use `path.relative` to verify the path is not escaping the root.
 
 ### [VULN-NEW-02] Global Permission Persistence

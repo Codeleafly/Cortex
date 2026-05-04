@@ -1,4 +1,4 @@
-// Cortex Tic Tac Toe - TUI Edition
+// Nox Tic Tac Toe - TUI Edition
 // Using Raw ANSI Escapes and Secure Input
 
 let b1 = "1" let b2 = "2" let b3 = "3"
@@ -17,7 +17,7 @@ fn color(mark) {
 
 fn draw_board() {
     print "\e[H\e[J" // Clear screen
-    print "\e[1;36m  Cortex Tic Tac Toe\e[0m"
+    print "\e[1;36m  Nox Tic Tac Toe\e[0m"
     print ""
     print "     " + color(b1) + " | " + color(b2) + " | " + color(b3)
     print "    -----------"

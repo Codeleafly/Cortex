@@ -4,7 +4,7 @@
 fn main() {
     let count = arg_count()
     if (count < 1) {
-        print "Usage: cortex run main.ctx <input_file>"
+        print "Usage: nox run main.nx <input_file>"
         return 0
     }
 

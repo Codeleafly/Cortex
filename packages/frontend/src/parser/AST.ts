@@ -1,4 +1,4 @@
-import { Token } from '@cortex/shared';
+import { Token } from '@nox/shared';
 
 export type Stmt = 
     | LetStmt 

@@ -1,6 +1,6 @@
 import { describe, test, expect, beforeEach } from 'vitest';
-import { VM } from '@cortex/runtime';
-import { Opcode } from '@cortex/shared';
+import { VM } from '@nox/runtime';
+import { Opcode } from '@nox/shared';
 
 describe('VM Vulnerabilities', () => {
     let vm: VM;

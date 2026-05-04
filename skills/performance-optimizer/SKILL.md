@@ -1,6 +1,6 @@
 ---
 name: performance-optimizer
-description: Guardrails and techniques for maintaining the 'Bytecode-First' purity and execution speed of the Cortex engine. Use this when refactoring core VM logic or adding high-impact opcodes.
+description: Guardrails and techniques for maintaining the 'Bytecode-First' purity and execution speed of the Nox engine. Use this when refactoring core VM logic or adding high-impact opcodes.
 license: MIT
 metadata:
   version: "1.1.0"
@@ -8,7 +8,7 @@ metadata:
 
 # Performance Optimizer Skill
 
-This skill ensures that Cortex remains a high-performance engine by adhering to strict numeric bytecode standards.
+This skill ensures that Nox remains a high-performance engine by adhering to strict numeric bytecode standards.
 
 ## Optimization Guardrails
 
@@ -25,5 +25,5 @@ This skill ensures that Cortex remains a high-performance engine by adhering to 
 - Never use `as any`, as it bypasses the safety checks that help the V8 engine optimize the code.
 
 ## Verification
-- Run the `fib.ctx` benchmark script.
+- Run the `fib.nx` benchmark script.
 - Ensure no significant regressions in execution time for large loops.

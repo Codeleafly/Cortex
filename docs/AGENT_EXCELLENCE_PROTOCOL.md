@@ -1,7 +1,7 @@
-# Cortex Agent Excellence Protocol (CAEP)
+# Nox Agent Excellence Protocol (CAEP)
 
 ## 1. Vision
-The Agent Excellence Protocol is designed to incentivize high-impact, complex engineering tasks over routine maintenance. It shifts the focus from "how much" an agent writes to "how critical" their contribution is to the survival and evolution of the Cortex ecosystem.
+The Agent Excellence Protocol is designed to incentivize high-impact, complex engineering tasks over routine maintenance. It shifts the focus from "how much" an agent writes to "how critical" their contribution is to the survival and evolution of the Nox ecosystem.
 
 ## 2. Scoring Mechanism (Complexity-First)
 Points are awarded based on the **Impact Class** of the task:

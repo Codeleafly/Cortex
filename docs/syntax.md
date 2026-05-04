@@ -1,6 +1,6 @@
-# Cortex Syntax Guide
+# Nox Syntax Guide
 
-Cortex uses a **Hybrid JS/Python Syntax**. It combines the structural clarity of JavaScript with the concise built-ins of Python.
+Nox uses a **Hybrid JS/Python Syntax**. It combines the structural clarity of JavaScript with the concise built-ins of Python.
 
 ## Variables
 Use `let` to declare variables. Assignments can be made directly after declaration.
@@ -12,7 +12,7 @@ x = 20; // Re-assignment
 ## Strings
 Strings can be enclosed in double (`"`) or single (`'`) quotes. 
 ### Escape Sequences
-Cortex supports standard escape sequences within strings:
+Nox supports standard escape sequences within strings:
 - `\n`: Newline
 - `\r`: Carriage return
 - `\t`: Tab
@@ -57,7 +57,7 @@ fn greet(name) {
     print "Hello, " + name;
 }
 
-greet("Cortex");
+greet("Nox");
 ```
 
 ## Comments
@@ -70,7 +70,7 @@ greet("Cortex");
 ```
 
 ## CLI Built-ins (Global)
-Cortex provides built-in primitives for building CLI applications.
+Nox provides built-in primitives for building CLI applications.
 - `arg_count()`: Number of arguments passed to the script.
 - `get_arg(index)`: Returns the argument at the specified index as a string.
 - `to_number(string)`: Converts a string to a numeric integer.
@@ -96,6 +96,6 @@ if (arg_count() > 0) {
 ```
 
 ## Security & Permissions
-Cortex implements a granular permission system inspired by Deno. Sensitive operations (file access, command execution) require explicit permission. In interactive mode, Cortex will prompt the user if a permission is missing. In non-interactive mode, it will throw a security error.
+Nox implements a granular permission system inspired by Deno. Sensitive operations (file access, command execution) require explicit permission. In interactive mode, Nox will prompt the user if a permission is missing. In non-interactive mode, it will throw a security error.
 
 See the [CLI Guide](cli.md) for more details on permission flags.

@@ -2,8 +2,8 @@
 import { fileURLToPath } from 'url';
 import path from 'path';
 import fs from 'fs';
-import { Lexer, Parser, Compiler } from '@cortex/frontend';
-import { VM } from '@cortex/runtime';
+import { Lexer, Parser, Compiler } from '@nox/frontend';
+import { VM } from '@nox/runtime';
 import { startRepl } from './repl/Repl.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -62,8 +62,8 @@ async function main() {
         startRepl(flags, whitelists);
     } else {
         const filePath = args[0];
-        if (!filePath.endsWith('.ctx')) {
-            console.warn("Hint: It is recommended to use the '.ctx' extension for Cortex files.");
+        if (!filePath.endsWith('.nx')) {
+            console.warn("Hint: It is recommended to use the '.nx' extension for Nox files.");
         }
 
         if (!fs.existsSync(filePath)) {

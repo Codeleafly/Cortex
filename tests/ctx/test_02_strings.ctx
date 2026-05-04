@@ -1,2 +1,0 @@
-print "hello " + "cortex";
-// Expect: hello cortex

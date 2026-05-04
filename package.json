@@ -1,9 +1,9 @@
 {
-  "name": "cortex",
+  "name": "nox",
   "version": "1.0.0",
   "private": true,
   "type": "module",
-  "description": "Cortex - A high-performance programming language built from scratch",
+  "description": "Nox - A high-performance programming language built from scratch",
   "workspaces": [
     "packages/*"
   ],
@@ -11,7 +11,7 @@
     "build": "npm run clean && tsc -b",
     "test": "npm run build && vitest run",
     "test:watch": "vitest",
-    "start": "npm run start --workspace=@cortex/cli",
+    "start": "npm run start --workspace=@nox/cli",
     "clean": "tsc -b --clean"
   },
   "devDependencies": {

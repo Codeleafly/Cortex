@@ -1,6 +1,6 @@
-# Cortex AI Agents Configuration
+# Nox AI Agents Configuration
 
-Cortex is a high-performance, general-purpose programming language built from scratch in TypeScript, designed to be developed and managed primarily by AI agents.
+Nox is a high-performance, general-purpose programming language built from scratch in TypeScript, designed to be developed and managed primarily by AI agents.
 
 ## Ownership & Governance
 -   **Human Owner:** **Codeleafy** is the sole human architect and owner.
@@ -9,7 +9,7 @@ Cortex is a high-performance, general-purpose programming language built from sc
 - **Primary Commands:** 
   - `npm run build`: Compiles all packages using `tsc -b`.
   - `npm run test`: Runs all integration and unit tests.
-  - `cortex`: Starts the interactive Ink-based REPL.
+  - `nox`: Starts the interactive Ink-based REPL.
 
 ## Core Mandates (Mandatory for all AI Agents)
 1. **Plan First:** Always enter Plan Mode and get user approval before modifying code.
@@ -18,7 +18,7 @@ Cortex is a high-performance, general-purpose programming language built from sc
 4. **Mandatory Rule Maintenance:** AI agents MUST update `AGENTS.md`, `AGENTS_LOGS_RULE.md`, and related modular documentation whenever core rules, project structure, or workflows change.
 5. **Zero-Tolerance for `any`:** Strict TypeScript typing is required. `any` is strictly prohibited.
 6. **Bytecode-First:** Prioritize numeric `Int32Array` bytecode and a stack-based VM for maximum performance.
-7. **Verification Loop:** It is **compulsory** to run `npm run build` and execute all `.ctx` integration tests after every update.
+7. **Verification Loop:** It is **compulsory** to run `npm run build` and execute all `.nx` integration tests after every update.
 8. **Real-World Challenge Protocol:** Accept complex user challenges, create dedicated folders in `tests/real_world_tests/`, and iterate until 100% success.
 9. **Bug Hunting Expert:** Proactively audit the engine for subtle logic bugs (precedence, scope, memory leaks). When a bug is found, create a reproduction script before fixing.
 10. **Official Skills Standardization:** All new skills MUST follow the [Agent Skills Standard](https://agentskills.io), including full YAML frontmatter and documentation-first structure.
@@ -34,7 +34,7 @@ Cortex is a high-performance, general-purpose programming language built from sc
 
 ## Progressive Disclosure
 For detailed rules, architectural deep-dives, and coding patterns, refer to:
-- [Cortex Architecture](docs/architecture.md): Bytecode design, VM internals, and monorepo decoupling.
+- [Nox Architecture](docs/architecture.md): Bytecode design, VM internals, and monorepo decoupling.
 - [AI Development Workflow](docs/WORKFLOW.md): Detailed planning, research, and verification protocols.
 - [Engineering Standards](docs/STANDARDS.md): TDD requirements, error reporting, and styling.
 - [Syntax Guide](docs/syntax.md): Comprehensive hybrid JS/Python syntax documentation.

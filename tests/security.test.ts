@@ -1,8 +1,8 @@
 import { describe, it, expect } from 'vitest';
-import { Lexer, Parser, Compiler } from '@cortex/frontend';
-import { VM } from '@cortex/runtime';
+import { Lexer, Parser, Compiler } from '@nox/frontend';
+import { VM } from '@nox/runtime';
 
-describe('Cortex Security Audits', () => {
+describe('Nox Security Audits', () => {
     const run = (source: string, flags: any = {}) => {
         const lexer = new Lexer(source);
         const tokens = lexer.tokenize();

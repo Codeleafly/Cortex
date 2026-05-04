@@ -1,6 +1,6 @@
-# Cortex Package Ecosystem (High Detail Analysis)
+# Nox Package Ecosystem (High Detail Analysis)
 
-This document provides an exhaustive breakdown of the Cortex monorepo structure, dependencies, and inter-package linkages. Cortex is an **AI-Native** project where all packages are designed to be decoupled yet strictly synchronized through a shared contract.
+This document provides an exhaustive breakdown of the Nox monorepo structure, dependencies, and inter-package linkages. Nox is an **AI-Native** project where all packages are designed to be decoupled yet strictly synchronized through a shared contract.
 
 ## 1. Root Workspace (`/`)
 The root directory acts as the orchestrator for the entire ecosystem.
@@ -11,23 +11,23 @@ The root directory acts as the orchestrator for the entire ecosystem.
     -   `npm run test`: Runs the Vitest suite. It ensures integration between the compiler and the VM.
     -   `npm run clean`: Uses `tsc -b --clean` to wipe build artifacts safely.
 -   **Tooling:**
-    -   `vitest`: Chosen for its speed and native ESM support, critical for the Cortex 'module' architecture.
+    -   `vitest`: Chosen for its speed and native ESM support, critical for the Nox 'module' architecture.
     -   `typescript`: Strict mode is enforced globally via `tsconfig.base.json`.
 
 ---
 
-## 2. `@cortex/shared` (`packages/shared`)
+## 2. `@nox/shared` (`packages/shared`)
 The "Contract" of the language. This package contains no logic, only definitions.
 
 -   **Role:** Ensures that the Frontend (Compiler) and the Runtime (VM) use the exact same numeric identifiers for operations.
 -   **Key Exports:**
     -   `Opcode`: An enum of 32-bit integers. Using numeric opcodes instead of strings prevents overhead during VM execution.
     -   `TokenType`: Definitions for the Lexer and Parser.
--   **Linkage:** Every other package depends on `@cortex/shared`. Any change here requires a full rebuild of the ecosystem.
+-   **Linkage:** Every other package depends on `@nox/shared`. Any change here requires a full rebuild of the ecosystem.
 
 ---
 
-## 3. `@cortex/frontend` (`packages/frontend`)
+## 3. `@nox/frontend` (`packages/frontend`)
 The "Architect". It transforms human-readable code into machine-executable bytecode.
 
 -   **Components:**
@@ -41,7 +41,7 @@ The "Architect". It transforms human-readable code into machine-executable bytec
 
 ---
 
-## 4. `@cortex/runtime` (`packages/runtime`)
+## 4. `@nox/runtime` (`packages/runtime`)
 The "Engine". A high-performance, stack-based Virtual Machine.
 
 -   **Architecture:**
@@ -58,7 +58,7 @@ The "Engine". A high-performance, stack-based Virtual Machine.
 
 ---
 
-## 5. `@cortex/cli` (`packages/cli`)
+## 5. `@nox/cli` (`packages/cli`)
 The "Gateway". The primary entry point for users and agents.
 
 -   **Interface:**
@@ -68,7 +68,7 @@ The "Gateway". The primary entry point for users and agents.
     -   Parses Deno-style flags (e.g., `--allow-read`, `--allow-all`).
     -   Handles file execution logic and error reporting with source-code context.
 -   **Binaries:**
-    -   Exports the `cortex` command globally.
+    -   Exports the `nox` command globally.
 
 ---
 

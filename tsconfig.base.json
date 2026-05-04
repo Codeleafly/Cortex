@@ -13,7 +13,7 @@
     "jsx": "react-jsx",
     "baseUrl": ".",
     "paths": {
-      "@cortex/*": [
+      "@nox/*": [
         "packages/*"
       ]
     }

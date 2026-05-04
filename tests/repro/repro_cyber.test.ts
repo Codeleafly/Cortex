@@ -3,7 +3,7 @@ import { Lexer } from '../../packages/frontend/src/lexer/Lexer';
 import { Parser } from '../../packages/frontend/src/parser/Parser';
 import { Compiler } from '../../packages/frontend/src/compiler/Compiler';
 import { VM } from '../../packages/runtime/src/vm/VM';
-import { Opcode } from '@cortex/shared';
+import { Opcode } from '@nox/shared';
 import fs from 'fs';
 import path from 'path';
 

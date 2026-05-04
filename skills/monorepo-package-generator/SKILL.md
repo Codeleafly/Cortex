@@ -1,6 +1,6 @@
 ---
 name: monorepo-package-generator
-description: A standardized procedure for scaling the Cortex monorepo. Use this when the project needs a new decoupled package (e.g., @cortex/stdlib, @cortex/optimizer) following the modern ESM and TypeScript project references architecture.
+description: A standardized procedure for scaling the Nox monorepo. Use this when the project needs a new decoupled package (e.g., @nox/stdlib, @nox/optimizer) following the modern ESM and TypeScript project references architecture.
 license: MIT
 metadata:
   version: "1.1.0"
@@ -30,6 +30,6 @@ This skill ensures that all new packages follow the project's "Modern ESM" and "
 - Run `tsc -b` to verify the new project graph builds correctly.
 
 ## Standards
-- **Naming:** Use the `@cortex/` prefix for all internal packages.
+- **Naming:** Use the `@nox/` prefix for all internal packages.
 - **ESM:** Always include `.js` extensions in internal imports.
 - **Decoupling:** A package should have a single, clear responsibility.

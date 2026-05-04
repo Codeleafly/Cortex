@@ -1,6 +1,6 @@
 ---
 name: real-world-challenge-solver
-description: The official protocol for accepting and completing complex user challenges in the Cortex ecosystem. Use this when the user issues a high-stakes request to build a practical application (e.g., 'Build a CLI calculator').
+description: The official protocol for accepting and completing complex user challenges in the Nox ecosystem. Use this when the user issues a high-stakes request to build a practical application (e.g., 'Build a CLI calculator').
 license: MIT
 metadata:
   version: "1.1.0"
@@ -21,7 +21,7 @@ This skill mandates an iterative, 100% success-driven workflow for solving compl
 - Use the `bytecode-instruction-adder` skill to implement missing features in the engine.
 
 ### 3. Iterative Implementation
-- Build the project step-by-step in Cortex (`.ctx`).
+- Build the project step-by-step in Nox (`.nx`).
 - Persistently update the engine until the challenge code runs without errors.
 
 ### 4. Verification

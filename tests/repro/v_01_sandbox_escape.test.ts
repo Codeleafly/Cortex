@@ -5,15 +5,15 @@ import path from 'path';
 describe('VULN-NEW-01: Sandbox Escape via Prefix Bug', () => {
     it('should NOT allow access to a sibling directory with a similar name', () => {
         // Mock CWD to something specific
-        const mockCwd = '/home/user/Cortex';
+        const mockCwd = '/home/user/Nox';
         vi.spyOn(process, 'cwd').mockReturnValue(mockCwd);
 
         const vm = new VM({ read: true }, false);
         
         // This path is OUTSIDE the sandbox but STARTS with the same prefix
-        const maliciousPath = '/home/user/Cortex-secrets/passwords.txt';
+        const maliciousPath = '/home/user/Nox-secrets/passwords.txt';
         
-        // Currently, this will pass because '/home/user/Cortex-secrets/passwords.txt'.startsWith('/home/user/Cortex') is true
+        // Currently, this will pass because '/home/user/Nox-secrets/passwords.txt'.startsWith('/home/user/Nox') is true
         // We want it to THROW a Security Error.
         
         // Note: safeResolve is private, but it's called by READ_FILE opcode.

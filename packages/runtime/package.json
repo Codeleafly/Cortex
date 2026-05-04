@@ -1,5 +1,5 @@
 {
-  "name": "@cortex/runtime",
+  "name": "@nox/runtime",
   "version": "1.0.0",
   "type": "module",
   "exports": {
@@ -13,8 +13,7 @@
     "build": "tsc -b"
   },
   "dependencies": {
-    "@cortex/shared": "*",
-    "readline-sync": "^1.4.10"
+    "@nox/shared": "*",    "readline-sync": "^1.4.10"
   },
   "types": "./dist/index.d.ts",
   "devDependencies": {

@@ -1,6 +1,6 @@
 ---
 name: bug-hunter
-description: Expert procedure for auditing the Cortex engine for subtle logic bugs, security vulnerabilities, and standard violations. Use this when performing deep logic forensics or when a new subtle vector is identified.
+description: Expert procedure for auditing the Nox engine for subtle logic bugs, security vulnerabilities, and standard violations. Use this when performing deep logic forensics or when a new subtle vector is identified.
 license: MIT
 metadata:
   version: "1.0.0"
@@ -9,7 +9,7 @@ metadata:
 
 # Bug Hunter Skill
 
-This skill turns an AI agent into a "Bug Hunting Expert" specialized in the Cortex stack (TypeScript, Bytecode, VM).
+This skill turns an AI agent into a "Bug Hunting Expert" specialized in the Nox stack (TypeScript, Bytecode, VM).
 
 ## Core Audit Protocols
 
@@ -29,7 +29,7 @@ This skill turns an AI agent into a "Bug Hunting Expert" specialized in the Cort
 
 ## Workflow
 1. **Research:** Read the relevant source files thoroughly.
-2. **Reproduce:** Create a minimal `.ctx` script or vitest case that demonstrates the bug.
+2. **Reproduce:** Create a minimal `.nx` script or vitest case that demonstrates the bug.
 3. **Analyze:** Identify the root cause in the Lexer/Parser/Compiler/VM pipeline.
 4. **Fix:** Apply a surgical fix that maintains engine performance and purity.
 5. **Verify:** Run the reproduction script and all existing tests.
