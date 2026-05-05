@@ -17,7 +17,7 @@ const fileLinks = [
 ];
 
 const folderLinks = [
-    // Skills Mirroring
+    // Skills Mirroring (Kept as is)
     { src: 'skills', dest: '.gemini/skills' },
     { src: 'skills', dest: '.claude/skills' },
     { src: 'skills', dest: '.codex/skills' },
@@ -25,12 +25,7 @@ const folderLinks = [
     { src: 'skills', dest: '.cursor/skills' },
     { src: 'skills', dest: '.opencode/skills' },
 
-    // 🔥 MASTER AGENTS MIRROR (Updated)
-    { src: '.gemini/agents', dest: '.codex/agents' },
-    { src: '.gemini/agents', dest: '.claude/agents' },
-    { src: '.gemini/agents', dest: '.opencode/agents' },
-    { src: '.gemini/agents', dest: '.agents/agents' },
-    { src: '.gemini/agents', dest: '.cursor/agents' },
+    // ❌ AGENTS MIRRORS REMOVED
 ];
 
 function safeExists(filePath) {
@@ -47,18 +42,15 @@ async function createSymlink(srcName, destPath) {
     const fullDest = path.join(root, destPath);
     const destDir = path.dirname(fullDest);
 
-    // ensure source exists before linking
     if (!safeExists(fullSrc)) {
         console.warn(`⚠ Source missing, skipping: ${srcName}`);
         return;
     }
 
-    // ensure parent folder exists
     if (!fs.existsSync(destDir)) {
         fs.mkdirSync(destDir, { recursive: true });
     }
 
-    // remove existing target (file/symlink only)
     if (safeExists(fullDest)) {
         fs.rmSync(fullDest, { recursive: true, force: true });
     }
@@ -86,7 +78,7 @@ async function main() {
         }
     } catch {}
 
-    console.log('\n🚀 Sync Starting...\n');
+    console.log('\n🚀 Sync Starting (Agents Mirror Disabled)...\n');
 
     for (const link of fileLinks) {
         await createSymlink(link.src, link.dest);
