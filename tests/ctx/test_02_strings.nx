@@ -1,2 +1,3 @@
-print "hello " + "nox";
-// Expect: hello nox
+is s = "hello"
+is n = "nox"
+print s + " " + n

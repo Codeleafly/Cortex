@@ -5,7 +5,9 @@ export type Stmt =
     | AssignStmt 
     | PrintStmt 
     | WhileStmt 
+    | ForStmt
     | IfStmt 
+    | MatchStmt
     | FnStmt 
     | ReturnStmt 
     | ExprStmt;
@@ -14,6 +16,7 @@ export interface LetStmt {
     type: 'LetStmt';
     name: string;
     initializer: Expr;
+    isMutable: boolean;
 }
 
 export interface AssignStmt {
@@ -31,6 +34,19 @@ export interface WhileStmt {
     type: 'WhileStmt';
     condition: Expr;
     body: Stmt[];
+}
+
+export interface ForStmt {
+    type: 'ForStmt';
+    item: string;
+    iterable: Expr;
+    body: Stmt[];
+}
+
+export interface MatchStmt {
+    type: 'MatchStmt';
+    expression: Expr;
+    cases: { condition: Expr | null, body: Stmt[] }[];
 }
 
 export interface IfStmt {
@@ -64,7 +80,20 @@ export type Expr =
     | VariableExpr 
     | CallExpr 
     | GroupingExpr
-    | ArgCountExpr;
+    | ArgCountExpr
+    | DictExpr
+    | RangeExpr;
+
+export interface DictExpr {
+    type: 'DictExpr';
+    entries: { key: string, value: Expr }[];
+}
+
+export interface RangeExpr {
+    type: 'RangeExpr';
+    start: Expr;
+    end: Expr;
+}
 
 export interface BinaryExpr {
     type: 'BinaryExpr';
@@ -77,6 +106,7 @@ export interface UnaryExpr {
     type: 'UnaryExpr';
     operator: Token;
     right: Expr;
+    kind: 'prefix' | 'postfix';
 }
 
 export interface LiteralExpr {

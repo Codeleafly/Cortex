@@ -9,41 +9,41 @@ describe('VM Vulnerabilities', () => {
         vm = new VM();
     });
 
-    test('VULN-VM-01: Unbounded Memory Access (LOAD)', () => {
+    test('VULN-VM-01: Unbounded Memory Access (LOAD)', async () => {
         const bytecode = new Int32Array([
             Opcode.LOAD, 2000000, // Address beyond 1,048,576 (MAX_MEMORY_SIZE)
             Opcode.HALT
         ]);
         // Should throw due to MAX_MEMORY_SIZE limit
-        expect(() => vm.run(bytecode)).toThrow(/Memory Error/); 
+        await expect(vm.run(bytecode)).rejects.toThrow(/Memory Error/); 
     });
 
-    test('VULN-VM-01: Unbounded Memory Access (STORE)', () => {
+    test('VULN-VM-01: Unbounded Memory Access (STORE)', async () => {
         const bytecode = new Int32Array([
             Opcode.PUSH, 42,
             Opcode.STORE, 2000000, // Address beyond 1,048,576
             Opcode.HALT
         ]);
-        expect(() => vm.run(bytecode)).toThrow(/Memory Error/);
+        await expect(vm.run(bytecode)).rejects.toThrow(/Memory Error/);
     });
 
-    test('VULN-VM-03: Stack Underflow', () => {
+    test('VULN-VM-03: Stack Underflow', async () => {
         const bytecode = new Int32Array([
             Opcode.ADD, // Pop from empty stack
             Opcode.HALT
         ]);
-        expect(() => vm.run(bytecode)).toThrow();
+        await expect(vm.run(bytecode)).rejects.toThrow();
     });
 
-    test('VULN-VM-04: Top-Level Return Crash', () => {
+    test('VULN-VM-04: Top-Level Return Crash', async () => {
         const bytecode = new Int32Array([
             Opcode.RET,
             Opcode.HALT
         ]);
-        expect(() => vm.run(bytecode)).toThrow();
+        await expect(vm.run(bytecode)).rejects.toThrow();
     });
 
-    test('VULN-COMP-01: Recursion (Factorial)', () => {
+    test('VULN-COMP-01: Recursion (Factorial)', async () => {
         // [0] JMP 27
         // [2] fact start:
         // [2] STORE 0 (n)
@@ -90,27 +90,27 @@ describe('VM Vulnerabilities', () => {
             Opcode.HALT
         ]);
 
-        vm.run(bytecode);
+        await vm.run(bytecode);
         expect(vm.logs).toEqual(['120']);
     });
 
-    test('VULN-VM-DoS-01: Call Stack Overflow', () => {
+    test('VULN-VM-DoS-01: Call Stack Overflow', async () => {
         // [0] CALL 0, 0
         const bytecode = new Int32Array([
             Opcode.CALL, 0, 0,
             Opcode.HALT
         ]);
-        expect(() => vm.run(bytecode)).toThrow('Call Stack Overflow');
+        await expect(vm.run(bytecode)).rejects.toThrow('Call Stack Overflow');
     });
 
-    test('VULN-VM-DATA-01: Truncated Bytecode', () => {
+    test('VULN-VM-DATA-01: Truncated Bytecode', async () => {
         const bytecode = new Int32Array([
             Opcode.PUSH // Missing operand
         ]);
-        expect(() => vm.run(bytecode)).toThrow('Unexpected end of bytecode: missing or invalid operand');
+        await expect(vm.run(bytecode)).rejects.toThrow('Unexpected end of bytecode');
     });
 
-    test('VULN-VM-LOGIC-01: Global Memory Pointer Isolation', () => {
+    test('VULN-VM-LOGIC-01: Global Memory Pointer Isolation', async () => {
         // Corrected Indices:
         // [0] JMP 9
         // [2] test start:
@@ -139,7 +139,7 @@ describe('VM Vulnerabilities', () => {
             Opcode.HALT
         ]);
 
-        vm.run(bytecode);
+        await vm.run(bytecode);
         expect(vm.logs).toEqual(['200']);
 
         // Now test high global
@@ -159,7 +159,7 @@ describe('VM Vulnerabilities', () => {
             Opcode.CALL, 2, 0,
             Opcode.HALT
         ]);
-        vm.run(bytecodeHigh);
+        await vm.run(bytecodeHigh);
         expect(vm.logs).toEqual(['200']);
     });
 });

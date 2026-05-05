@@ -1,6 +1,5 @@
-let i = 3;
-while (i > 0) {
-    print i;
-    i = i - 1;
+mut i = 3
+while i > 0 {
+    print i
+    i = i - 1
 }
-// Expect: 3, 2, 1

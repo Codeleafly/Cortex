@@ -1,101 +1,118 @@
-# Nox Syntax Guide
+# Nox Syntax Guide (Modern Standard)
 
-Nox uses a **Hybrid JS/Python Syntax**. It combines the structural clarity of JavaScript with the concise built-ins of Python.
+Nox uses a **Modern, Sci-Fi Syntax** designed for speed, clarity, and safety.
 
-## Variables
-Use `let` to declare variables. Assignments can be made directly after declaration.
+## 1. Variables (is vs mut)
+Variables are explicit. Use `is` for constants and `mut` for mutable state.
 ```javascript
-let x = 10;
-x = 20; // Re-assignment
+is name = "Nox"       // Constant (Immutable) - cannot be changed
+mut score = 100       // Mutable - can be updated
+score = 105           // Allowed
+// name = "New"       // ERROR: Cannot re-assign a constant
+```
+> **Deprecation Notice:** The `let` keyword is **DEPRECATED**. Use `is` or `mut` instead.
+
+## 2. Functions (fn)
+Functions support both arrow syntax for expressions and block syntax for logic.
+### Arrow Functions (1-line)
+```javascript
+fn square(n) => n * n
+```
+### Block Functions
+```javascript
+fn calculate(a, b) {
+    is result = (a + b) * 2
+    return result
+}
 ```
 
-## Strings
+## 3. Control Flow (No Parentheses)
+Logic blocks use `{}` but do not require `()` for the condition.
+### If/Else Statements
+```javascript
+if age >= 18 {
+    print "User is adult"
+} else {
+    print "User is minor"
+}
+```
+
+### Match Statement (Pattern Matching)
+```rust
+match status {
+    200 => print "Success"
+    404 => print "Not Found"
+    _   => print "Unknown Error"
+}
+```
+
+## 4. Loops
+### For...In Loop
+Iterate over arrays or ranges.
+```javascript
+is items = ["A", "B", "C"]
+for item in items {
+    print item
+}
+
+// Range loop (inclusive)
+for i in 1..10 {
+    print "Number: " + i
+}
+```
+
+### While Loops
+```javascript
+mut i = 5
+while i > 0 {
+    print i
+    i = i - 1
+}
+```
+
+## 5. Power Features
+### Pipe Operator (`|>`)
+Chain data through functions easily.
+```javascript
+"hello world" |> str_upper |> print
+```
+
+### Safe Call (`?.`) & Null Coalescing (`??`)
+Handle null values without crashes.
+```javascript
+is city = user?.address?.city ?? "Unknown"
+```
+
+### Short-hand Async (`!`)
+Wait for asynchronous results (like `fetch` or `sleep`) using the `!` operator.
+```javascript
+is data = fetch("api/url")!
+print data.json()!
+```
+
+## 6. Strings & Escapes
 Strings can be enclosed in double (`"`) or single (`'`) quotes. 
 ### Escape Sequences
-Nox supports standard escape sequences within strings:
 - `\n`: Newline
 - `\r`: Carriage return
 - `\t`: Tab
 - `\\`: Backslash
 - `\"`: Double quote
 - `\'`: Single quote
-- `\e`: **ANSI Escape code** (useful for terminal colors and styling).
+- `\e`: **ANSI Escape code** (useful for terminal colors).
 
-Example of colored output:
-```javascript
-print "\e[32mSuccess: \e[0mOperation complete";
-```
+Example: `print "\e[32mSuccess\e[0m"`
 
-## Math & Operators
+## 7. Math & Operators
 - **Arithmetic:** `+`, `-`, `*`, `/`
 - **Comparison:** `>`, `<`, `==`, `!=`
-- **Logical:** `&&` (AND), `||` (OR), `!` (NOT) - *Supports full short-circuiting (lazy evaluation).*
+- **Logical:** `&&` (AND), `||` (OR), `!` (NOT) - *Supports full short-circuiting.*
 
-## Control Flow
-### If/Else Statements
-```javascript
-if (x > 10) {
-    print "High";
-} else {
-    print "Low";
-}
-```
+---
 
-### While Loops
-```javascript
-let i = 5;
-while (i > 0) {
-    print i;
-    i = i - 1;
-}
-```
-
-## Functions
-Declare functions using the `fn` keyword.
-```javascript
-fn greet(name) {
-    print "Hello, " + name;
-}
-
-greet("Nox");
-```
-
-## Comments
-```javascript
-// Single-line comment
-/* 
-   Multi-line
-   comment
-*/
-```
-
-## CLI Built-ins (Global)
-Nox provides built-in primitives for building CLI applications.
-- `arg_count()`: Number of arguments passed to the script.
-- `get_arg(index)`: Returns the argument at the specified index as a string.
-- `to_number(string)`: Converts a string to a numeric integer.
-- `read_line()`: Reads a line of input from the user (blocks until Enter is pressed).
-- `read_file(path)`: Reads the content of a file. Returns `null` if the file doesn't exist or cannot be read.
-- `write_file(path, content)`: Writes content to a file. Returns `1` on success, `0` on failure.
-- `file_exists(path)`: Returns `1` if the file exists within the workspace, `0` otherwise.
-- `str_upper(string)`: Returns the uppercase version of the string.
-- `str_words(string)`: Returns the number of words in the string.
-- `str_at(string, index)`: Returns the character at the given index, or `null` if out of bounds.
-- `str_len(string)`: Returns the length of the string.
-- `run_command(command)`: Executes a shell command and returns its stdout. Requires `run` permission.
-
-```javascript
-if (arg_count() > 0) {
-    let path = get_arg(0);
-    if (file_exists(path)) {
-        let content = read_file(path);
-        print str_upper(content);
-        print "Words: " + str_words(content);
-    }
-}
-```
-
-## Security & Permissions
-Nox implements a granular permission system inspired by Deno. Sensitive operations (file access, command execution) require explicit permission. In interactive mode, Nox will prompt the user if a permission is missing. In non-interactive mode, it will throw a security error.
-
-See the [CLI Guide](cli.md) for more details on permission flags.
+## Legacy Syntax (DEPRECATED)
+The following syntax is supported for backward compatibility but is **deprecated** and should not be used in new code.
+- `let x = 10;` (Use `is` or `mut`)
+- `if (condition) { ... }` (Parentheses are now optional)
+- `while (condition) { ... }` (Parentheses are now optional)
+- Mandatory semicolons `;` (Newlines now act as terminators)

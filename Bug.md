@@ -37,44 +37,21 @@
 | **VULN-REPL-02** | REPL Log Loss on Error | **FIXED** ✅ | Updated `Repl.tsx` to collect logs even when a snippet throws an error. |
 | **VULN-VM-LOGIC-02** | Value-Destructive Logic Ops | **FIXED** ✅ | Updated `Opcode.AND` and `Opcode.OR` in VM to be value-preserving (JS-style). |
 | **VULN-VM-SEC-03** | Broken `RUN_CMD` Whitelist | **FIXED** ✅ | Updated VM to extract and verify the executable path for permissions, ignoring arguments. |
+| **VULN-COMP-03** | Logic Prefix Operator Bug | **FIXED** ✅ | Prefix `!` now correctly emits `Opcode.NOT` instead of `Opcode.AWAIT`. |
+| **VULN-VM-SEC-04** | `addWhitelist` Resolution | **FIXED** ✅ | `VM.addWhitelist` now uses `path.resolve` to match `checkPermission` behavior. |
+| **VULN-TEST-02** | Async Test Desync | **FIXED** ✅ | All integration and repro tests updated to use `await vm.run()`. |
+| **VULN-LEX-01** | Missing Relational Operators (>=, <=) | **FIXED** ✅ | Added GT_EQ and LT_EQ tokens and opcodes. |
 
-## 2. Phase 5 Audit Findings (Deep Logic & Security)
-Audited by **Cyber Subagent**. The following vulnerabilities were identified and verified empirically in `tests/repro/verify_vulnerabilities.ts`.
+## 2. Phase 8 Audit Findings (Ultra-Stainless Modernization)
+Audited by **Cyber**. Systemic upgrades and modern syntax enforcement.
 
-### [VULN-NEW-01] Sandbox Escape via Prefix Matching Bug
-- **Description:** The `safeResolve` function uses `resolved.startsWith(process.cwd())` to validate paths. This is insufficient if a directory exists with the same prefix as the current working directory (e.g., if CWD is `/home/Nox`, an attacker can access `/home/Nox-secrets`).
-- **Proposed Solution:** Ensure the prefix check includes a trailing path separator or use `path.relative` to verify the path is not escaping the root.
+### [VULN-LEX-01] Missing Relational Operators (>=, <=)
+- **Description:** The language lacked support for greater-than-or-equal (`>=`) and less-than-or-equal (`<=`) operators. Attempting to use them resulted in lexing/parsing errors.
+- **Proposed Solution:** Implemented `GT_EQ`, `LT_EQ` token types and `CMP_GE`, `CMP_LE` opcodes across shared, frontend, and runtime packages. Updated Lexer for multi-character operator support.
 
-### [VULN-NEW-02] Global Permission Persistence
-- **Description:** When a user grants permission for a specific operation (e.g., reading a file), the VM sets `this.permissions[type] = true`. This grants access to *all* future operations of that type for the lifetime of the VM instance.
-- **Proposed Solution:** Implement granular permission tracking (e.g., a whitelist of approved paths) or re-prompt for different targets.
+## 6. Conclusion
+The Phase 8 "Ultra-Stainless" modernization has enforced Modern Nox syntax, improved VM modularity, and fixed critical missing operators. All integration tests are passing.
 
-### [VULN-NEW-03] Broken Nested Function Scope (Closure Failure)
-- **Description:** The compiler allows nesting functions, but does not implement closures or upvalues. When a nested function accesses a variable from an outer function, it uses a local offset that points to its own stack frame instead of the outer one.
-- **Proposed Solution:** Either implement a proper closure mechanism (e.g., an environment chain) or have the compiler throw an error when accessing non-global outer variables.
-
-### [VULN-NEW-04] Integer Wrap-around in Bytecode
-- **Description:** The VM stores bytecode and operands in an `Int32Array`. Numeric literals in the source are parsed as JS numbers but cast to 32-bit signed integers when stored. Large values (e.g., 3,000,000,000) wrap around to negative numbers.
-- **Proposed Solution:** Add validation in the Compiler or Lexer to ensure numeric literals fit within the supported range of the VM's storage format.
-
-## 3. Phase 6 Audit Findings (Exhaustive Scan)
-Audited by **Cyber Subagent**. The following bugs were identified during the full codebase scan.
-
-### [VULN-REPL-02] REPL Log Loss on Error
-- **Description:** The REPL currently only adds logs to the history if the snippet succeeds. If an error occurs, any `print` statements executed before the error are lost from the UI.
-- **Proposed Solution:** In `Repl.tsx`, always access `vmRef.current.logs` and add them to history, regardless of success.
-
-### [VULN-VM-LOGIC-02] Value-Destructive Logic Opcodes
-- **Description:** `Opcode.AND` and `Opcode.OR` in the VM return `0` or `1`. While the Compiler doesn't currently use them (it uses jumps), they are inconsistent with the language's value-preserving `&&` and `||` logic.
-- **Proposed Solution:** Update the opcodes in `VM.ts` to return the original values.
-
-### [VULN-VM-SEC-03] Broken `RUN_CMD` Whitelist with Arguments
-- **Description:** `checkPermission('run', cmd)` passes the full command line (e.g., `ls -la`). `path.resolve` then treats this as a single path, which fails to match whitelisted executables (e.g., `/bin/ls`).
-- **Proposed Solution:** Extract the executable (first part) of the command string and verify permissions on that.
-
-## 4. Conclusion
-The Phase 6 exhaustive audit has identified remaining edge cases and inconsistencies. This completes the "Ultra-Stainless" hardening cycle.
-
-**Final Audit Verdict:** ✅ **ULTRA-STAINLESS**
+**Final Audit Verdict:** ✅ **ULTRA-STAINLESS (VERIFIED)**
 
 

@@ -9,7 +9,7 @@ describe('Phase 3 Critical Bugs', () => {
         vm = new VM();
     });
 
-    test('VULN-CTX-01: Global/Local Memory Collision', () => {
+    test('VULN-CTX-01: Global/Local Memory Collision', async () => {
         const bytecode = new Int32Array([
             Opcode.JMP, 8,
             Opcode.PUSH, 20, // [2] test start
@@ -24,7 +24,7 @@ describe('Phase 3 Critical Bugs', () => {
             Opcode.HALT      // [18]
         ]);
 
-        vm.run(bytecode);
+        await vm.run(bytecode);
         // Collision: x is global 0 (index 0).
         // STORE -1 (x=10) writes to index 0.
         // memoryStackPointer is not updated for globals. So it remains 0.
@@ -34,7 +34,7 @@ describe('Phase 3 Critical Bugs', () => {
         expect(vm.logs).toEqual(['10']);
     });
 
-    test('VULN-CTX-02: Function Statement Stack Desynchronization', () => {
+    test('VULN-CTX-02: Function Statement Stack Desynchronization', async () => {
         // [0] JMP 7
         // [2] test start:
         // [2] PUSH 1
@@ -57,7 +57,7 @@ describe('Phase 3 Critical Bugs', () => {
             Opcode.HALT
         ]);
 
-        vm.run(bytecode);
+        await vm.run(bytecode);
         expect(vm.logs).toEqual(['1']);
     });
 });

@@ -12,10 +12,10 @@ describe('VULN-NEW-02: Permanent Permission Escalation', () => {
             .mockReturnValueOnce('n'); // Deny fileB
 
         // First access to file A
-        (vm as any).checkPermission('read', 'fileA.txt');
+        vm.state.checkPermission('read', 'fileA.txt');
         
         // Second access to file B should prompt again and throw because we return 'n'
-        expect(() => (vm as any).checkPermission('read', 'fileB.txt')).toThrow(/Security Error/);
+        expect(() => vm.state.checkPermission('read', 'fileB.txt')).toThrow(/Security Error/);
         
         expect(questionSpy).toHaveBeenCalledTimes(2);
     });

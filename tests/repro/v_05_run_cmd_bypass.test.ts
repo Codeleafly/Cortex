@@ -6,7 +6,7 @@ import { Compiler } from '../../packages/frontend/src/compiler/Compiler';
 import { VM } from '../../packages/runtime/src/vm/VM';
 
 describe('VULN-05: RUN_CMD Shell Injection Bypass', () => {
-    it('should NOT allow shell injection via newline', () => {
+    it('should NOT allow shell injection via newline', async () => {
         const source = `
         let cmd = "echo hello\\nls -la"
         run_command(cmd)
@@ -24,14 +24,10 @@ describe('VULN-05: RUN_CMD Shell Injection Bypass', () => {
         
         // However, execSync("echo hello\nls -la") will execute both in most shells.
         
-        try {
-            vm.run(bytecode, stringPool);
-        } catch (e: any) {
-            expect(e.message).toContain('Security Error');
-        }
+        await expect(vm.run(bytecode, stringPool)).rejects.toThrow('Security Error');
     });
 
-    it('should NOT allow shell injection via redirection', () => {
+    it('should NOT allow shell injection via redirection', async () => {
         const source = `
         let cmd = "echo evil > /tmp/evil.txt"
         run_command(cmd)
@@ -45,10 +41,6 @@ describe('VULN-05: RUN_CMD Shell Injection Bypass', () => {
 
         const vm = new VM();
         
-        try {
-            vm.run(bytecode, stringPool);
-        } catch (e: any) {
-            expect(e.message).toContain('Security Error');
-        }
+        await expect(vm.run(bytecode, stringPool)).rejects.toThrow('Security Error');
     });
 });

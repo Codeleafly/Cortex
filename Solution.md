@@ -38,3 +38,24 @@ This document tracks the solutions implemented for every bug identified in `Bug.
 | **VULN-REPL-02** | REPL Log Loss on Error | [x] | Updated `Repl.tsx` to collect logs even when a snippet throws an error. |
 | **VULN-VM-LOGIC-02** | Value-Destructive Logic Ops | [x] | Updated `Opcode.AND` and `Opcode.OR` in VM to be value-preserving (JS-style). |
 | **VULN-VM-SEC-03** | Broken `RUN_CMD` Whitelist | [x] | Updated VM to extract and verify the executable path for permissions, ignoring arguments. |
+| **VULN-COMP-03** | Logic Prefix Operator Bug | [x] | Prefix `!` now correctly emits `Opcode.NOT` instead of `Opcode.AWAIT`. |
+| **VULN-VM-SEC-04** | `addWhitelist` Resolution | [x] | `VM.addWhitelist` now uses `path.resolve` to match `checkPermission` behavior. |
+| **VULN-TEST-02** | Async Test Desync | [x] | All integration and repro tests updated to use `await vm.run()`. |
+| **VULN-DIAG-01** | Snippet Line Offset | [x] | `ErrorHandler.tsx` adjusted to show exactly 10 lines (5 before, 4 after). |
+| **VULN-LEX-01** | Missing Relational Operators | [x] | Added GT_EQ and LT_EQ tokens and opcodes across pipeline. |
+
+## 2. Detailed Solutions
+
+### [VULN-LEX-01] Missing Relational Operators (>=, <=)
+**Status:** FIXED ✅
+
+**Description:**
+The language was missing `>=` and `<=` operators in all stages of the pipeline.
+
+**Fix Details:**
+- Added `GT_EQ` and `LT_EQ` to `TokenType`.
+- Added `CMP_GE` and `CMP_LE` to `Opcode`.
+- Updated `Lexer.ts` to support multi-character relational operators.
+- Updated `BinaryParser.ts` to include these tokens in the `comparison()` method.
+- Updated `Compiler.ts` to emit the new opcodes.
+- Updated `math_logic.ts` in the VM to perform the actual comparisons.

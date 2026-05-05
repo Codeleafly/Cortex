@@ -96,12 +96,17 @@ export class Lexer {
                 }
                 const keywords: Record<string, TokenType> = {
                     'let': TokenType.LET,
+                    'is': TokenType.IS,
+                    'mut': TokenType.MUT,
                     'print': TokenType.PRINT,
                     'if': TokenType.IF,
                     'else': TokenType.ELSE,
                     'while': TokenType.WHILE,
+                    'for': TokenType.FOR,
+                    'in': TokenType.IN,
                     'fn': TokenType.FN,
                     'return': TokenType.RETURN,
+                    'match': TokenType.MATCH,
                     'true': TokenType.TRUE,
                     'false': TokenType.FALSE,
                     'null': TokenType.NULL,
@@ -127,14 +132,16 @@ export class Lexer {
                 '(': TokenType.LPAREN, ')': TokenType.RPAREN,
                 '+': TokenType.PLUS, '-': TokenType.MINUS,
                 '*': TokenType.STAR, '/': TokenType.SLASH,
-                ';': TokenType.SEMICOLON, '>': TokenType.GT,
-                '<': TokenType.LT, ',': TokenType.COMMA,
+                ';': TokenType.SEMICOLON, ',': TokenType.COMMA,
                 '!': TokenType.BANG
             };
 
             if (char === '=') {
                 if (this.source[this.pos + 1] === '=') {
                     tokens.push({ type: TokenType.EQ_EQ, line: this.line, col: this.col });
+                    this.pos += 2; this.col += 2;
+                } else if (this.source[this.pos + 1] === '>') {
+                    tokens.push({ type: TokenType.ARROW, line: this.line, col: this.col });
                     this.pos += 2; this.col += 2;
                 } else {
                     tokens.push({ type: TokenType.EQUALS, line: this.line, col: this.col });
@@ -143,14 +150,64 @@ export class Lexer {
                 continue;
             }
 
-            if (char === '&' && this.source[this.pos + 1] === '&') {
-                tokens.push({ type: TokenType.AND_AND, line: this.line, col: this.col });
+            if (char === '>') {
+                if (this.source[this.pos + 1] === '=') {
+                    tokens.push({ type: TokenType.GT_EQ, line: this.line, col: this.col });
+                    this.pos += 2; this.col += 2;
+                } else {
+                    tokens.push({ type: TokenType.GT, line: this.line, col: this.col });
+                    this.pos++; this.col++;
+                }
+                continue;
+            }
+
+            if (char === '<') {
+                if (this.source[this.pos + 1] === '=') {
+                    tokens.push({ type: TokenType.LT_EQ, line: this.line, col: this.col });
+                    this.pos += 2; this.col += 2;
+                } else {
+                    tokens.push({ type: TokenType.LT, line: this.line, col: this.col });
+                    this.pos++; this.col++;
+                }
+                continue;
+            }
+
+            if (char === '|') {
+                if (this.source[this.pos + 1] === '|') {
+                    tokens.push({ type: TokenType.OR_OR, line: this.line, col: this.col });
+                    this.pos += 2; this.col += 2;
+                } else if (this.source[this.pos + 1] === '>') {
+                    tokens.push({ type: TokenType.PIPE, line: this.line, col: this.col });
+                    this.pos += 2; this.col += 2;
+                } else {
+                    // Current Nox doesn't have single |, but we should handle it or error
+                    tokens.push({ type: TokenType.SLASH, line: this.line, col: this.col }); // Wait, single | is not SLASH
+                    throw new Error(`Unexpected character: | at line ${this.line}, col ${this.col}`);
+                }
+                continue;
+            }
+
+            if (char === '?') {
+                if (this.source[this.pos + 1] === '.') {
+                    tokens.push({ type: TokenType.QUESTION_DOT, line: this.line, col: this.col });
+                    this.pos += 2; this.col += 2;
+                } else if (this.source[this.pos + 1] === '?') {
+                    tokens.push({ type: TokenType.NULL_COAL, line: this.line, col: this.col });
+                    this.pos += 2; this.col += 2;
+                } else {
+                    throw new Error(`Unexpected character: ? at line ${this.line}, col ${this.col}`);
+                }
+                continue;
+            }
+
+            if (char === '.' && this.source[this.pos + 1] === '.') {
+                tokens.push({ type: TokenType.DOT_DOT, line: this.line, col: this.col });
                 this.pos += 2; this.col += 2;
                 continue;
             }
 
-            if (char === '|' && this.source[this.pos + 1] === '|') {
-                tokens.push({ type: TokenType.OR_OR, line: this.line, col: this.col });
+            if (char === '&' && this.source[this.pos + 1] === '&') {
+                tokens.push({ type: TokenType.AND_AND, line: this.line, col: this.col });
                 this.pos += 2; this.col += 2;
                 continue;
             }

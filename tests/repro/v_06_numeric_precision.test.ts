@@ -6,7 +6,7 @@ import { Compiler } from '../../packages/frontend/src/compiler/Compiler';
 import { VM } from '../../packages/runtime/src/vm/VM';
 
 describe('Numeric Precision Audit', () => {
-    it('should handle large calculations starting from small numbers', () => {
+    it('should handle large calculations starting from small numbers', async () => {
         const source = `
         let a = 2147483647
         let b = 2147483647
@@ -21,11 +21,11 @@ describe('Numeric Precision Audit', () => {
         const { bytecode, stringPool } = compiler.compile(ast);
 
         const vm = new VM();
-        vm.run(bytecode, stringPool);
+        await vm.run(bytecode, stringPool);
         expect(vm.logs[0]).toBe("4294967294");
     });
 
-    it('should detect precision loss in very large multiplications', () => {
+    it('should detect precision loss in very large multiplications', async () => {
         const source = `
         let a = 2147483647
         let b = 2147483647
@@ -40,6 +40,6 @@ describe('Numeric Precision Audit', () => {
         const { bytecode, stringPool } = compiler.compile(ast);
 
         const vm = new VM();
-        expect(() => vm.run(bytecode, stringPool)).toThrow('Numeric Precision Error');
+        await expect(vm.run(bytecode, stringPool)).rejects.toThrow('Numeric Precision Error');
     });
 });

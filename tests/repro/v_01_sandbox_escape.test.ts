@@ -19,6 +19,6 @@ describe('VULN-NEW-01: Sandbox Escape via Prefix Bug', () => {
         // Note: safeResolve is private, but it's called by READ_FILE opcode.
         // We can access it via (vm as any).safeResolve for direct testing or run bytecode.
         
-        expect(() => (vm as any).safeResolve(maliciousPath)).toThrow(/Security Error: Sandbox escape attempt/);
+        expect(() => vm.state.safeResolve(maliciousPath)).toThrow(/Security Error: Sandbox escape attempt/);
     });
 });

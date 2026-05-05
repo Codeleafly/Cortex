@@ -26,10 +26,10 @@ describe('VULN-08: Symlink Sandbox Escape', () => {
         vi.spyOn(process, 'cwd').mockReturnValue(root);
 
         // Accessing the symlink directly
-        expect(() => (vm as any).safeResolve('link_outside')).toThrow(/Security Error: Sandbox escape attempt/);
+        expect(() => vm.state.safeResolve('link_outside')).toThrow(/Security Error: Sandbox escape attempt/);
 
         // Accessing a path THROUGH a symlink prefix
-        expect(() => (vm as any).safeResolve('link_outside/newfile.txt')).toThrow(/Security Error: Sandbox escape attempt/);
+        expect(() => vm.state.safeResolve('link_outside/newfile.txt')).toThrow(/Security Error: Sandbox escape attempt/);
 
         // Cleanup
         fs.unlinkSync(symlinkPath);

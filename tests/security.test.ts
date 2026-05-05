@@ -3,7 +3,7 @@ import { Lexer, Parser, Compiler } from '@nox/frontend';
 import { VM } from '@nox/runtime';
 
 describe('Nox Security Audits', () => {
-    const run = (source: string, flags: any = {}) => {
+    const run = async (source: string, flags: any = {}) => {
         const lexer = new Lexer(source);
         const tokens = lexer.tokenize();
         const parser = new Parser();
@@ -11,22 +11,22 @@ describe('Nox Security Audits', () => {
         const compiler = new Compiler();
         const { bytecode, stringPool } = compiler.compile(statements);
         const vm = new VM(flags, false);
-        vm.run(bytecode, stringPool);
+        await vm.run(bytecode, stringPool);
     };
 
-    it('should block path traversal in read_file', () => {
+    it('should block path traversal in read_file', async () => {
         const code = `print read_file("../../../etc/passwd")`;
         // Without flags, it will prompt. In tests, we want it to throw or we can mock it.
         // For now, let's assume if it requests permission and we don't provide it, it fails.
         // But the prompt hangs. We need to pass flags that don't cover the path.
-        expect(() => run(code, { read: false })).toThrow();
+        await expect(run(code, { read: false })).rejects.toThrow();
     });
 
-    it('should allow local file access with flags', () => {
+    it('should allow local file access with flags', async () => {
         const code = `
             write_file("local_test.txt", "safe")
             print file_exists("local_test.txt")
         `;
-        expect(() => run(code, { read: true, write: true })).not.toThrow();
+        await expect(run(code, { read: true, write: true })).resolves.not.toThrow();
     });
 });

@@ -6,7 +6,7 @@ import { Compiler } from '../../packages/frontend/src/compiler/Compiler';
 import { VM } from '../../packages/runtime/src/vm/VM';
 
 describe('Resource Exhaustion Audit', () => {
-    it('should prevent infinite loops via instruction limit', () => {
+    it('should prevent infinite loops via instruction limit', async () => {
         const source = `
         while (true) {
             let x = 1
@@ -20,10 +20,10 @@ describe('Resource Exhaustion Audit', () => {
         const { bytecode, stringPool } = compiler.compile(ast);
 
         const vm = new VM();
-        expect(() => vm.run(bytecode, stringPool)).toThrow('Maximum instruction limit reached');
+        await expect(vm.run(bytecode, stringPool)).rejects.toThrow('Maximum instruction limit reached');
     });
 
-    it('should prevent infinite string growth', () => {
+    it('should prevent infinite string growth', async () => {
         const source = `
         let s = "a"
         while (true) {
@@ -38,6 +38,6 @@ describe('Resource Exhaustion Audit', () => {
         const { bytecode, stringPool } = compiler.compile(ast);
 
         const vm = new VM();
-        expect(() => vm.run(bytecode, stringPool)).toThrow('Resource Exhaustion: String length exceeds limit');
+        await expect(vm.run(bytecode, stringPool)).rejects.toThrow('String length exceeds limit');
     });
 });

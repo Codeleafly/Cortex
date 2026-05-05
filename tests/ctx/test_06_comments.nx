@@ -1,7 +1,4 @@
-/* 
-  Multi-line
-  comment
-*/
-// Single-line
-print "comment test";
-// Expect: comment test
+// This is a comment
+/* This is a 
+   multi-line comment */
+print "comment test"

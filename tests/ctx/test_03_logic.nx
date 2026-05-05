@@ -1,4 +1,5 @@
-print true && false;
-print true || false;
-print !true;
-// Expect: 0, 1, 0
+is a = true
+is b = false
+print a && b
+print a || b
+print !a

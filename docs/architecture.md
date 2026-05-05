@@ -23,6 +23,9 @@ Nox is a programming language built from scratch in TypeScript, designed for hig
 - **Addressing:**
   - **Local:** Frame-relative addressing via Base Pointer (`bp`).
   - **Global:** Absolute addressing in the dedicated globals segment.
+- **Modularity:** 
+  - **Modular VM Architecture:** Opcodes are isolated into logical modules (math, I/O, async, core) to maintain codebase cleanliness and prevent "God Objects".
+  - **True Async Model:** The VM supports non-blocking execution of async opcodes using `async/await` and an internal promise-tracking mechanism.
 - **Safety Features:** 
   - Mandatory bounds checking for all memory and bytecode access.
   - Stack overflow/underflow protection.

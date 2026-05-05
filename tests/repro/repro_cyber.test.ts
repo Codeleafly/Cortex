@@ -10,7 +10,7 @@ import path from 'path';
 describe('Cyber Audit Vulnerabilities', () => {
 
     describe('VULN-CYBER-01: Logical Operators Value Retention', () => {
-        it('should return the original truthy value for ||', () => {
+        it('should return the original truthy value for ||', async () => {
             const source = `
                 let x = "hello" || 0;
                 print x;
@@ -23,12 +23,12 @@ describe('Cyber Audit Vulnerabilities', () => {
             const { bytecode, stringPool } = compiler.compile(statements);
             const vm = new VM();
             
-            vm.run(bytecode, stringPool);
+            await vm.run(bytecode, stringPool);
             
             expect(vm.logs[0]).toBe("hello");
         });
 
-        it('should return the original truthy value for &&', () => {
+        it('should return the original truthy value for &&', async () => {
             const source = `
                 let x = 1 && "world";
                 print x;
@@ -41,12 +41,12 @@ describe('Cyber Audit Vulnerabilities', () => {
             const { bytecode, stringPool } = compiler.compile(statements);
             const vm = new VM();
             
-            vm.run(bytecode, stringPool);
+            await vm.run(bytecode, stringPool);
             
             expect(vm.logs[0]).toBe("world");
         });
         
-        it('should short-circuit and return the first falsey value for &&', () => {
+        it('should short-circuit and return the first falsey value for &&', async () => {
              const source = `
                 let x = 0 && "world";
                 print x;
@@ -59,14 +59,14 @@ describe('Cyber Audit Vulnerabilities', () => {
             const { bytecode, stringPool } = compiler.compile(statements);
             const vm = new VM();
             
-            vm.run(bytecode, stringPool);
+            await vm.run(bytecode, stringPool);
             
             expect(vm.logs[0]).toBe("0"); 
         });
     });
 
     describe('VULN-CYBER-02: Permission Granularity (CLI & VM)', () => {
-        it('should respect path-specific whitelists for READ_FILE', () => {
+        it('should respect path-specific whitelists for READ_FILE', async () => {
             const vm = new VM({}, false); 
             
             // Manually add to whitelist
@@ -76,7 +76,7 @@ describe('Cyber Audit Vulnerabilities', () => {
             fs.writeFileSync('forbidden.txt', 'you should not see this');
             
             try {
-                vm.run(new Int32Array([
+                await vm.run(new Int32Array([
                     Opcode.PUSH_STR, 0,
                     Opcode.READ_FILE,
                     Opcode.PRINT,
@@ -84,13 +84,13 @@ describe('Cyber Audit Vulnerabilities', () => {
                 ]), ['allowed.txt']);
                 expect(vm.logs).toContain('secret content');
 
-                expect(() => {
-                    vm.run(new Int32Array([
+                await expect(async () => {
+                    await vm.run(new Int32Array([
                         Opcode.PUSH_STR, 0,
                         Opcode.READ_FILE,
                         Opcode.HALT
                     ]), ['forbidden.txt']);
-                }).toThrow(/Security Error: READ permission denied/);
+                }).rejects.toThrow(/Security Error: READ permission denied/);
 
             } finally {
                 if (fs.existsSync('allowed.txt')) fs.unlinkSync('allowed.txt');
@@ -100,18 +100,18 @@ describe('Cyber Audit Vulnerabilities', () => {
     });
 
     describe('VULN-CYBER-03: Shell Injection in RUN_CMD', () => {
-        it('should THROW Security Error on shell metacharacters', () => {
+        it('should THROW Security Error on shell metacharacters', async () => {
             const vm = new VM({ run: true }, false); 
             
             const maliciousCmd = 'echo hello; touch injected_cyber.txt';
             
-            expect(() => {
-                vm.run(new Int32Array([
+            await expect(async () => {
+                await vm.run(new Int32Array([
                     Opcode.PUSH_STR, 0,
                     Opcode.RUN_CMD,
                     Opcode.HALT
                 ]), [maliciousCmd]);
-            }).toThrow(/Security Error: Shell metacharacters, newlines, or redirection are not allowed/);
+            }).rejects.toThrow(/Security Error: Shell metacharacters are not allowed/);
             
             const injectedFileExists = fs.existsSync('injected_cyber.txt');
             expect(injectedFileExists).toBe(false);
@@ -119,7 +119,7 @@ describe('Cyber Audit Vulnerabilities', () => {
     });
 
     describe('VULN-CYBER-04: REPL Memory Leak', () => {
-        it('should clear stack on error in runSnippet', () => {
+        it('should clear stack on error in runSnippet', async () => {
             const vm = new VM();
             
             // First snippet: leaves something on stack then throws
@@ -131,7 +131,7 @@ describe('Cyber Audit Vulnerabilities', () => {
                 Opcode.HALT
             ]);
             
-            expect(() => vm.runSnippet(bytecode1, [], 0)).toThrow(/Division by zero/);
+            await expect(vm.runSnippet(bytecode1, [], 0)).rejects.toThrow(/Division by zero/);
             
             // Second snippet: check if 42 is still there
             const bytecode2 = new Int32Array([
@@ -141,7 +141,7 @@ describe('Cyber Audit Vulnerabilities', () => {
                 Opcode.HALT
             ]);
             
-            expect(() => vm.runSnippet(bytecode2, [], 0)).toThrow(/Stack Underflow/);
+            await expect(vm.runSnippet(bytecode2, [], 0)).rejects.toThrow(/Stack Underflow/);
         });
     });
 });
