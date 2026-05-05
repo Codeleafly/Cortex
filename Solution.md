@@ -46,6 +46,7 @@ This document tracks the solutions implemented for every bug identified in `Bug.
 | **VULN-STACK-01** | Match Statement Stack Leak | [x] | Refactored compiler to ensure match value is popped in all branches. |
 | **VULN-STACK-02** | Function Return Stack Leak | [x] | Implemented caller-recorded stack pointer restoration on return. |
 | **VULN-STACK-03** | Iterator Stack Leak | [x] | Throw RuntimeError for non-iterables in `for` loops. |
+| **VULN-REPL-03** | REPL History Vanishing Input | [x] | Implemented unique ID generation for history items to fix Ink reconciliation. |
 
 ## 2. Detailed Solutions
 
@@ -81,3 +82,15 @@ Function calls could leak intermediate stack values if they returned early or le
 
 **Fix Details:**
 Updated `packages/runtime/src/vm/opcodes/data_async.ts` to explicitly pop the iterator and throw a `RuntimeError` if the value is not a `RangeIterator`. This prevents stack accumulation and provides better diagnostic feedback.
+
+### [VULN-REPL-03] REPL History Vanishing Input
+**Status:** FIXED ✅
+
+**Description:**
+Submitted commands were disappearing from the REPL UI.
+
+**Fix Details:**
+- Modified `packages/cli/src/repl/Repl.tsx` to include a `generateId` function using a random string.
+- Every item added to the `history` state now has a unique `id`.
+- Updated `REPLHistory.tsx` to use these IDs as keys in the `Static` component.
+- This ensures that React/Ink correctly identifies each history item as a new, permanent entry, preventing them from being merged or removed during reconciliation.

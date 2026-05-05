@@ -68,7 +68,7 @@ export async function executeDataAsync(opcode: Opcode, state: VMState): Promise<
         case Opcode.AWAIT: {
             const promise = state.pop();
             if (promise instanceof Promise) {
-                state.push(await promise);
+                state.push((await promise) as StackValue);
             } else {
                 state.push(promise);
             }

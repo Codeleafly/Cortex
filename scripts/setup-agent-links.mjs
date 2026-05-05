@@ -17,6 +17,7 @@ const fileLinks = [
 ];
 
 const folderLinks = [
+    // Skills Mirroring
     { src: 'skills', dest: '.gemini/skills' },
     { src: 'skills', dest: '.claude/skills' },
     { src: 'skills', dest: '.codex/skills' },
@@ -24,9 +25,12 @@ const folderLinks = [
     { src: 'skills', dest: '.cursor/skills' },
     { src: 'skills', dest: '.opencode/skills' },
 
-    // 🔥 MASTER AGENTS MIRROR
+    // 🔥 MASTER AGENTS MIRROR (Updated)
     { src: '.gemini/agents', dest: '.codex/agents' },
     { src: '.gemini/agents', dest: '.claude/agents' },
+    { src: '.gemini/agents', dest: '.opencode/agents' },
+    { src: '.gemini/agents', dest: '.agents/agents' },
+    { src: '.gemini/agents', dest: '.cursor/agents' },
 ];
 
 function safeExists(filePath) {
@@ -43,7 +47,13 @@ async function createSymlink(srcName, destPath) {
     const fullDest = path.join(root, destPath);
     const destDir = path.dirname(fullDest);
 
-    // ensure parent folder exists (but NEVER touch .gemini root itself)
+    // ensure source exists before linking
+    if (!safeExists(fullSrc)) {
+        console.warn(`⚠ Source missing, skipping: ${srcName}`);
+        return;
+    }
+
+    // ensure parent folder exists
     if (!fs.existsSync(destDir)) {
         fs.mkdirSync(destDir, { recursive: true });
     }

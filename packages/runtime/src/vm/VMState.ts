@@ -3,7 +3,7 @@ import path from 'path';
 import readline from 'readline-sync';
 import { RuntimeError } from './RuntimeError.js';
 
-export type StackValue = number | string | boolean | null | { [key: string]: StackValue } | RangeIterator;
+export type StackValue = number | string | boolean | null | { [key: string]: StackValue } | RangeIterator | Promise<unknown>;
 
 export class RangeIterator {
     private current: number;

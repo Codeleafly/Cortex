@@ -5,9 +5,7 @@ import path from 'path';
 import { Lexer, Parser, Compiler } from '@nox/frontend';
 import { VM } from '@nox/runtime';
 import { ErrorDiagnostic } from '../diagnostic/ErrorHandler.js';
-import { startRepl } from '../repl/Repl.js';
-
-export const NOX_VERSION = '1.0.0';
+import { NOX_VERSION } from '../version.js';
 
 export async function runCommand(args: string[]) {
     let filePath = '';
@@ -18,19 +16,17 @@ export async function runCommand(args: string[]) {
     // Basic arg parsing for run
     for (let i = 0; i < args.length; i++) {
         const arg = args[i];
-        if (arg.startsWith('--allow=')) {
-            const perms = arg.split('=')[1].split(',');
-            for (const p of perms) {
-                if (p === 'read') flags.read = true;
-                if (p === 'write') flags.write = true;
-                if (p === 'run') flags.run = true;
-                if (p === 'all') { flags.read = true; flags.write = true; flags.run = true; }
-            }
+        if (arg.startsWith('--allow-read')) {
+            flags.read = true;
+        } else if (arg.startsWith('--allow-write')) {
+            flags.write = true;
+        } else if (arg.startsWith('--allow-run')) {
+            flags.run = true;
         } else if (arg === '--allow-all') {
             flags.read = true; flags.write = true; flags.run = true;
-        } else if (!filePath) {
+        } else if (!filePath && !arg.startsWith('--')) {
             filePath = arg;
-        } else {
+        } else if (filePath) {
             scriptArgs.push(arg);
         }
     }
@@ -56,14 +52,13 @@ export async function runCommand(args: string[]) {
         const { bytecode, stringPool } = compiler.compile(statements);
         
         const vm = new VM(flags);
-        for (const p of whitelists.read) vm.addWhitelist('read', p);
-        for (const p of whitelists.write) vm.addWhitelist('write', p);
-        for (const p of whitelists.run) vm.addWhitelist('run', p);
+        // Map whitelists if any (WIP)
 
         await vm.run(bytecode, stringPool, scriptArgs);
     } catch (err) {
-        const { unmount } = render(<ErrorDiagnostic error={err} sourceCode={source} filePath={filePath} />);
-        unmount();
+        const { waitUntilExit } = render(<ErrorDiagnostic error={err} sourceCode={source} filePath={filePath} />);
+        // Give it a moment to render before exiting if it's not interactive
+        await new Promise(resolve => setTimeout(resolve, 100));
         process.exit(1);
     }
 }

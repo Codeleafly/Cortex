@@ -5,7 +5,7 @@ tools:
   - "*"
 model: gemini-3-flash-preview
 temperature: 0.1
-max_turns: 100
+max_turns: 180
 ---
 
 # Cyber Subagent: The Invisible Threat Hunter

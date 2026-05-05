@@ -1,20 +1,23 @@
-import React, { useState, useRef } from 'react';
-import { render, Text, Box, useApp, Static } from 'ink';
-import TextInput from 'ink-text-input';
-import { Lexer, Parser, Compiler } from '@nox/frontend';
-import { VM } from '@nox/runtime';
+import React, { useState, useRef, useMemo } from 'react';
+import { render, Box, useApp } from 'ink';
+import { ExecutionEngine } from './engine/ExecutionEngine.js';
+import { REPLHistory, HistoryItem } from './components/REPLHistory.js';
+import { REPLInput } from './components/REPLInput.js';
+import { REPLStatus } from './components/REPLStatus.js';
 
 const HELP_TEXT = `
 Available Commands:
   .help    - Show this help message
   .reset   - Reset the VM and environment
   .exit    - Exit the REPL
-  .editor  - Toggle multi-line editor mode (WIP)
 
-Syntax Examples:
-  let x = 10
-  print x + 5
-  while (x > 0) { print x; x = x - 1 }
+Syntax Examples (Modern Nox):
+  is x = 10                  (Constant)
+  mut y = 5                  (Mutable)
+  print x + y
+  fn add(a, b) => a + b      (Arrow)
+  if x > 5 { print "Large" } (No Parens)
+  "nox" |> print             (Pipe)
 `;
 
 interface ReplProps {
@@ -25,130 +28,114 @@ interface ReplProps {
 const REPL = ({ initialPermissions, whitelists }: ReplProps) => {
     const { exit } = useApp();
     const [input, setInput] = useState('');
-    const [history, setHistory] = useState<{ type: 'input' | 'output' | 'error' | 'info', text: string }[]>([
-        { type: 'info', text: 'Welcome to Nox REPL! Type .help for commands.' }
+    const [history, setHistory] = useState<HistoryItem[]>([
+        { id: 'init', type: 'info', text: 'Welcome to Nox REPL! High-performance interactive mode enabled.' }
     ]);
-    const [editorMode, setEditorMode] = useState(false);
-    const [multiLineInput, setMultiLineInput] = useState('');
+    const [accumulatedInput, setAccumulatedInput] = useState('');
+    
+    // Maintain execution state
+    const engine = useRef(new ExecutionEngine(initialPermissions, whitelists));
 
-    const createVM = () => {
-        const vm = new VM(initialPermissions, true);
-        if (whitelists) {
-            for (const path of whitelists.read) vm.addWhitelist('read', path);
-            for (const path of whitelists.write) vm.addWhitelist('write', path);
-            for (const path of whitelists.run) vm.addWhitelist('run', path);
+    const generateId = () => Math.random().toString(36).substring(2, 9);
+
+    const isComplete = (code: string): boolean => {
+        const trimmed = code.trim();
+        if (!trimmed) return true;
+
+        // Braces/Parens balance
+        const openBraces = (code.match(/\{/g) || []).length;
+        const closeBraces = (code.match(/\}/g) || []).length;
+        const openParens = (code.match(/\(/g) || []).length;
+        const closeParens = (code.match(/\)/g) || []).length;
+        
+        if (openBraces !== closeBraces || openParens !== closeParens) return false;
+
+        // Check for trailing operators or keywords that expect more
+        const lastLine = trimmed.split('\n').pop()?.trim() || '';
+        
+        // Ends with pipe or arithmetic operator
+        if (lastLine.endsWith('|>') || lastLine.endsWith('+') || lastLine.endsWith('-') || 
+            lastLine.endsWith('*') || lastLine.endsWith('/') || lastLine.endsWith('=')) {
+            return false;
         }
-        return vm;
-    };
 
-    // Persist Compiler and VM across the session
-    const compilerRef = useRef(new Compiler());
-    const vmRef = useRef(createVM());
-
-    const execute = (code: string) => {
-        try {
-            const lexer = new Lexer(code);
-            const tokens = lexer.tokenize();
-            const parser = new Parser();
-            const statements = parser.parse(tokens);
-            
-            // Incremental Compilation
-            const { bytecode, stringPool, startIp } = compilerRef.current.compileSnippet(statements);
-            
-            // Incremental Execution
-            vmRef.current.runSnippet(bytecode, stringPool, startIp);
-            
-            return { success: true, logs: vmRef.current.logs };
-        } catch (err: unknown) {
-            const message = err instanceof Error ? err.message : String(err);
-            return { success: false, error: message };
+        // Ends with fn signature but no body
+        if (lastLine.startsWith('fn ') && !lastLine.includes('=>') && !lastLine.includes('{')) {
+            return false;
         }
+
+        // Incomplete if/while/match (no block)
+        if ((lastLine.startsWith('if ') || lastLine.startsWith('while ') || lastLine.startsWith('match ')) && !lastLine.includes('{')) {
+            return false;
+        }
+
+        return true;
     };
 
     const handleSubmit = (val: string) => {
-        const fullInput = editorMode ? multiLineInput + val + '\n' : val;
         const trimmed = val.trim();
         
-        if (!editorMode && trimmed === '.exit') {
+        if (trimmed === '.exit') {
             exit();
             return;
         }
 
-        if (!editorMode && trimmed === '.help') {
-            setHistory(prev => [...prev, { type: 'input', text: val }, { type: 'info', text: HELP_TEXT }]);
+        if (trimmed === '.help') {
+            setHistory(prev => [
+                ...prev, 
+                { id: generateId(), type: 'input', text: val }, 
+                { id: generateId(), type: 'info', text: HELP_TEXT }
+            ]);
             setInput('');
             return;
         }
 
-        if (!editorMode && trimmed === '.reset') {
-            compilerRef.current = new Compiler();
-            vmRef.current = createVM();
-            setHistory([{ type: 'info', text: 'Environment reset.' }]);
+        if (trimmed === '.reset') {
+            engine.current.reset(initialPermissions, whitelists);
+            setHistory([{ id: generateId(), type: 'info', text: 'Environment reset. Memory cleared.' }]);
             setInput('');
+            setAccumulatedInput('');
             return;
         }
 
-        if (!editorMode && trimmed === '.editor') {
-            setHistory(prev => [...prev, { type: 'input', text: val }, { type: 'info', text: 'Multi-line editor mode enabled. Submit an empty line or matching braces to execute.' }]);
-            setEditorMode(true);
-            setInput('');
-            return;
-        }
+        const currentFullInput = accumulatedInput + (accumulatedInput ? '\n' : '') + val;
 
-        // Advanced Multi-line Detection
-        const openBraces = (fullInput.match(/\{/g) || []).length;
-        const closeBraces = (fullInput.match(/\}/g) || []).length;
-        const openParens = (fullInput.match(/\(/g) || []).length;
-        const closeParens = (fullInput.match(/\)/g) || []).length;
-
-        if (openBraces > closeBraces || openParens > closeParens) {
-            setMultiLineInput(fullInput);
-            setHistory(prev => [...prev, { type: 'input', text: val }]);
-            setEditorMode(true);
+        if (!isComplete(currentFullInput)) {
+            setHistory(prev => [...prev, { id: generateId(), type: 'input', text: val, isContinuation: accumulatedInput.length > 0 }]);
+            setAccumulatedInput(currentFullInput);
             setInput('');
             return;
         }
 
         // Execute code
-        setHistory(prev => [...prev, { type: 'input', text: val }]);
-        const result = execute(fullInput);
+        setHistory(prev => [...prev, { id: generateId(), type: 'input', text: val, isContinuation: accumulatedInput.length > 0 }]);
+        const result = engine.current.execute(currentFullInput);
         
-        // Always collect logs from the VM, even if execution failed
-        const logs = vmRef.current.logs || [];
-        logs.forEach((log: string) => {
-            setHistory(prev => [...prev, { type: 'output', text: log }]);
+        // Handle output
+        const newHistory: HistoryItem[] = [];
+        result.logs.forEach(log => {
+            newHistory.push({ id: generateId(), type: 'output', text: log });
         });
 
         if (!result.success) {
-            setHistory(prev => [...prev, { type: 'error', text: `Error: ${result.error}` }]);
+            newHistory.push({ id: generateId(), type: 'error', text: result.error || 'Unknown error' });
         }
         
+        setHistory(prev => [...prev, ...newHistory]);
         setInput('');
-        setMultiLineInput('');
-        setEditorMode(false);
+        setAccumulatedInput('');
     };
 
     return (
-        <Box flexDirection="column">
-            <Static items={history}>
-                {(item, index) => (
-                    <Box key={index}>
-                        {item.type === 'input' && <Text color="cyan">{index === 0 ? '›' : ' ' } {item.text}</Text>}
-                        {item.type === 'output' && <Text color="green">{item.text}</Text>}
-                        {item.type === 'error' && <Text color="red">{item.text}</Text>}
-                        {item.type === 'info' && <Text color="yellow" italic>{item.text}</Text>}
-                    </Box>
-                )}
-            </Static>
-            
-            <Box marginTop={1}>
-                <Text color="cyan">{editorMode ? '... ' : '› '}</Text>
-                <TextInput 
-                    value={input} 
-                    onChange={setInput} 
-                    onSubmit={handleSubmit} 
-                />
-            </Box>
+        <Box flexDirection="column" padding={1}>
+            <REPLHistory history={history} />
+            <REPLInput 
+                input={input} 
+                setInput={setInput} 
+                onSubmit={handleSubmit} 
+                isMultiline={accumulatedInput.length > 0} 
+            />
+            <REPLStatus />
         </Box>
     );
 };

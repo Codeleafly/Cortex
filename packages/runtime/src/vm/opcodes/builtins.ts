@@ -51,6 +51,12 @@ export function executeBuiltins(opcode: Opcode, state: VMState): boolean {
             state.push(str.length);
             break;
         }
+        case Opcode.SLEEP: {
+            const ms = state.pop();
+            if (typeof ms !== 'number') throw new RuntimeError('sleep requires numeric milliseconds', state.ip);
+            state.push(new Promise(resolve => setTimeout(resolve, ms)));
+            break;
+        }
         default:
             return false;
     }

@@ -44,6 +44,7 @@
 | **VULN-STACK-01** | Match Statement Stack Leak | **FIXED** ✅ | Match value was not popped when a case matched. |
 | **VULN-STACK-02** | Function Return Stack Leak | **FIXED** ✅ | Range iterators and other artifacts leaked on early function return. |
 | **VULN-STACK-03** | Iterator Stack Leak | **FIXED** ✅ | Non-iterable values used in `for` loops leak on the stack. |
+| **VULN-REPL-03** | REPL History Vanishing Input | **FIXED** ✅ | Input items disappeared from UI due to missing unique IDs in `Static` component. |
 
 ## 2. Phase 8 Audit Findings (Ultra-Stainless Modernization)
 Audited by **Cyber**. Systemic upgrades and modern syntax enforcement.
@@ -63,6 +64,10 @@ Audited by **Cyber**. Systemic upgrades and modern syntax enforcement.
 - **Description:** When a `for` loop is executed on a non-iterable value (or an unimplemented iterable type like an array), the VM jumps to the end of the loop but fails to pop the value from the stack. This leads to rapid stack exhaustion.
 - **Reproduction:** `tests/repro/v_12_stack_leak_iter.test.ts`
 - **Proposed Solution:** Update `Opcode.ITER_NEXT` to throw a `RuntimeError` for non-iterables, ensuring the stack is cleaned by error handling or explicit pops.
+
+### [VULN-REPL-03] REPL History Vanishing Input
+- **Description:** Users reported that submitted commands disappeared from the REPL history. This was caused by the `REPLHistory` component using `Static` without providing unique `id`s for each item, leading to React/Ink reconciliation issues where items were lost on state updates.
+- **Proposed Solution:** Implemented a `generateId` utility in `Repl.tsx` and updated the `HistoryItem` interface to require a unique ID for every entry.
 
 ## 6. Conclusion
 The Phase 8 "Ultra-Stainless" modernization has enforced Modern Nox syntax, improved VM modularity, and fixed critical missing operators. All integration tests are passing.

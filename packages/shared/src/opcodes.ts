@@ -48,4 +48,5 @@ export enum Opcode {
     AWAIT = 40,
     ITER_NEXT = 41,
     RANGE = 42,
-}
+    SLEEP = 45,
+    }

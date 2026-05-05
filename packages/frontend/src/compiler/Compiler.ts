@@ -431,6 +431,7 @@ export class Compiler {
                     'read_line': { opcode: Opcode.READ_LINE, args: 0 },
                     'str_at': { opcode: Opcode.STR_AT, args: 2 },
                     'str_len': { opcode: Opcode.STR_LEN, args: 1 },
+                    'sleep': { opcode: Opcode.SLEEP, args: 1 },
                     'run_command': { opcode: Opcode.RUN_CMD, args: 1 }
                 };
 
