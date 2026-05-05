@@ -74,10 +74,11 @@ export function executeCore(opcode: Opcode, state: VMState): boolean {
             const argCount = state.readOperand();
             if (state.callStack.length >= 256) throw new RuntimeError('Call Stack Overflow', state.ip);
             if (state.stack.length < argCount) throw new RuntimeError('Stack Underflow in CALL', state.ip);
-            const args = [];
-            for (let i = 0; i < argCount; i++) args.push(state.pop());
-            for (let i = argCount - 1; i >= 0; i--) state.push(args[i]);
-            state.callStack.push({ returnAddr: state.ip, oldBp: state.bp });
+            
+            // Record stack pointer BEFORE arguments
+            const oldSp = state.stack.length - argCount;
+            
+            state.callStack.push({ returnAddr: state.ip, oldBp: state.bp, oldSp });
             state.bp = state.memoryStackPointer;
             state.ip = address;
             break;
@@ -85,9 +86,19 @@ export function executeCore(opcode: Opcode, state: VMState): boolean {
         case Opcode.RET: {
             const frame = state.callStack.pop();
             if (!frame) throw new RuntimeError('Top-level return', state.ip);
+            
+            // If function pushed values, use the top one as return value
+            // Otherwise, default to null. Discard any extra values.
+            const returnValue = state.stack.length > frame.oldSp ? state.pop() : null;
+            
+            // Restore state
             state.memoryStackPointer = state.bp;
             state.bp = frame.oldBp;
             state.ip = frame.returnAddr;
+            
+            // Clean stack
+            state.stack.length = frame.oldSp;
+            state.push(returnValue); // Push return value onto cleaned stack
             break;
         }
         default:

@@ -1,0 +1,6 @@
+let mut total = 0;
+for x in 123 {
+    total = total + 1;
+}
+// 123 should still be on the stack here if there is a leak
+print total;

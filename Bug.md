@@ -41,13 +41,28 @@
 | **VULN-VM-SEC-04** | `addWhitelist` Resolution | **FIXED** ✅ | `VM.addWhitelist` now uses `path.resolve` to match `checkPermission` behavior. |
 | **VULN-TEST-02** | Async Test Desync | **FIXED** ✅ | All integration and repro tests updated to use `await vm.run()`. |
 | **VULN-LEX-01** | Missing Relational Operators (>=, <=) | **FIXED** ✅ | Added GT_EQ and LT_EQ tokens and opcodes. |
+| **VULN-STACK-01** | Match Statement Stack Leak | **FIXED** ✅ | Match value was not popped when a case matched. |
+| **VULN-STACK-02** | Function Return Stack Leak | **FIXED** ✅ | Range iterators and other artifacts leaked on early function return. |
+| **VULN-STACK-03** | Iterator Stack Leak | **FIXED** ✅ | Non-iterable values used in `for` loops leak on the stack. |
 
 ## 2. Phase 8 Audit Findings (Ultra-Stainless Modernization)
 Audited by **Cyber**. Systemic upgrades and modern syntax enforcement.
 
 ### [VULN-LEX-01] Missing Relational Operators (>=, <=)
-- **Description:** The language lacked support for greater-than-or-equal (`>=`) and less-than-or-equal (`<=`) operators. Attempting to use them resulted in lexing/parsing errors.
-- **Proposed Solution:** Implemented `GT_EQ`, `LT_EQ` token types and `CMP_GE`, `CMP_LE` opcodes across shared, frontend, and runtime packages. Updated Lexer for multi-character operator support.
+...
+
+### [VULN-STACK-01] Match Statement Stack Leak
+- **Description:** When a `match` case matched, the VM executed the body and jumped to the end, skipping the instruction that pops the match expression value from the stack.
+- **Proposed Solution:** Refactored `Compiler.ts` to ensure all match case branches jump to a shared `POP` instruction before exiting the statement.
+
+### [VULN-STACK-02] Function Return Stack Leak
+- **Description:** Functions returning early (e.g., from inside a loop) left artifacts like `RangeIterator` or intermediate expression values on the stack. The VM did not reset the stack pointer on `RET`.
+- **Proposed Solution:** Updated `VMState` and `CALL`/`RET` opcodes to record the stack pointer at call-time and restore it on return, ensuring exactly one return value remains on the stack.
+
+### [VULN-STACK-03] Iterator Stack Leak
+- **Description:** When a `for` loop is executed on a non-iterable value (or an unimplemented iterable type like an array), the VM jumps to the end of the loop but fails to pop the value from the stack. This leads to rapid stack exhaustion.
+- **Reproduction:** `tests/repro/v_12_stack_leak_iter.test.ts`
+- **Proposed Solution:** Update `Opcode.ITER_NEXT` to throw a `RuntimeError` for non-iterables, ensuring the stack is cleaned by error handling or explicit pops.
 
 ## 6. Conclusion
 The Phase 8 "Ultra-Stainless" modernization has enforced Modern Nox syntax, improved VM modularity, and fixed critical missing operators. All integration tests are passing.

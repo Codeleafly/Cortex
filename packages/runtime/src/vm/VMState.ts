@@ -29,7 +29,7 @@ export class VMState {
     public ip = 0;
     public bp = 0;
     public memoryStackPointer = 0;
-    public callStack: { returnAddr: number, oldBp: number }[] = [];
+    public callStack: { returnAddr: number, oldBp: number, oldSp: number }[] = [];
     public logs: string[] = [];
     public bytecode: Int32Array = new Int32Array(0);
     public stringPool: string[] = [];

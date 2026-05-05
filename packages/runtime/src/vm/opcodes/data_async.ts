@@ -52,10 +52,9 @@ export async function executeDataAsync(opcode: Opcode, state: VMState): Promise<
                 } else {
                     state.push(next);
                 }
-            } else if (Array.isArray(iter)) {
-                state.ip = target; // Simplified array iter
             } else {
-                state.ip = target;
+                state.pop(); // Pop the non-iterable to prevent leak before throwing
+                throw new RuntimeError(`Type Error: Value of type ${typeof iter} is not iterable`, state.ip);
             }
             break;
         }

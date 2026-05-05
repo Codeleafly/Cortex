@@ -43,19 +43,41 @@ This document tracks the solutions implemented for every bug identified in `Bug.
 | **VULN-TEST-02** | Async Test Desync | [x] | All integration and repro tests updated to use `await vm.run()`. |
 | **VULN-DIAG-01** | Snippet Line Offset | [x] | `ErrorHandler.tsx` adjusted to show exactly 10 lines (5 before, 4 after). |
 | **VULN-LEX-01** | Missing Relational Operators | [x] | Added GT_EQ and LT_EQ tokens and opcodes across pipeline. |
+| **VULN-STACK-01** | Match Statement Stack Leak | [x] | Refactored compiler to ensure match value is popped in all branches. |
+| **VULN-STACK-02** | Function Return Stack Leak | [x] | Implemented caller-recorded stack pointer restoration on return. |
+| **VULN-STACK-03** | Iterator Stack Leak | [x] | Throw RuntimeError for non-iterables in `for` loops. |
 
 ## 2. Detailed Solutions
 
 ### [VULN-LEX-01] Missing Relational Operators (>=, <=)
+...
+
+### [VULN-STACK-01] Match Statement Stack Leak
 **Status:** FIXED ✅
 
 **Description:**
-The language was missing `>=` and `<=` operators in all stages of the pipeline.
+`match` statements leaked the expression value on the stack if a case matched.
 
 **Fix Details:**
-- Added `GT_EQ` and `LT_EQ` to `TokenType`.
-- Added `CMP_GE` and `CMP_LE` to `Opcode`.
-- Updated `Lexer.ts` to support multi-character relational operators.
-- Updated `BinaryParser.ts` to include these tokens in the `comparison()` method.
-- Updated `Compiler.ts` to emit the new opcodes.
-- Updated `math_logic.ts` in the VM to perform the actual comparisons.
+The compiler emitted a `POP` after the cases, but matched cases jumped past it to the end of the statement. The solution was to capture the address of the `POP` instruction and ensure all `endJumps` from case bodies point to it instead of the instruction after it.
+
+### [VULN-STACK-02] Function Return Stack Leak
+**Status:** FIXED ✅
+
+**Description:**
+Function calls could leak intermediate stack values if they returned early or left artifacts.
+
+**Fix Details:**
+- `VMState` was updated to store `oldSp` (stack pointer) in each `callStack` frame.
+- `Opcode.CALL` records the stack pointer minus argument count as `oldSp`.
+- `Opcode.RET` pops the return value, resets `state.stack.length` to `oldSp`, and then pushes the return value back.
+- This ensures that every function call leaves exactly one value on the stack, regardless of internal branching or loops.
+
+### [VULN-STACK-03] Iterator Stack Leak
+**Status:** FIXED ✅
+
+**Description:**
+`for` loops on non-iterable values leaked the value on the stack because `ITER_NEXT` would jump to the end of the loop without popping the iterator.
+
+**Fix Details:**
+Updated `packages/runtime/src/vm/opcodes/data_async.ts` to explicitly pop the iterator and throw a `RuntimeError` if the value is not a `RangeIterator`. This prevents stack accumulation and provides better diagnostic feedback.

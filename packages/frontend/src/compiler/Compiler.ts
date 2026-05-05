@@ -232,7 +232,7 @@ export class Compiler {
                     if (c.condition === null) {
                         // Default case
                         for (const s of c.body) this.statement(s);
-                        break; // Default case is always last
+                        break; 
                     } else {
                         this.emit(Opcode.DUP); // Duplicate value to compare
                         this.expression(c.condition);
@@ -250,8 +250,10 @@ export class Compiler {
                         this.bytecode[nextCaseIdx] = this.bytecode.length;
                     }
                 }
+                
+                const popAddr = this.bytecode.length;
                 this.emit(Opcode.POP); // Pop the match expression value
-                for (const idx of endJumps) this.bytecode[idx] = this.bytecode.length;
+                for (const idx of endJumps) this.bytecode[idx] = popAddr;
                 break;
             }
             case 'ReturnStmt':
