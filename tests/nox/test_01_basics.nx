@@ -1,0 +1,2 @@
+name = "Nox"
+say "Hello " + name

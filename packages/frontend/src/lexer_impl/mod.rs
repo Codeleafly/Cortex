@@ -29,6 +29,7 @@ impl Lexer {
         keywords.insert("true".to_string(), TokenType::TRUE);
         keywords.insert("false".to_string(), TokenType::FALSE);
         keywords.insert("null".to_string(), TokenType::NULL);
+        keywords.insert("_".to_string(), TokenType::UNDERSCORE);
         keywords.insert("arg_count".to_string(), TokenType::ARG_COUNT);
         keywords.insert("get_arg".to_string(), TokenType::GET_ARG);
         keywords.insert("to_number".to_string(), TokenType::TO_NUMBER);
@@ -41,6 +42,10 @@ impl Lexer {
         keywords.insert("str_at".to_string(), TokenType::STR_AT);
         keywords.insert("str_len".to_string(), TokenType::STR_LEN);
         keywords.insert("run_command".to_string(), TokenType::RUN_CMD);
+        keywords.insert("say".to_string(), TokenType::SAY);
+        keywords.insert("ask".to_string(), TokenType::ASK);
+        keywords.insert("import".to_string(), TokenType::IMPORT);
+        keywords.insert("from".to_string(), TokenType::FROM);
 
         Self {
             source: source.chars().collect(),

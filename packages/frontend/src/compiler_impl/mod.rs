@@ -54,19 +54,19 @@ impl Compiler {
         self.bytecode.push(val);
     }
 
-    pub fn resolve_variable(&self, name: &str) -> (i64, bool) {
+    pub fn resolve_variable(&self, name: &str) -> Option<(i64, bool)> {
         for i in (0..self.scopes.len()).rev() {
             if let Some(info) = self.scopes[i].get(name) {
                 if self.function_start_scope_index == 0 || i == 0 {
-                    return (!(info.address as i64), info.is_mutable);
+                    return Some((!(info.address as i64), info.is_mutable));
                 }
                 if i < self.function_start_scope_index {
                     panic!("Closure Error: Cannot access non-global variable from nested function");
                 }
-                return (info.address as i64, info.is_mutable);
+                return Some((info.address as i64, info.is_mutable));
             }
         }
-        panic!("Undefined variable: {}", name);
+        None
     }
 
     pub fn define_variable(&mut self, name: String, is_mutable: bool) -> i64 {

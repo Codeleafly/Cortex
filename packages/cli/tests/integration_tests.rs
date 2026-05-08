@@ -21,21 +21,21 @@ async fn run_file(file_name: &str) -> Vec<String> {
 }
 
 #[tokio::test]
-async fn test_01_arithmetic() {
-    let logs = run_file("test_01_arithmetic.nx").await;
-    assert_eq!(logs, vec!["50"]);
+async fn test_01_basics() {
+    let logs = run_file("test_01_basics.nx").await;
+    assert_eq!(logs, vec!["Hello Nox"]);
 }
 
 #[tokio::test]
-async fn test_02_strings() {
-    let logs = run_file("test_02_strings.nx").await;
-    assert_eq!(logs, vec!["hello nox"]);
+async fn test_02_logic() {
+    let logs = run_file("test_02_logic.nx").await;
+    assert_eq!(logs, vec!["ten"]);
 }
 
 #[tokio::test]
-async fn test_03_logic() {
-    let logs = run_file("test_03_logic.nx").await;
-    assert_eq!(logs, vec!["0", "1", "0"]);
+async fn test_03_loops() {
+    let logs = run_file("test_03_loops.nx").await;
+    assert_eq!(logs, vec!["1", "2", "3"]);
 }
 
 #[tokio::test]
@@ -45,19 +45,7 @@ async fn test_04_functions() {
 }
 
 #[tokio::test]
-async fn test_05_loops() {
-    let logs = run_file("test_05_loops.nx").await;
-    assert_eq!(logs, vec!["3", "2", "1"]);
-}
-
-#[tokio::test]
-async fn test_06_comments() {
-    let logs = run_file("test_06_comments.nx").await;
-    assert_eq!(logs, vec!["comment test"]);
-}
-
-#[tokio::test]
-async fn test_07_ifelse() {
-    let logs = run_file("test_07_ifelse.nx").await;
-    assert_eq!(logs, vec!["then", "else2"]);
+async fn test_05_strict() {
+    let logs = run_file("test_05_strict.nx").await;
+    assert_eq!(logs, vec!["10"]);
 }
