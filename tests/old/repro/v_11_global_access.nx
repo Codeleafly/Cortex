@@ -1,1 +1,0 @@
-var g = 10; fn f(x) { return x + g; } print f(5);

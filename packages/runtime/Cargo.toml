@@ -1,0 +1,8 @@
+[package]
+name = "nox-runtime"
+version = "1.0.0"
+edition = "2021"
+
+[dependencies]
+nox-shared = { path = "../shared" }
+tokio = { version = "1.35", features = ["full"] }

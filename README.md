@@ -17,24 +17,21 @@ A high-performance, general-purpose programming language built from scratch in T
 git clone https://github.com/Codeleafly/Nox.git
 cd Nox
 
-# Install dependencies
-npm install
-
 # Build the project
-npm run build
+cargo build --release
 ```
 
 ## Usage
 ### Running a file
-Nox files traditionally use the `.nx` extension.
+Nox files use the `.nx` extension.
 ```bash
-npx nox run hello.nx
+cargo run --package nox -- run hello.nx
 ```
 
 ### Interactive REPL
 Simply run the `nox` command:
 ```bash
-npx nox
+cargo run --package nox -- repl
 ```
 In the REPL, you can use:
 - `.help`: Show help

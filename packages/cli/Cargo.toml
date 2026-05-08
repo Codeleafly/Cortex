@@ -1,0 +1,25 @@
+[package]
+name = "nox"
+version = "1.0.0"
+edition = "2021"
+description = "Nox Programming Language"
+license = "MIT"
+
+[package.metadata.deb]
+maintainer = "Nox Contributors"
+copyright = "2024, Nox Contributors"
+license-file = ["../../LICENSE", "4"]
+extended-description = """
+Nox is a high-performance, 64-bit programming language built in Rust.
+"""
+depends = "$auto"
+section = "devel"
+priority = "optional"
+
+[dependencies]
+nox-shared = { path = "../shared" }
+nox-runtime = { path = "../runtime" }
+nox-frontend = { path = "../frontend" }
+tokio = { version = "1.35", features = ["full"] }
+clap = { version = "4.4", features = ["derive"] }
+colored = "2.1"

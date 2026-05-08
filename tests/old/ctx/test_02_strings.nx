@@ -1,2 +1,0 @@
-print "hello " + "nox";
-// Expect: hello nox

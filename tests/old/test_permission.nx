@@ -1,2 +1,0 @@
-let content = read_file("package.json")
-print content

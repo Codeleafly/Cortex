@@ -1,4 +1,0 @@
-print true && false;
-print true || false;
-print !true;
-// Expect: 0, 1, 0

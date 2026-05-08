@@ -1,5 +1,0 @@
-hello world
-this is a nox
-real world challenge
-testing file io and string parsing
-123 456

@@ -1,0 +1,9 @@
+[workspace]
+resolver = "2"
+
+members = [
+    "packages/cli",
+    "packages/frontend",
+    "packages/runtime",
+    "packages/shared",
+]

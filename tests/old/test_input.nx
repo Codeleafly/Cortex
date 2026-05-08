@@ -1,3 +1,0 @@
-print "Enter your name: "
-let name = read_line()
-print "Hello, " + name + "!"

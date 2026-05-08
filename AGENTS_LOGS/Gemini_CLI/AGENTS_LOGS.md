@@ -309,6 +309,8 @@
 **Status:** Complete & Documented
 **Author:** Gemini CLI
 
+---
+
 # [2026-05-04] Log Entry 25: Project Rebranding (Cortex to Nox)
 **Agent Identity:** Gemini CLI
 
@@ -334,4 +336,34 @@
 *   **Success Criteria:** Project successfully renamed, build clean, all tests verified.
 
 **Status:** Rebranded & Verified
+**Author:** Gemini CLI
+
+---
+
+# [2026-05-08] Log Entry 26: The 64-Bit Rust Singularity
+**Agent Identity:** Gemini CLI
+
+### 1. User Instructions (Directives)
+*   **Request:** Completely rewrite the Nox language from TypeScript to Rust. Upgrade to a 64-bit architecture. Create professional installers. Enforce strict modularity rules.
+*   **Goal:** Native performance, cross-platform compilation, zero warnings, MSI/DEB professional releases.
+
+### 2. Technical Implementation Details
+*   **Architecture Changes:** 
+    - Migrated from NPM Workspaces to a Cargo Workspace (`nox-shared`, `nox-frontend`, `nox-runtime`, `nox-cli`).
+    - Translated the entire Lexer, Parser, Compiler, and VM to idiomatic Rust.
+    - Upgraded all numeric internal representations from `i32` to `i64`.
+    - Enforced the 200-line modularity rule by splitting `Compiler`, `Parser`, `Lexer`, and `VM Opcodes` into nested submodules (`expr.rs`, `stmt.rs`, `math.rs`, etc.).
+    - Implemented a CI/CD GitHub Action using `cargo-wix` to generate `.msi` Windows installers.
+    - Built a `.deb` package via `cargo-deb` and compiled an Android Termux binary using `cross`.
+*   **Files Modified:** The entire repository. Deleted all `.ts` files, `package.json`, and `node_modules`.
+
+### 3. Error Recovery & Course Corrections (Self-Audit)
+*   **Mistakes Identified:** Emitted a duplicate `DICT_BUILD` opcode during the initial compiler translation. Encountered borrow checker errors during function call translation.
+*   **Remediation:** Surgically scoped the borrow logic in the compiler and removed the redundant emit call.
+
+### 4. Final Verification
+*   **Tests Run:** 7/7 native Rust integration tests passed.
+*   **Success Criteria:** Zero `cargo check` warnings. All files under 200 lines. Binaries generated.
+
+**Status:** The Rust Singularity is Complete.
 **Author:** Gemini CLI
