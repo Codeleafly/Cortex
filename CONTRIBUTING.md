@@ -8,8 +8,8 @@ Thank you for your interest in contributing to Nox! This project follows a stric
 - **Pull Requests (PRs):** Every change must be submitted via a PR with a clear description of the "why" and "what".
 
 ## 2. Code Quality and Linting
-- **Automated Linting:** PRs will only be merged if they pass all automated linting checks (Prettier/ESLint).
-- **Zero Warnings Policy:** All warnings are treated as errors. The codebase must remain clean at all times.
+- **Automated Linting:** PRs will only be merged if they pass all automated linting checks (`cargo fmt` and `cargo clippy`).
+- **Zero Warnings Policy:** All warnings are treated as errors (`cargo check` must be clean). The codebase must remain clean at all times.
 
 ## 3. Safety and Security Rules
 - **Signed Commits:** All contributors are encouraged (and in some cases required) to GPG-sign their commits for verification.

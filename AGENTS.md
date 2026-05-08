@@ -36,7 +36,7 @@ Nox is a high-performance, general-purpose programming language built from scrat
 22. **True Async VM Model:** The Nox VM MUST support non-blocking execution. All external I/O and time-based operations MUST use async workflows where appropriate.
 23. **Systemic Refactoring:** The codebase is now entirely Rust. Ensure all newly added code strictly follows idiomatic Rust practices and maintains 100% Modern Nox syntax compliance.
 24. **Professional Distribution:** AI agents MUST prioritize standard, professional installer packages for releases. For Windows releases, generate Microsoft Installer (`.msi`) packages. For Linux releases, generate Debian (`.deb`) packages. These installers must automatically add Nox to the global `PATH`. Raw executables (`.exe`, `./nox`) are strictly permitted for local development and testing only.
-25. **Workspace Hygiene:** Cargo build artifacts can become extremely heavy. AI agents MUST run `cargo clean` periodically after heavy builds or cross-compilation tasks to save disk space and maintain a lean workspace environment.
+26. **Blueprint Protocol (`PLAN.md`):** Use `PLAN.md` strictly as a temporary, human-readable roadmap for GitHub visibility and user coordination. AI agents MUST still rely on the internal `Plan Mode` tool for permanent AI task tracking, state management, and execution orchestration.
 
 ## Progressive Disclosure
 For detailed rules, architectural deep-dives, and coding patterns, refer to:

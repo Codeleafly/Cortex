@@ -1,15 +1,16 @@
 # Nox CLI & REPL Guide
 
-Nox provides a modern, interactive CLI built with **React** and **Ink**.
+Nox provides a modern, interactive CLI built in **Rust**.
 
 ## Global Command
-If you have run `npm link`, you can use the `nox` command from anywhere.
+If you have installed Nox globally (e.g., using a `.msi` or `.deb` release, or via `cargo install --path packages/cli`), you can use the `nox` command from anywhere.
 
 ## Interactive REPL
 To start the REPL, simply run:
 ```bash
-nox
+nox repl
 ```
+*(Or use `cargo run --package nox -- repl` during development)*
 
 ### REPL Commands (Dot Commands)
 - `.help`: Displays available commands and syntax.
@@ -23,8 +24,9 @@ Nox REPL features intelligent multi-line detection. If you enter an incomplete c
 ## Running Files
 To execute a Nox script, pass the file path as an argument.
 ```bash
-nox my_script.nx
+nox run my_script.nx
 ```
+*(Or use `cargo run --package nox -- run my_script.nx` during development)*
 *Note: While any extension works, `.nx` is the recommended standard.*
 
 ### Permission Flags
@@ -38,5 +40,5 @@ By default, Nox scripts run in a sandbox with no access to the filesystem or she
 
 **Example:**
 ```bash
-nox --allow-read --allow-write log_processor.nx
+nox run --allow-read --allow-write log_processor.nx
 ```

@@ -8,8 +8,8 @@ This project is primarily developed, reviewed, and managed by AI agents.
 - **Research & Strategy:** Read all relevant files (`.ts`, `.txt`, `.md`, `.nx`) to fully understand the context before writing code.
 - **Systemic Refactoring:** Proactively refactor legacy syntax to Modern Nox standard (`is`/`mut`, no-parens) when modifying files.
 - **Verification:** 
-  - Run `npm run build` after every update.
-  - Execute and verify all integration tests in `tests/`.
+  - Run `cargo check` and `cargo build` after every update to ensure zero warnings.
+  - Execute and verify all integration tests in `tests/` using `cargo test`.
 
 ## AI Protocols
 - **Agent Identification:** Explicitly state your agent name (e.g., "Developed by Gemini CLI") in commit messages and documentation.
