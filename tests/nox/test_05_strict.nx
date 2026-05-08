@@ -1,0 +1,3 @@
+!strict
+is x = 10
+say x

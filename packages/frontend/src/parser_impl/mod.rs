@@ -7,14 +7,18 @@ use crate::ast::Stmt;
 pub struct Parser {
     pub tokens: Vec<Token>,
     pub pos: usize,
+    pub is_strict: bool,
 }
 
 impl Parser {
     pub fn new(tokens: Vec<Token>) -> Self {
-        Self { tokens, pos: 0 }
+        Self { tokens, pos: 0, is_strict: false }
     }
 
     pub fn parse(&mut self) -> Vec<Stmt> {
+        if self.match_token(TokenType::BANG_STRICT) {
+            self.is_strict = true;
+        }
         let mut statements = Vec::new();
         while !self.is_at_end() {
             statements.push(self.statement());

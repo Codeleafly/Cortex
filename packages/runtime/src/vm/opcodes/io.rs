@@ -18,6 +18,15 @@ pub fn execute_io(opcode: Opcode, state: &mut VMState) -> bool {
             true
         }
         Opcode::READ_LINE => {
+            let prompt = state.pop();
+            if let StackValue::String(p) = prompt {
+                if !p.is_empty() {
+                    print!("{}", p);
+                    use std::io::Write;
+                    std::io::stdout().flush().unwrap();
+                }
+            }
+
             if !state.is_interactive {
                 panic!("READ_LINE denied in non-interactive mode");
             }
