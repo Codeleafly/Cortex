@@ -1,3 +1,0 @@
-is s = "hello"
-is n = "nox"
-print s + " " + n
