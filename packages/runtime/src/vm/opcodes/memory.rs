@@ -184,6 +184,7 @@ pub fn execute_memory_and_core(opcode: Opcode, state: &mut VMState) -> bool {
                     state.push(StackValue::Number(val));
                 } else {
                     state.ip = target;
+                    // Note: We don't push the iterator back here, so it's effectively popped
                 }
             } else {
                 panic!("ITER_NEXT requires range iterator");

@@ -108,11 +108,49 @@ impl VMState {
         }
     }
 
-    pub fn check_permission(&self, _perm_type: &str, _target: Option<&str>) {
-        // Implementation for later
+    pub fn check_permission(&self, perm_type: &str, target: Option<&str>) {
+        let has_perm = match perm_type {
+            "read" => self.permissions.read,
+            "write" => self.permissions.write,
+            "run" => self.permissions.run,
+            _ => false,
+        };
+
+        if !has_perm {
+            panic!("Permission Error: Restricted access to '{}' system", perm_type);
+        }
+
+        if let Some(target_path) = target {
+            if let Some(whitelist) = self.whitelists.get(perm_type) {
+                if !whitelist.is_empty() {
+                    let resolved = self.safe_resolve(target_path);
+                    let mut allowed = false;
+                    for path in whitelist {
+                        if resolved.starts_with(path) {
+                            allowed = true;
+                            break;
+                        }
+                    }
+                    if !allowed {
+                        panic!("Security Error: Path '{}' is not whitelisted for '{}'", target_path, perm_type);
+                    }
+                }
+            }
+        }
     }
 
     pub fn safe_resolve(&self, user_path: &str) -> PathBuf {
-        PathBuf::from(user_path)
+        let path = PathBuf::from(user_path);
+        if path.is_absolute() {
+            return path;
+        }
+
+        let mut full_path = std::env::current_dir().unwrap_or_else(|_| PathBuf::from("."));
+        full_path.push(path);
+
+        match std::fs::canonicalize(&full_path) {
+            Ok(p) => p,
+            Err(_) => full_path
+        }
     }
 }
