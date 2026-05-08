@@ -13,24 +13,13 @@ impl Compiler {
                 self.emit(addr);
             }
             Stmt::Assign { name, value } => {
-                let var_info = self.resolve_variable(&name);
-                match var_info {
-                    Some((addr, is_mutable)) => {
-                        if !is_mutable {
-                            panic!("Immutable Error: Cannot re-assign constant variable '{}'", name);
-                        }
-                        self.expression(value);
-                        self.emit(Opcode::STORE as i64);
-                        self.emit(addr);
-                    }
-                    None => {
-                        // Implicit declaration in non-strict mode (handled by parser sometimes, but here as fallback)
-                        self.expression(value);
-                        let addr = self.define_variable(name, true);
-                        self.emit(Opcode::STORE as i64);
-                        self.emit(addr);
-                    }
+                let (addr, is_mutable) = self.resolve_variable(&name);
+                if !is_mutable {
+                    panic!("Immutable Error: Cannot re-assign constant variable '{}'", name);
                 }
+                self.expression(value);
+                self.emit(Opcode::STORE as i64);
+                self.emit(addr);
             }
             Stmt::Print { expression } => {
                 self.expression(expression);
@@ -109,95 +98,11 @@ impl Compiler {
                 self.expression(value);
                 self.emit(Opcode::RET as i64);
             }
-            Stmt::Import { names: _, source: _ } => {
-                // For now, we don't have true dynamic loading in the VM,
-                // so we just emit a placeholder or print a warning.
-                // In a real implementation, this would trigger a download/link.
-            }
             Stmt::Expr(expr) => {
                 self.expression(expr);
                 self.emit(Opcode::POP as i64);
             }
-            Stmt::For { item, iterable, body } => {
-                self.expression(iterable);
-                let loop_start = self.bytecode.len() as i64;
-                self.emit(Opcode::ITER_NEXT as i64);
-                let jump_to_end_idx = self.bytecode.len();
-                self.emit(0);
-
-                self.scopes.push(HashMap::new());
-                let addr = self.define_variable(item, true);
-                self.emit(Opcode::STORE as i64);
-                self.emit(addr);
-
-                for s in body { self.statement(s); }
-                self.scopes.pop();
-
-                self.emit(Opcode::JMP as i64);
-                self.emit(loop_start);
-
-                let end_addr = self.bytecode.len() as i64;
-                self.bytecode[jump_to_end_idx] = end_addr;
-            }
-            Stmt::Match { expression, cases } => {
-                self.expression(expression);
-                let mut end_jumps = Vec::new();
-                let mut has_default = false;
-
-                for (condition, body) in cases {
-                    if let Some(cond_expr) = condition {
-                        self.emit(Opcode::DUP as i64);
-                        self.expression(cond_expr);
-                        self.emit(Opcode::CMP_EQ as i64);
-                        self.emit(Opcode::JMP_IF_TRUE as i64);
-                        let matched_idx = self.bytecode.len();
-                        self.emit(0);
-
-                        // If not matched, we need to jump to the next case
-                        self.emit(Opcode::JMP as i64);
-                        let next_case_idx = self.bytecode.len();
-                        self.emit(0);
-
-                        // Matched!
-                        let matched_addr = self.bytecode.len() as i64;
-                        self.bytecode[matched_idx] = matched_addr;
-
-                        self.emit(Opcode::POP as i64); // Pop the original match value
-
-                        self.scopes.push(HashMap::new());
-                        for s in body { self.statement(s); }
-                        self.scopes.pop();
-
-                        self.emit(Opcode::JMP as i64);
-                        end_jumps.push(self.bytecode.len());
-                        self.emit(0);
-
-                        let next_case_addr = self.bytecode.len() as i64;
-                        self.bytecode[next_case_idx] = next_case_addr;
-                    } else {
-                        self.emit(Opcode::POP as i64); // Pop the original match value
-                        self.scopes.push(HashMap::new());
-                        for s in body { self.statement(s); }
-                        self.scopes.pop();
-
-                        self.emit(Opcode::JMP as i64);
-                        end_jumps.push(self.bytecode.len());
-                        self.emit(0);
-
-                        has_default = true;
-                        break; // Default case should be the last one processed
-                    }
-                }
-
-                if !has_default {
-                    self.emit(Opcode::POP as i64); // Pop the original match value if no cases matched
-                }
-
-                let end_addr = self.bytecode.len() as i64;
-                for jump_idx in end_jumps {
-                    self.bytecode[jump_idx] = end_addr;
-                }
-            }
+            _ => panic!("Statement type not recognized in compiler"),
         }
     }
 }

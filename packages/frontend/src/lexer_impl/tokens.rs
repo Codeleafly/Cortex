@@ -66,43 +66,16 @@ impl Lexer {
                 '(' => { self.advance(); tokens.push(Token::new(TokenType::LPAREN, None, start_line, start_col)); }
                 ')' => { self.advance(); tokens.push(Token::new(TokenType::RPAREN, None, start_line, start_col)); }
                 '+' => { self.advance(); tokens.push(Token::new(TokenType::PLUS, None, start_line, start_col)); }
-                '-' => {
-                    self.advance();
-                    if self.peek() == '>' {
-                        self.advance();
-                        tokens.push(Token::new(TokenType::THIN_ARROW, None, start_line, start_col));
-                    } else {
-                        tokens.push(Token::new(TokenType::MINUS, None, start_line, start_col));
-                    }
-                }
+                '-' => { self.advance(); tokens.push(Token::new(TokenType::MINUS, None, start_line, start_col)); }
                 '*' => { self.advance(); tokens.push(Token::new(TokenType::STAR, None, start_line, start_col)); }
                 '/' => { self.advance(); tokens.push(Token::new(TokenType::SLASH, None, start_line, start_col)); }
                 ';' => { self.advance(); tokens.push(Token::new(TokenType::SEMICOLON, None, start_line, start_col)); }
                 ',' => { self.advance(); tokens.push(Token::new(TokenType::COMMA, None, start_line, start_col)); }
-                ':' => { self.advance(); tokens.push(Token::new(TokenType::COLON, None, start_line, start_col)); }
                 '!' => {
                     self.advance();
                     if self.peek() == '=' {
                         self.advance();
                         tokens.push(Token::new(TokenType::BANG_EQ, None, start_line, start_col));
-                    } else if self.peek() == 's' && self.peek_next() == 't' {
-                         // Check for !strict
-                         let mut i = 0;
-                         let strict_word = "strict";
-                         let mut matched = true;
-                         while i < strict_word.len() {
-                             if self.source[self.pos + i] != strict_word.chars().nth(i).unwrap() {
-                                 matched = false;
-                                 break;
-                             }
-                             i += 1;
-                         }
-                         if matched {
-                             for _ in 0..strict_word.len() { self.advance(); }
-                             tokens.push(Token::new(TokenType::BANG_STRICT, None, start_line, start_col));
-                         } else {
-                             tokens.push(Token::new(TokenType::BANG, None, start_line, start_col));
-                         }
                     } else {
                         tokens.push(Token::new(TokenType::BANG, None, start_line, start_col));
                     }

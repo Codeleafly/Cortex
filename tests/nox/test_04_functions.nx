@@ -1,2 +1,2 @@
 fn add(a, b) => a + b
-say add(5, 10)
+print add(5, 10)

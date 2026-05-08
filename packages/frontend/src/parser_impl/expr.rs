@@ -1,5 +1,5 @@
 use nox_shared::TokenType;
-use crate::ast::{Expr, LiteralValue, Stmt};
+use crate::ast::{Expr, LiteralValue};
 use crate::parser_impl::Parser;
 
 impl Parser {
@@ -140,23 +140,6 @@ impl Parser {
         if self.match_token(TokenType::NULL) { return Expr::Literal(LiteralValue::Null); }
         if self.match_token(TokenType::ARG_COUNT) { return Expr::ArgCount; }
         
-        if self.match_token(TokenType::SAY) {
-            return Expr::Say(Box::new(self.expression()));
-        }
-
-        if self.match_token(TokenType::ASK) {
-            let prompt = if self.peek().token_type == TokenType::STRING {
-                self.advance().value.clone().unwrap()
-            } else {
-                "".to_string()
-            };
-            return Expr::Call { callee: "read_line".to_string(), args: vec![Expr::Literal(LiteralValue::String(prompt))] };
-        }
-
-        if self.match_token(TokenType::FN) {
-            return self.anonymous_fn();
-        }
-
         if self.match_token(TokenType::LBRACE) {
             return self.dict_literal();
         }
@@ -177,26 +160,6 @@ impl Parser {
             return Expr::Grouping(Box::new(expr));
         }
         panic!("Expect expression at {:?}", self.peek());
-    }
-
-    pub fn anonymous_fn(&mut self) -> Expr {
-        let mut params = Vec::new();
-        if self.match_token(TokenType::LPAREN) {
-            if !self.check(TokenType::RPAREN) {
-                loop {
-                    params.push(self.consume(TokenType::IDENTIFIER, "Expect parameter name").value.clone().unwrap());
-                    if !self.match_token(TokenType::COMMA) { break; }
-                }
-            }
-            self.consume(TokenType::RPAREN, "Expect ')' after parameters");
-        }
-        self.consume(TokenType::COLON, "Expect ':' before anonymous function body");
-        let body = if self.check(TokenType::LBRACE) {
-            self.block()
-        } else {
-            vec![Stmt::Return { value: self.expression() }]
-        };
-        Expr::AnonymousFn { params, body }
     }
 
     pub fn dict_literal(&mut self) -> Expr {

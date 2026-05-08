@@ -1,7 +1,6 @@
 use nox_shared::{Opcode, TokenType};
 use crate::ast::{Expr, LiteralValue};
 use crate::compiler_impl::Compiler;
-use std::collections::HashMap;
 
 impl Compiler {
     pub fn expression(&mut self, expr: Expr) {
@@ -88,14 +87,9 @@ impl Compiler {
                 }
             }
             Expr::Variable(name) => {
-                let var_info = self.resolve_variable(&name);
-                match var_info {
-                    Some((addr, _)) => {
-                        self.emit(Opcode::LOAD as i64);
-                        self.emit(addr);
-                    }
-                    None => panic!("Undefined variable: {}", name),
-                }
+                let (addr, _) = self.resolve_variable(&name);
+                self.emit(Opcode::LOAD as i64);
+                self.emit(addr);
             }
             Expr::Call { callee, args } => {
                 for arg in args { self.expression(arg); }
@@ -173,44 +167,6 @@ impl Compiler {
             }
             Expr::ArgCount => {
                 self.emit(Opcode::ARG_COUNT as i64);
-            }
-            Expr::Say(e) => {
-                self.expression(*e);
-                self.emit(Opcode::PRINT as i64);
-                // say as expression returns the value
-                self.emit(Opcode::DUP as i64);
-            }
-            Expr::AnonymousFn { params, body } => {
-                self.emit(Opcode::JMP as i64);
-                let jump_over_idx = self.bytecode.len();
-                self.emit(0);
-
-                let fn_start = self.bytecode.len();
-                // Since it's anonymous, we don't insert into self.functions,
-                // but we need to push its address to the stack.
-
-                let old_start_scope = self.function_start_scope_index;
-                self.function_start_scope_index = self.scopes.len();
-                self.scopes.push(HashMap::new());
-
-                for p in params.into_iter().rev() {
-                    let addr = self.define_variable(p, true);
-                    self.emit(Opcode::STORE as i64);
-                    self.emit(addr);
-                }
-
-                for s in body { self.statement(s); }
-
-                self.emit(Opcode::PUSH as i64);
-                self.emit(0); // null
-                self.emit(Opcode::RET as i64);
-
-                self.scopes.pop();
-                self.function_start_scope_index = old_start_scope;
-                self.bytecode[jump_over_idx] = self.bytecode.len() as i64;
-
-                self.emit(Opcode::PUSH as i64);
-                self.emit(fn_start as i64);
             }
         }
     }

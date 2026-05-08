@@ -1,6 +1,0 @@
-x = 10
-match x {
-    5 => say "five"
-    10 => say "ten"
-    _ => say "other"
-}
