@@ -1,25 +1,36 @@
-# Nox Architecture (v1.0.1 Blueprint)
+# Nox Architecture
 
-Nox is a programming language built from scratch in Rust, designed for high performance, distribution, and a "toy-to-pro" developer experience.
+Nox is a programming language built from scratch in Rust, designed for high performance and AI-first development.
 
 ## Core Decisions
-- **Monorepo Structure:** Isolated Cargo crates: `shared`, `frontend`, `runtime`, `cli`.
-- **Hybrid Syntax:** Default Mode (natural keywords like `say`/`ask`) and Strict Mode (`!strict`, explicit types).
-- **64-bit VM:** Numeric bytecode execution (`Vec<i64>`) on a stack-based architecture.
-- **Deno-Style Modularity:** URL-based imports with a global deduplicated cache (`$HOME/.nox_libx/`).
-- **Sandbox Security:** Capability-based permissions (`--allow-read`, etc.) and path-based whitelisting.
+- **Monorepo Structure:** The project follows a professional Cargo workspace architecture. Code is divided into isolated crates under `packages/` (`shared`, `frontend`, `runtime`, `cli`).
+- **Bytecode-First:** Nox prioritizes numeric bytecode execution (`Vec<i64>`) over AST interpretation for maximum performance.
+- **Strict Separation of Concerns:** Lexer, Parser, Compiler, and VM are strictly decoupled into their respective crates.
+- **Two-Stage Frontend:** The language uses a formal Parser and Abstract Syntax Tree (AST) stage between the Lexer and Compiler. This allows for complex optimizations and better semantic analysis.
+- **AST-to-Bytecode:** The compiler walks the AST to generate numeric opcodes, maintaining a decoupling between syntax and execution.
 
 ## Package Layout
-- `packages/frontend`: Recursive-descent Parser and AST-to-Bytecode Compiler.
-- `packages/runtime`: Modular VM with async support (Tokio).
-- `packages/shared`: Contract of numeric Opcodes and Tokens.
-- `packages/cli`: `rustyline`-powered REPL and script runner.
+- `packages/frontend`: Lexer and Parser for hybrid JS/Python syntax.
+- `packages/runtime`: Stack-based Virtual Machine (VM).
+- `packages/shared`: Common types, tokens, and opcodes.
+- `packages/cli`: Executable entry point.
 
 ## VM Technical Specifications
-- **Operand Stack:** 1024 slots.
-- **Global Memory:** 512 slots.
-- **Local Memory:** 1024 slots (frame-relative addressing via `bp`).
-- **Safety:** Automatic bounds checking, stack restoration on `RET`, and path resolution isolation.
+- **Operand Stack:** 1024 slots (`StackValue` enum).
+- **Call Stack:** 256 frames (for return addresses and base pointers).
+- **Global Memory:** 512 slots (isolated global storage).
+- **Local Memory Stack:** 1024 slots (dedicated to function frames).
+- **Addressing:**
+  - **Local:** Frame-relative addressing via Base Pointer (`bp`).
+  - **Global:** Absolute addressing in the dedicated globals segment.
+- **Modularity:** 
+  - **Modular VM Architecture:** Opcodes are isolated into logical modules (math, I/O, async, core) to maintain codebase cleanliness and prevent "God Objects".
+  - **True Async Model:** The VM supports non-blocking execution of async opcodes using Rust's async/await where applicable.
+- **Safety Features:** 
+  - Mandatory bounds checking for all memory and bytecode access.
+  - Stack overflow/underflow protection.
+  - Isolated memory segments to prevent state corruption.
+  - Typed numeric bytecode execution via `Vec<i64>`.
 
-For syntax details, see [docs/syntax.md](syntax.md).
-For CLI usage, see [docs/cli.md](cli.md).
+For syntax details, see [syntax.md](syntax.md).
+For CLI usage, see [cli.md](cli.md).

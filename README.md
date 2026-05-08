@@ -1,14 +1,15 @@
 # Nox 🧠
 
-A high-performance, general-purpose programming language built from scratch in Rust.
+A high-performance, general-purpose programming language built from scratch in TypeScript.
 
-## Features (v1.0.1 Blueprint)
-- **Ultra-Modern Syntax:** Clean, beginner-friendly syntax (`say`, `ask`, keyword-less variables) that scales to Rust-level safety.
-- **Numeric Bytecode VM:** Compiles source code directly into 64-bit numeric bytecode for maximum performance.
+## Features
+- **Modern Syntax:** Clean, sci-fi inspired syntax (`is`, `mut`, `fn =>`, `match`) optimized for readability and speed.
+- **Numeric Bytecode VM:** Compiles source code directly into `Int32Array` bytecode for maximum execution speed.
 - **Stack-Based Architecture:** Efficient execution using a numeric virtual machine.
-- **Modern CLI/REPL:** Interactive REPL built with Rust and `rustyline`, featuring multi-line support.
-- **Deno-Style Modules:** Import directly from URLs (Phase 11 roadmap).
-- **Global Smart Cache:** No `node_modules`. All dependencies stored in `$HOME/.nox_libx/`.
+- **Modern CLI/REPL:** Interactive REPL built with React and Ink, featuring multi-line support and dot commands.
+- **Advanced Types:** Support for Strings, Booleans, Numbers, Arrays, and Null.
+- **Control Flow:** `if` statements, `while` loops, `for` loops, and `match` expressions.
+- **True Async:** Built-in support for asynchronous operations using the `!` operator.
 
 ## Installation
 ```bash
@@ -22,58 +23,81 @@ cargo build --release
 
 ## Usage
 ### Running a file
+Nox files use the `.nx` extension.
 ```bash
-./target/release/nox run hello.nx
+cargo run --package nox -- run hello.nx
 ```
 
 ### Interactive REPL
 Simply run the `nox` command:
 ```bash
-./target/release/nox
+cargo run --package nox -- repl
 ```
 In the REPL, you can use:
 - `.help`: Show help
 - `.reset`: Reset the environment
 - `.exit`: Exit the REPL
 
-## Syntax Overview (Default Mode)
+## Syntax Overview
 
-### Variables & Output
+### Variables & Math
 ```javascript
-name = "Nox"
-say "Hello " + name
+is x = 10
+mut y = 20
+print (x + y) * 2 // Output: 60
 ```
 
-### Asking for Input
+### Strings
 ```javascript
-name = ask "What is your name? "
-say "Welcome, " + name
+is name = "Nox"
+print "Hello, " + name // Output: Hello, Nox
 ```
 
 ### Loops
 ```javascript
-for i in 1..5 {
-    say i
+mut i = 5
+while i > 0 {
+    print i
+    i = i - 1
 }
 ```
 
-### Pattern Matching
+### Functions
 ```javascript
-match x {
-    1 => say "one"
-    _ => say "other"
-}
+fn square(n) => n * n
+print square(4) // Output: 16
 ```
+
+### Pipe Operator
+```javascript
+"hello" |> str_upper |> print // Output: HELLO
+```
+### Comments
+```javascript
+// Single-line comment
+/* 
+   Multi-line
+   comment
+*/
+```
+
 
 ## Verification
 After making changes, run:
 ```bash
-cargo test
-cargo check
+npm run clean
+npm run build
+npm run test
+```
+
+For faster local iteration (without the full pre-build test flow), use:
+```bash
+npm run test:watch
 ```
 
 ## Contributing & Ownership
 Nox is an **AI-Native project**. While **Codeleafy** is the human owner, the language is primarily developed and managed by AI agents.
 
-- For the full blueprint, see [PLAN.md](PLAN.md).
-- For syntax details, see [docs/syntax.md](docs/syntax.md).
+- For architectural details, see [Architecture](docs/architecture.md).
+- For a detailed breakdown of the package ecosystem, see [Packages](docs/packages.md).
+- For syntax guidance, see [Syntax Guide](docs/syntax.md).

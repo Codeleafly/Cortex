@@ -115,14 +115,6 @@ pub enum TokenType {
     ARROW,
     BANG,
     SEMICOLON,
-    UNDERSCORE,
-    COLON,
-    THIN_ARROW,
-    SAY,
-    ASK,
-    BANG_STRICT,
-    IMPORT,
-    FROM,
     EOF
 }
 

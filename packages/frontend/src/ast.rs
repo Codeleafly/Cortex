@@ -11,7 +11,6 @@ pub enum Stmt {
     Match { expression: Expr, cases: Vec<(Option<Expr>, Vec<Stmt>)> },
     Fn { name: String, params: Vec<String>, body: Vec<Stmt> },
     Return { value: Expr },
-    Import { names: Vec<String>, source: String },
     Expr(Expr),
 }
 
@@ -29,8 +28,6 @@ pub enum Expr {
     Pipe { left: Box<Expr>, right: Box<Expr> },
     SafeCall { left: Box<Expr>, right: String },
     NullCoalesce { left: Box<Expr>, right: Box<Expr> },
-    AnonymousFn { params: Vec<String>, body: Vec<Stmt> },
-    Say(Box<Expr>),
 }
 
 #[derive(Debug, Clone, PartialEq)]

@@ -7,15 +7,13 @@ impl Parser {
         if self.match_token(TokenType::IS) { self.let_statement() }
         else if self.match_token(TokenType::MUT) { self.let_statement_mut() }
         else if self.peek().token_type == TokenType::IDENTIFIER && self.peek_next().token_type == TokenType::EQUALS { self.assign_statement() }
-        else if self.match_token(TokenType::PRINT) || self.match_token(TokenType::SAY) { self.print_statement() }
+        else if self.match_token(TokenType::PRINT) { self.print_statement() }
         else if self.match_token(TokenType::IF) { self.if_statement() }
         else if self.match_token(TokenType::WHILE) { self.while_statement() }
         else if self.match_token(TokenType::FOR) { self.for_statement() }
         else if self.match_token(TokenType::FN) { self.fn_statement() }
         else if self.match_token(TokenType::RETURN) { self.return_statement() }
         else if self.match_token(TokenType::MATCH) { self.match_statement() }
-        else if self.match_token(TokenType::IMPORT) { self.import_statement() }
-        else if !self.is_strict && self.peek().token_type == TokenType::IDENTIFIER && self.peek_next().token_type == TokenType::EQUALS { self.let_statement_implicit() }
         else { self.expression_statement() }
     }
 
@@ -24,27 +22,11 @@ impl Parser {
         self.consume(TokenType::EQUALS, "Expect '=' after variable name");
         let value = self.expression();
         if self.peek().token_type == TokenType::SEMICOLON { self.advance(); }
-
-        if !self.is_strict {
-             // In non-strict mode, assignment to unknown can be declaration.
-             // For now, let's keep it as Assign and handle in Compiler or treat as implicit declaration if not found.
-        }
         Stmt::Assign { name, value }
-    }
-
-    pub fn let_statement_implicit(&mut self) -> Stmt {
-        let name = self.consume(TokenType::IDENTIFIER, "Expect variable name").value.clone().unwrap();
-        self.consume(TokenType::EQUALS, "Expect '=' after variable name");
-        let initializer = self.expression();
-        if self.peek().token_type == TokenType::SEMICOLON { self.advance(); }
-        Stmt::Let { name, initializer, is_mutable: true }
     }
 
     pub fn let_statement(&mut self) -> Stmt {
         let name = self.consume(TokenType::IDENTIFIER, "Expect variable name").value.clone().unwrap();
-        if self.match_token(TokenType::COLON) {
-            self.consume(TokenType::IDENTIFIER, "Expect type name after ':'");
-        }
         self.consume(TokenType::EQUALS, "Expect '=' after variable name");
         let initializer = self.expression();
         if self.peek().token_type == TokenType::SEMICOLON { self.advance(); }
@@ -53,9 +35,6 @@ impl Parser {
 
     pub fn let_statement_mut(&mut self) -> Stmt {
         let name = self.consume(TokenType::IDENTIFIER, "Expect variable name").value.clone().unwrap();
-        if self.match_token(TokenType::COLON) {
-            self.consume(TokenType::IDENTIFIER, "Expect type name after ':'");
-        }
         self.consume(TokenType::EQUALS, "Expect '=' after variable name");
         let initializer = self.expression();
         if self.peek().token_type == TokenType::SEMICOLON { self.advance(); }
@@ -105,20 +84,14 @@ impl Parser {
             loop {
                 // Support optional type annotations: name: type
                 let param_name = self.consume(TokenType::IDENTIFIER, "Expect parameter name").value.clone().unwrap();
-                if self.match_token(TokenType::COLON) {
-                    self.consume(TokenType::IDENTIFIER, "Expect type name after ':'");
-                }
+                // We parse but currently ignore the type for execution since it's optional
+                /* We will add type parsing later if needed */
                 params.push(param_name);
                 if !self.match_token(TokenType::COMMA) { break; }
             }
         }
         self.consume(TokenType::RPAREN, "Expect ')' after parameters");
         
-        // Check for return type
-        if self.match_token(TokenType::THIN_ARROW) {
-            self.consume(TokenType::IDENTIFIER, "Expect return type after '->'");
-        }
-
         let body = if self.match_token(TokenType::ARROW) {
             vec![Stmt::Return { value: self.expression() }]
         } else {
@@ -139,19 +112,13 @@ impl Parser {
         self.consume(TokenType::LBRACE, "Expect '{' after match expression");
         let mut cases = Vec::new();
         while !self.check(TokenType::RBRACE) && !self.is_at_end() {
-            let condition = if self.match_token(TokenType::UNDERSCORE) || self.match_token(TokenType::ELSE) {
+            let condition = if self.match_token(TokenType::ELSE) {
                 None
             } else {
                 Some(self.expression())
             };
             self.consume(TokenType::ARROW, "Expect '=>' after case condition");
-
-            let body = if self.check(TokenType::LBRACE) {
-                self.block()
-            } else {
-                vec![self.statement()]
-            };
-
+            let body = self.block();
             cases.push((condition, body));
         }
         self.consume(TokenType::RBRACE, "Expect '}' after match cases");
@@ -166,26 +133,6 @@ impl Parser {
         }
         self.consume(TokenType::RBRACE, "Expect '}' after block");
         statements
-    }
-
-    pub fn import_statement(&mut self) -> Stmt {
-        let mut names = Vec::new();
-        if self.match_token(TokenType::LBRACE) {
-            loop {
-                names.push(self.consume(TokenType::IDENTIFIER, "Expect imported name").value.clone().unwrap());
-                if !self.match_token(TokenType::COMMA) { break; }
-            }
-            self.consume(TokenType::RBRACE, "Expect '}' after names");
-            self.consume(TokenType::FROM, "Expect 'from' after names");
-        } else {
-            names.push(self.consume(TokenType::IDENTIFIER, "Expect name").value.clone().unwrap());
-            if self.match_token(TokenType::FROM) {
-                // as above
-            }
-        }
-        let source = self.consume(TokenType::STRING, "Expect source URL/path").value.clone().unwrap();
-        if self.peek().token_type == TokenType::SEMICOLON { self.advance(); }
-        Stmt::Import { names, source }
     }
 
     pub fn expression_statement(&mut self) -> Stmt {

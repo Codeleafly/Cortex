@@ -1,0 +1,15 @@
+is age = 20
+if age >= 18 {
+    print "then"
+} else {
+    print "else"
+}
+
+is score = 75
+if score < 50 {
+    print "fail"
+} else if score < 80 {
+    print "else2"
+} else {
+    print "pass"
+}
