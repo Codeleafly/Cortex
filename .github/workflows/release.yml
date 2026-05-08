@@ -45,17 +45,23 @@ jobs:
       if: matrix.target == 'aarch64-linux-android'
       run: cross build --release --target ${{ matrix.target }} --package nox
 
-    - name: Build with cargo
-      if: matrix.target != 'aarch64-linux-android'
+    - name: Build with cargo (Unix)
+      if: matrix.target != 'aarch64-linux-android' && runner.os != 'Windows'
       run: cargo build --release --target ${{ matrix.target }} --package nox
+
+    - name: Install cargo-wix (Windows)
+      if: runner.os == 'Windows'
+      run: cargo install cargo-wix
+
+    - name: Initialize and Build MSI (Windows)
+      if: runner.os == 'Windows'
+      run: |
+        cargo wix init --package nox
+        cargo wix --no-build --target ${{ matrix.target }} --package nox --output target/${{ matrix.target }}/release/${{ matrix.artifact_name }}
 
     - name: Rename Artifact (Unix)
       if: runner.os != 'Windows'
-      run: mv target/${{ matrix.target }}/release/nox-cli target/${{ matrix.target }}/release/${{ matrix.artifact_name }}
-
-    - name: Rename Artifact (Windows)
-      if: runner.os == 'Windows'
-      run: mv target/${{ matrix.target }}/release/nox-cli.exe target/${{ matrix.target }}/release/${{ matrix.artifact_name }}
+      run: mv target/${{ matrix.target }}/release/nox target/${{ matrix.target }}/release/${{ matrix.artifact_name }}
 
     - name: Upload Artifact
       uses: actions/upload-artifact@v4
@@ -70,16 +76,6 @@ jobs:
     steps:
       - name: Download all artifacts
         uses: actions/download-artifact@v4
-        with:
-          path: artifacts
-
-      - name: Create GitHub Release
-        uses: softprops/action-gh-release@v1
-        with:
-          files: artifacts/**/*
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-uses: actions/download-artifact@v4
         with:
           path: artifacts
 

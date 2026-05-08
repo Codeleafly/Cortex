@@ -9,7 +9,10 @@ pub fn execute_math(opcode: Opcode, state: &mut VMState) -> bool {
             match (a, b) {
                 (StackValue::Number(a), StackValue::Number(b)) => state.push(StackValue::Number(a + b)),
                 (StackValue::String(a), StackValue::String(b)) => state.push(StackValue::String(format!("{}{}", a, b))),
-                _ => panic!("Invalid types for ADD"),
+                (StackValue::String(_), StackValue::Number(_)) | (StackValue::Number(_), StackValue::String(_)) => {
+                    panic!("TypeError: Cannot directly add String and Number. Use explicit conversion (e.g., to_string() or to_number()).");
+                }
+                _ => panic!("TypeError: Invalid types for ADD operator."),
             }
             true
         }
