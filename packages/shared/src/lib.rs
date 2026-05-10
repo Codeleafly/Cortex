@@ -50,6 +50,11 @@ pub enum Opcode {
     ITER_NEXT = 41,
     RANGE = 42,
     SLEEP = 45,
+    HTTP_GET = 46,
+    HTTP_POST = 47,
+    JSON_PARSE = 48,
+    JSON_STR = 49,
+    OS_INFO = 50,
 }
 
 impl From<i64> for Opcode {
@@ -120,9 +125,11 @@ pub enum TokenType {
     THIN_ARROW,
     SAY,
     ASK,
+    INPUT,
     BANG_STRICT,
     IMPORT,
     FROM,
+    EXPORT,
     EOF
 }
 

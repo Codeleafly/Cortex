@@ -1,0 +1,11 @@
+export fn info() => os_info()
+export fn args() => {
+    let count = arg_count()
+    mut result = []
+    mut i = 0
+    while i < count {
+        result.push(get_arg(i))
+        i = i + 1
+    }
+    return result
+}

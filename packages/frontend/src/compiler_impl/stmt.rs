@@ -40,6 +40,7 @@ impl Compiler {
                 self.expression(condition);
                 self.emit(Opcode::JMP_IF_FALSE as i64);
                 let jump_to_else_idx = self.bytecode.len();
+                self.jump_offsets.push(jump_to_else_idx);
                 self.emit(0);
 
                 self.scopes.push(HashMap::new());
@@ -49,6 +50,7 @@ impl Compiler {
                 if let Some(else_stmts) = else_branch {
                     self.emit(Opcode::JMP as i64);
                     let jump_to_end_idx = self.bytecode.len();
+                    self.jump_offsets.push(jump_to_end_idx);
                     self.emit(0);
                     
                     self.bytecode[jump_to_else_idx] = self.bytecode.len() as i64;
@@ -67,6 +69,7 @@ impl Compiler {
                 self.expression(condition);
                 self.emit(Opcode::JMP_IF_FALSE as i64);
                 let jump_to_end_idx = self.bytecode.len();
+                self.jump_offsets.push(jump_to_end_idx);
                 self.emit(0);
 
                 self.scopes.push(HashMap::new());
@@ -74,16 +77,19 @@ impl Compiler {
                 self.scopes.pop();
 
                 self.emit(Opcode::JMP as i64);
+                self.jump_offsets.push(self.bytecode.len());
                 self.emit(loop_start);
                 self.bytecode[jump_to_end_idx] = self.bytecode.len() as i64;
             }
             Stmt::Fn { name, params, body } => {
                 self.emit(Opcode::JMP as i64);
                 let jump_over_idx = self.bytecode.len();
+                self.jump_offsets.push(jump_over_idx);
                 self.emit(0);
 
                 let fn_start = self.bytecode.len();
                 self.functions.insert(name.clone(), FunctionInfo { address: fn_start, arg_count: params.len() });
+                self.local_functions.insert(name.clone());
 
                 let old_start_scope = self.function_start_scope_index;
                 self.function_start_scope_index = self.scopes.len();
@@ -109,10 +115,19 @@ impl Compiler {
                 self.expression(value);
                 self.emit(Opcode::RET as i64);
             }
-            Stmt::Import { names: _, source: _ } => {
-                // For now, we don't have true dynamic loading in the VM,
-                // so we just emit a placeholder or print a warning.
-                // In a real implementation, this would trigger a download/link.
+            Stmt::Import { names, source } => {
+                self.imports.push((names, source));
+            }
+            Stmt::Export(inner) => {
+                 match &*inner {
+                     Stmt::Let { name, .. } => self.exports.push(name.clone()),
+                     Stmt::Fn { name, .. } => self.exports.push(name.clone()),
+                     _ => {}
+                 }
+                 self.statement(*inner.clone());
+            }
+            Stmt::ExportList(names) => {
+                self.exports.extend(names);
             }
             Stmt::Expr(expr) => {
                 self.expression(expr);
@@ -123,6 +138,7 @@ impl Compiler {
                 let loop_start = self.bytecode.len() as i64;
                 self.emit(Opcode::ITER_NEXT as i64);
                 let jump_to_end_idx = self.bytecode.len();
+                self.jump_offsets.push(jump_to_end_idx);
                 self.emit(0);
 
                 self.scopes.push(HashMap::new());
@@ -134,6 +150,7 @@ impl Compiler {
                 self.scopes.pop();
 
                 self.emit(Opcode::JMP as i64);
+                self.jump_offsets.push(self.bytecode.len());
                 self.emit(loop_start);
 
                 let end_addr = self.bytecode.len() as i64;
@@ -151,11 +168,13 @@ impl Compiler {
                         self.emit(Opcode::CMP_EQ as i64);
                         self.emit(Opcode::JMP_IF_TRUE as i64);
                         let matched_idx = self.bytecode.len();
+                        self.jump_offsets.push(matched_idx);
                         self.emit(0);
 
                         // If not matched, we need to jump to the next case
                         self.emit(Opcode::JMP as i64);
                         let next_case_idx = self.bytecode.len();
+                        self.jump_offsets.push(next_case_idx);
                         self.emit(0);
 
                         // Matched!
@@ -170,6 +189,8 @@ impl Compiler {
 
                         self.emit(Opcode::JMP as i64);
                         end_jumps.push(self.bytecode.len());
+                        self.jump_offsets.push(self.bytecode.len());
+                        self.jump_offsets.push(self.bytecode.len());
                         self.emit(0);
 
                         let next_case_addr = self.bytecode.len() as i64;

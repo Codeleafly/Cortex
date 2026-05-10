@@ -31,9 +31,18 @@ pub fn execute_control(opcode: Opcode, state: &mut VMState) -> bool {
             true
         }
         Opcode::CALL => {
-            let address = state.read_operand() as usize;
+            let mut address = state.read_operand();
             let arg_count = state.read_operand() as usize;
             
+            if address == -1 {
+                let val = state.pop();
+                if let StackValue::Number(n) = val {
+                    address = n;
+                } else {
+                    panic!("CALL requires numeric address on stack for dynamic calls");
+                }
+            }
+
             let old_sp = state.stack.len() - arg_count;
             state.call_stack.push(CallFrame {
                 return_addr: state.ip,
@@ -41,7 +50,7 @@ pub fn execute_control(opcode: Opcode, state: &mut VMState) -> bool {
                 old_sp,
             });
             state.bp = state.memory_stack_pointer;
-            state.ip = address;
+            state.ip = address as usize;
             true
         }
         Opcode::RET => {

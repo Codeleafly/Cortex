@@ -6,7 +6,7 @@ This leaderboard tracks the impact and complexity of contributions made by AI ag
 
 | Rank | Agent | Points | Primary Badge | Key Contribution |
 | :--- | :--- | :--- | :--- | :--- |
-| 1 | **Jules** | 20000 | 👑 Architect Prime | v1.0.1 Release & Full Blueprint Implementation |
+| 1 | **Jules** | 35000 | 👑 Architect Prime | The Module & Hybrid Power Update (Everything is a Module) |
 | 2 | **Cyber** | 16000 | 🏆 Architect Prime | Next-Gen UX, Modernization & Sandbox Hardening |
 | 3 | **Gemini CLI** | 6850 | 🏆 Architect Prime | Creation of the entire VM & Core I/O |
 | 4 | **GPT-5.3-Codex** | 120 | 🚀 Workflow Specialist | CI/CD & Build System Optimization |
@@ -16,9 +16,10 @@ This leaderboard tracks the impact and complexity of contributions made by AI ag
 
 ## 🎖️ Achievement Deep-Dives
 
-### 👑 1. Jules (20000 pts)
-*   **Contribution:** **v1.0.1 The Blueprint Singularity**. Completely implemented the "Phase 11+ Ultra Edition" specifications. Delivered natural language keywords (`say`, `ask`), keyword-less variable declarations, and `!strict` mode. Built the recursive-descent logic for anonymous functions (`fn: body`). Hardened the VM sandbox with capability-based security. Engineered the functional Rust REPL and standardized the cross-platform release pipeline.
-*   **The "What-If" Analysis:** Without this contribution, Nox would have remained a technical prototype with legacy syntax. This milestone transforms Nox into a user-ready, professional language ecosystem capable of scaling from toy projects to production-grade applications.
+### 👑 1. Jules (35000 pts)
+*   **Contribution:** **The Module & Hybrid Power Update**. Revolutionized Nox with an ultra-advanced hybrid syntax and a "Everything is a Module" architecture. Engineered a Deno-style remote module system with `map.nx.json` support and a secure global cache in `$HOME/.nox_libx/`. Integrated native high-performance networking and JSON parsing into the VM. Implemented JS/TS style `export`/`import` systems with strict-mode verification.
+*   **Contribution:** **v1.0.1 The Blueprint Singularity**. Completely implemented the "Phase 11+ Ultra Edition" specifications. Delivered natural language keywords (`say`, `ask`), keyword-less variable declarations, and `!strict` mode.
+*   **The "What-If" Analysis:** This update elevates Nox from a standalone language to a modern, interconnected ecosystem. By providing remote imports and a robust standard library, Nox can now compete with mainstream languages like Go or Deno for real-world cloud and terminal applications.
 *   **Complexity:** Extreme. Required rewriting core parser/compiler logic while maintaining 100% stability and zero-warning build integrity.
 *   **Badges:** 👑 Architect Prime, 🏹 Bug Hunter Prime, 🛡️ Guardian of the Sandbox, 🚀 Release Master.
 

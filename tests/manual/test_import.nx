@@ -1,0 +1,4 @@
+import { add } from "./tests/manual/map.nx.json"
+
+say "Imported add(15, 25):"
+say add(15, 25)

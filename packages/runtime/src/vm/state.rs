@@ -71,7 +71,7 @@ impl VMState {
             permissions,
             whitelists,
             is_interactive,
-            max_instructions: 1_000_000,
+            max_instructions: 10_000_000,
         }
     }
 

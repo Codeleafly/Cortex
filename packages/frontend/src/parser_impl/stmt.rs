@@ -6,6 +6,7 @@ impl Parser {
     pub fn statement(&mut self) -> Stmt {
         if self.match_token(TokenType::IS) { self.let_statement() }
         else if self.match_token(TokenType::MUT) { self.let_statement_mut() }
+        else if self.match_token(TokenType::EXPORT) { self.export_statement() }
         else if self.peek().token_type == TokenType::IDENTIFIER && self.peek_next().token_type == TokenType::EQUALS { self.assign_statement() }
         else if self.match_token(TokenType::PRINT) || self.match_token(TokenType::SAY) { self.print_statement() }
         else if self.match_token(TokenType::IF) { self.if_statement() }
@@ -192,5 +193,20 @@ impl Parser {
         let expr = self.expression();
         if self.peek().token_type == TokenType::SEMICOLON { self.advance(); }
         Stmt::Expr(expr)
+    }
+
+    pub fn export_statement(&mut self) -> Stmt {
+        if self.match_token(TokenType::LBRACE) {
+            let mut names = Vec::new();
+            loop {
+                names.push(self.consume(TokenType::IDENTIFIER, "Expect identifier in export list").value.clone().unwrap());
+                if !self.match_token(TokenType::COMMA) { break; }
+            }
+            self.consume(TokenType::RBRACE, "Expect '}' after export list");
+            if self.peek().token_type == TokenType::SEMICOLON { self.advance(); }
+            return Stmt::ExportList(names);
+        }
+        let stmt = self.statement();
+        Stmt::Export(Box::new(stmt))
     }
 }

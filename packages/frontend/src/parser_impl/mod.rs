@@ -3,16 +3,23 @@ pub mod expr;
 
 use nox_shared::{Token, TokenType};
 use crate::ast::Stmt;
+use crate::diagnostics::Diagnostic;
 
 pub struct Parser {
     pub tokens: Vec<Token>,
     pub pos: usize,
     pub is_strict: bool,
+    pub diagnostic: Option<Diagnostic>,
 }
 
 impl Parser {
     pub fn new(tokens: Vec<Token>) -> Self {
-        Self { tokens, pos: 0, is_strict: false }
+        Self { tokens, pos: 0, is_strict: false, diagnostic: None }
+    }
+
+    pub fn with_diagnostic(mut self, diag: Diagnostic) -> Self {
+        self.diagnostic = Some(diag);
+        self
     }
 
     pub fn parse(&mut self) -> Vec<Stmt> {
@@ -75,6 +82,16 @@ impl Parser {
     }
 
     pub fn consume(&mut self, token_type: TokenType, message: &str) -> &Token {
-        if self.check(token_type) { self.advance() } else { panic!("{}", message) }
+        if self.check(token_type) {
+            self.advance()
+        } else {
+            let token = self.peek();
+            if let Some(diag) = &self.diagnostic {
+                diag.report_error(token.line, token.col, message, None);
+                std::process::exit(1);
+            } else {
+                panic!("{} at line {}, col {}", message, token.line, token.col);
+            }
+        }
     }
 }

@@ -111,6 +111,10 @@ impl Parser {
             } else if self.match_token(TokenType::QUESTION_DOT) {
                 let name = self.consume(TokenType::IDENTIFIER, "Expect property name after '?.'").value.clone().unwrap();
                 expr = Expr::SafeCall { left: Box::new(expr), right: name };
+            } else if self.check(TokenType::IDENTIFIER) && self.peek().value.as_deref() == Some(".") {
+                self.advance(); // consume .
+                let name = self.consume(TokenType::IDENTIFIER, "Expect property name after '.'").value.clone().unwrap();
+                expr = Expr::SafeCall { left: Box::new(expr), right: name }; // reuse SafeCall logic for now
             } else {
                 break;
             }
@@ -144,13 +148,13 @@ impl Parser {
             return Expr::Say(Box::new(self.expression()));
         }
 
-        if self.match_token(TokenType::ASK) {
+        if self.match_token(TokenType::ASK) || self.match_token(TokenType::INPUT) {
             let prompt = if self.peek().token_type == TokenType::STRING {
                 self.advance().value.clone().unwrap()
             } else {
                 "".to_string()
             };
-            return Expr::Call { callee: "read_line".to_string(), args: vec![Expr::Literal(LiteralValue::String(prompt))] };
+            return Expr::Ask(Box::new(Expr::Literal(LiteralValue::String(prompt))));
         }
 
         if self.match_token(TokenType::FN) {

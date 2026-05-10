@@ -44,8 +44,13 @@ impl Lexer {
         keywords.insert("run_command".to_string(), TokenType::RUN_CMD);
         keywords.insert("say".to_string(), TokenType::SAY);
         keywords.insert("ask".to_string(), TokenType::ASK);
+        keywords.insert("input".to_string(), TokenType::INPUT);
         keywords.insert("import".to_string(), TokenType::IMPORT);
         keywords.insert("from".to_string(), TokenType::FROM);
+        keywords.insert("export".to_string(), TokenType::EXPORT);
+        keywords.insert("http_get".to_string(), TokenType::IDENTIFIER);
+        keywords.insert("json_parse".to_string(), TokenType::IDENTIFIER);
+        keywords.insert("json_str".to_string(), TokenType::IDENTIFIER);
 
         Self {
             source: source.chars().collect(),

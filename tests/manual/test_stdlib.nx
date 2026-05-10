@@ -1,0 +1,15 @@
+import { get } from "nox:http"
+import { parse } from "nox:json"
+
+say "StdLib HTTP Get Test..."
+res = get("https://jsonplaceholder.typicode.com/todos/2")
+say "Status: "
+say res.status
+
+data = parse(res.body)
+say "Title from StdLib: "
+say data.title
+
+info = os_info()
+say "OS: " + info.os
+say "Arch: " + info.arch

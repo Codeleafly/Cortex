@@ -164,7 +164,7 @@ impl Lexer {
                         self.advance();
                         tokens.push(Token::new(TokenType::DOT_DOT, None, start_line, start_col));
                     } else {
-                        panic!("Unexpected character: . at line {}, col {}", start_line, start_col);
+                        tokens.push(Token::new(TokenType::IDENTIFIER, Some(".".to_string()), start_line, start_col));
                     }
                 }
                 '?' => {

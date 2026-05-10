@@ -1,0 +1,1 @@
+export fn get(url) => http_get(url)
