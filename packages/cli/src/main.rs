@@ -8,7 +8,7 @@ use nox_frontend::{Lexer, Parser as NoxParser, Compiler};
 
 #[derive(Parser)]
 #[command(name = "nox")]
-#[command(about = "Nox Programming Language (Rust)", long_about = None)]
+#[command(version, about = "Nox Programming Language (Rust)", long_about = None)]
 struct Cli {
     #[command(subcommand)]
     command: Option<Commands>,
