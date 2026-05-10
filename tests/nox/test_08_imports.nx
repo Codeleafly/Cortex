@@ -1,0 +1,4 @@
+import { math } from "https://nox-lib.io/math/map.nx.json"
+import server from "github:nox-org/web@v1.2.0"
+
+print "Imports parsed and triggered"
