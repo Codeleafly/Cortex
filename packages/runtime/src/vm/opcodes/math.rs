@@ -7,7 +7,10 @@ pub fn execute_math(opcode: Opcode, state: &mut VMState) -> bool {
             let b = state.pop();
             let a = state.pop();
             match (a, b) {
-                (StackValue::Number(a), StackValue::Number(b)) => state.push(StackValue::Number(a + b)),
+                (StackValue::Number(a), StackValue::Number(b)) => {
+                    let res = a.checked_add(b).expect("Arithmetic Overflow: ADD");
+                    state.push(StackValue::Number(res));
+                }
                 (StackValue::String(a), StackValue::String(b)) => state.push(StackValue::String(format!("{}{}", a, b))),
                 (StackValue::String(_), StackValue::Number(_)) | (StackValue::Number(_), StackValue::String(_)) => {
                     panic!("TypeError: Cannot directly add String and Number. Use explicit conversion (e.g., to_string() or to_number()).");
@@ -20,7 +23,10 @@ pub fn execute_math(opcode: Opcode, state: &mut VMState) -> bool {
             let b = state.pop();
             let a = state.pop();
             match (a, b) {
-                (StackValue::Number(a), StackValue::Number(b)) => state.push(StackValue::Number(a - b)),
+                (StackValue::Number(a), StackValue::Number(b)) => {
+                    let res = a.checked_sub(b).expect("Arithmetic Overflow: SUB");
+                    state.push(StackValue::Number(res));
+                }
                 _ => panic!("SUB requires numeric operands"),
             }
             true
@@ -29,7 +35,10 @@ pub fn execute_math(opcode: Opcode, state: &mut VMState) -> bool {
             let b = state.pop();
             let a = state.pop();
             match (a, b) {
-                (StackValue::Number(a), StackValue::Number(b)) => state.push(StackValue::Number(a * b)),
+                (StackValue::Number(a), StackValue::Number(b)) => {
+                    let res = a.checked_mul(b).expect("Arithmetic Overflow: MUL");
+                    state.push(StackValue::Number(res));
+                }
                 _ => panic!("MUL requires numeric operands"),
             }
             true
@@ -40,7 +49,8 @@ pub fn execute_math(opcode: Opcode, state: &mut VMState) -> bool {
             match (a, b) {
                 (StackValue::Number(a), StackValue::Number(b)) => {
                     if b == 0 { panic!("Division by zero"); }
-                    state.push(StackValue::Number(a / b))
+                    let res = a.checked_div(b).expect("Arithmetic Overflow: DIV");
+                    state.push(StackValue::Number(res));
                 },
                 _ => panic!("DIV requires numeric operands"),
             }

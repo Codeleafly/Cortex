@@ -1,7 +1,6 @@
 pub mod stmt;
 pub mod expr;
 
-use nox_shared::Opcode;
 use crate::ast::Stmt;
 use std::collections::{HashMap, HashSet};
 
@@ -62,7 +61,6 @@ impl Compiler {
 
     pub fn compile(&mut self, statements: Vec<Stmt>) -> CompilationResult {
         self.compile_no_halt(statements);
-        self.emit(Opcode::HALT as i64);
         self.finish()
     }
 

@@ -128,9 +128,63 @@ impl Compiler {
                         self.emit(0);
                         return;
                     }
-                    "ask" | "input" => {
+                    "ask" | "input" | "read_line" => {
                         for arg in args { self.expression(arg); }
                         self.emit(Opcode::READ_LINE as i64);
+                        return;
+                    }
+                    "arg_count" => {
+                        self.emit(Opcode::ARG_COUNT as i64);
+                        return;
+                    }
+                    "get_arg" => {
+                        for arg in args { self.expression(arg); }
+                        self.emit(Opcode::GET_ARG as i64);
+                        return;
+                    }
+                    "to_number" => {
+                        for arg in args { self.expression(arg); }
+                        self.emit(Opcode::TO_NUMBER as i64);
+                        return;
+                    }
+                    "read_file" => {
+                        for arg in args { self.expression(arg); }
+                        self.emit(Opcode::READ_FILE as i64);
+                        return;
+                    }
+                    "write_file" => {
+                        for arg in args { self.expression(arg); }
+                        self.emit(Opcode::WRITE_FILE as i64);
+                        return;
+                    }
+                    "file_exists" => {
+                        for arg in args { self.expression(arg); }
+                        self.emit(Opcode::FILE_EXISTS as i64);
+                        return;
+                    }
+                    "str_upper" => {
+                        for arg in args { self.expression(arg); }
+                        self.emit(Opcode::STR_UPPER as i64);
+                        return;
+                    }
+                    "str_words" => {
+                        for arg in args { self.expression(arg); }
+                        self.emit(Opcode::STR_WORDS as i64);
+                        return;
+                    }
+                    "str_at" => {
+                        for arg in args { self.expression(arg); }
+                        self.emit(Opcode::STR_AT as i64);
+                        return;
+                    }
+                    "str_len" => {
+                        for arg in args { self.expression(arg); }
+                        self.emit(Opcode::STR_LEN as i64);
+                        return;
+                    }
+                    "run_command" => {
+                        for arg in args { self.expression(arg); }
+                        self.emit(Opcode::RUN_CMD as i64);
                         return;
                     }
                     _ => {}
@@ -195,6 +249,21 @@ impl Compiler {
                 
                 self.bytecode[jump_to_null_idx] = self.bytecode.len() as i64;
             }
+            Expr::MethodCall { receiver, method, args } => {
+                let arg_len = args.len();
+                for arg in args { self.expression(arg); }
+                self.expression(*receiver);
+                self.emit(Opcode::PUSH_STR as i64);
+                let idx = self.string_pool.len();
+                self.string_pool.push(method);
+                self.string_offsets.push(self.bytecode.len());
+                self.emit(idx as i64);
+                self.emit(Opcode::DICT_GET as i64);
+                
+                self.emit(Opcode::CALL as i64);
+                self.emit(-1); // Dynamic call
+                self.emit(arg_len as i64);
+            }
             Expr::NullCoalesce { left, right } => {
                 self.expression(*left);
                 self.emit(Opcode::DUP as i64);
@@ -222,6 +291,14 @@ impl Compiler {
                     self.expression(value);
                 }
                 self.emit(Opcode::DICT_BUILD as i64);
+                self.emit(count);
+            }
+            Expr::Array(elements) => {
+                let count = elements.len() as i64;
+                for element in elements {
+                    self.expression(element);
+                }
+                self.emit(Opcode::ARRAY_BUILD as i64);
                 self.emit(count);
             }
             Expr::Range { start, end } => {

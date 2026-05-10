@@ -131,10 +131,12 @@ impl Parser {
             }
         }
         self.consume(TokenType::RPAREN, "Expect ')' after arguments");
-        if let Expr::Variable(name) = callee_expr {
-            Expr::Call { callee: name, args }
-        } else {
-            panic!("Only identifiers can be called currently");
+        
+        match callee_expr {
+            Expr::Variable(name) => Expr::Call { callee: name, args },
+            Expr::SafeCall { left, right } => Expr::MethodCall { receiver: left, method: right, args },
+            Expr::ArgCount => Expr::Call { callee: "arg_count".to_string(), args },
+            _ => panic!("Only identifiers or methods can be called currently (got {:?})", callee_expr),
         }
     }
 
@@ -144,6 +146,33 @@ impl Parser {
         if self.match_token(TokenType::NULL) { return Expr::Literal(LiteralValue::Null); }
         if self.match_token(TokenType::ARG_COUNT) { return Expr::ArgCount; }
         
+        let builtins = [
+            TokenType::PRINT, TokenType::GET_ARG, 
+            TokenType::TO_NUMBER, TokenType::READ_FILE, TokenType::WRITE_FILE,
+            TokenType::FILE_EXISTS, TokenType::STR_UPPER, TokenType::STR_WORDS,
+            TokenType::READ_LINE, TokenType::STR_AT, TokenType::STR_LEN,
+            TokenType::RUN_CMD
+        ];
+        
+        if self.match_tokens(&builtins) {
+            let name = match self.previous().token_type {
+                TokenType::PRINT => "print",
+                TokenType::GET_ARG => "get_arg",
+                TokenType::TO_NUMBER => "to_number",
+                TokenType::READ_FILE => "read_file",
+                TokenType::WRITE_FILE => "write_file",
+                TokenType::FILE_EXISTS => "file_exists",
+                TokenType::STR_UPPER => "str_upper",
+                TokenType::STR_WORDS => "str_words",
+                TokenType::READ_LINE => "read_line",
+                TokenType::STR_AT => "str_at",
+                TokenType::STR_LEN => "str_len",
+                TokenType::RUN_CMD => "run_command",
+                _ => unreachable!(),
+            };
+            return Expr::Variable(name.to_string());
+        }
+
         if self.match_token(TokenType::SAY) {
             return Expr::Say(Box::new(self.expression()));
         }
@@ -163,6 +192,10 @@ impl Parser {
 
         if self.match_token(TokenType::LBRACE) {
             return self.dict_literal();
+        }
+
+        if self.match_token(TokenType::LBRACKET) {
+            return self.array_literal();
         }
 
         if self.match_token(TokenType::NUMBER) {
@@ -216,5 +249,17 @@ impl Parser {
         }
         self.consume(TokenType::RBRACE, "Expect '}' after dictionary entries");
         Expr::Dict(entries)
+    }
+
+    pub fn array_literal(&mut self) -> Expr {
+        let mut elements = Vec::new();
+        if !self.check(TokenType::RBRACKET) {
+            loop {
+                elements.push(self.expression());
+                if !self.match_token(TokenType::COMMA) { break; }
+            }
+        }
+        self.consume(TokenType::RBRACKET, "Expect ']' after array elements");
+        Expr::Array(elements)
     }
 }

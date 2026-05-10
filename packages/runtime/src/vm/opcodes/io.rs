@@ -79,9 +79,24 @@ pub fn execute_io(opcode: Opcode, state: &mut VMState) -> bool {
             let cmd = state.pop();
             if let StackValue::String(cmd_str) = cmd {
                 state.check_permission("run", Some(&cmd_str));
-                let output = Command::new("sh")
-                    .arg("-c")
-                    .arg(cmd_str)
+                
+                let parts: Vec<&str> = cmd_str.split_whitespace().collect();
+                if parts.is_empty() {
+                    state.push(StackValue::Null);
+                    return true;
+                }
+                
+                let exe = parts[0];
+                let args = &parts[1..];
+
+                // Whitelist for security
+                let allowed_cmds = ["ls", "echo", "cat", "pwd", "date", "whoami", "ps"];
+                if !allowed_cmds.contains(&exe) {
+                    panic!("Security Error: Command '{}' is not in the whitelist", exe);
+                }
+
+                let output = Command::new(exe)
+                    .args(args)
                     .output();
                 match output {
                     Ok(out) => state.push(StackValue::String(String::from_utf8_lossy(&out.stdout).to_string())),
@@ -89,6 +104,31 @@ pub fn execute_io(opcode: Opcode, state: &mut VMState) -> bool {
                 }
             } else {
                 panic!("RUN_CMD requires string");
+            }
+            true
+        }
+        Opcode::RUN_CMD_ARGS => {
+            let args_val = state.pop();
+            let cmd = state.pop();
+            if let (StackValue::String(cmd_str), StackValue::String(args_str)) = (cmd, args_val) {
+                state.check_permission("run", Some(&cmd_str));
+                
+                // Whitelist for security
+                let allowed_cmds = ["ls", "echo", "cat", "pwd", "date", "whoami", "ps"];
+                if !allowed_cmds.contains(&cmd_str.as_str()) {
+                    panic!("Security Error: Command '{}' is not in the whitelist", cmd_str);
+                }
+
+                let args: Vec<&str> = args_str.split_whitespace().collect();
+                let output = Command::new(cmd_str)
+                    .args(args)
+                    .output();
+                match output {
+                    Ok(out) => state.push(StackValue::String(String::from_utf8_lossy(&out.stdout).to_string())),
+                    Err(_) => state.push(StackValue::Null),
+                }
+            } else {
+                panic!("RUN_CMD_ARGS requires two strings");
             }
             true
         }

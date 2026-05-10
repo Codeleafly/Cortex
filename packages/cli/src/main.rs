@@ -77,9 +77,9 @@ async fn main() {
 
 fn get_perms(read: bool, write: bool, run: bool, all: bool) -> nox_runtime::vm::Permissions {
     if all {
-        nox_runtime::vm::Permissions { read: true, write: true, run: true }
+        nox_runtime::vm::Permissions { read: true, write: true, run: true, network: true }
     } else {
-        nox_runtime::vm::Permissions { read, write, run }
+        nox_runtime::vm::Permissions { read, write, run, network: false }
     }
 }
 
@@ -177,7 +177,7 @@ async fn run_repl() {
     println!("Type '.exit' to quit, '.help' for help.\n");
 
     let mut rl = DefaultEditor::new().expect("Failed to create REPL editor");
-    let mut vm = VM::new(nox_runtime::vm::Permissions { read: true, write: true, run: true }, true);
+    let mut vm = VM::new(nox_runtime::vm::Permissions { read: true, write: true, run: true, network: true }, true);
     let mut compiler = Compiler::new();
 
     let mut buffer = String::new();
@@ -199,7 +199,7 @@ async fn run_repl() {
                     continue;
                 }
                 if line.trim() == ".reset" {
-                    vm = VM::new(nox_runtime::vm::Permissions { read: true, write: true, run: true }, true);
+                    vm = VM::new(nox_runtime::vm::Permissions { read: true, write: true, run: true, network: true }, true);
                     compiler = Compiler::new();
                     buffer.clear();
                     println!("Environment reset.");
@@ -225,7 +225,11 @@ async fn run_repl() {
                     match statements {
                         Ok(stmts) => {
                             let result = compiler.compile(stmts);
-                            vm.run(result.bytecode, result.string_pool, vec![]).await;
+                            use futures::FutureExt;
+                            let run_future = std::panic::AssertUnwindSafe(vm.run(result.bytecode, result.string_pool, vec![])).catch_unwind();
+                            if let Err(_) = run_future.await {
+                                eprintln!("{}", "Error: Runtime panic during execution".red());
+                            }
                         }
                         Err(_) => {
                             eprintln!("{}", "Error: Parsing failed".red());
@@ -247,16 +251,33 @@ async fn run_repl() {
 fn is_balanced(code: &str) -> bool {
     let mut open_braces = 0;
     let mut open_parens = 0;
+    let mut in_string = false;
+    let mut string_char = '\0';
+    let mut escaped = false;
 
     for c in code.chars() {
-        match c {
-            '{' => open_braces += 1,
-            '}' => open_braces -= 1,
-            '(' => open_parens += 1,
-            ')' => open_parens -= 1,
-            _ => {}
+        if in_string {
+            if escaped {
+                escaped = false;
+            } else if c == '\\' {
+                escaped = true;
+            } else if c == string_char {
+                in_string = false;
+            }
+        } else {
+            match c {
+                '"' | '\'' => {
+                    in_string = true;
+                    string_char = c;
+                }
+                '{' => open_braces += 1,
+                '}' => open_braces -= 1,
+                '(' => open_parens += 1,
+                ')' => open_parens -= 1,
+                _ => {}
+            }
         }
     }
 
-    open_braces <= 0 && open_parens <= 0
+    open_braces <= 0 && open_parens <= 0 && !in_string
 }

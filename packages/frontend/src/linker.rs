@@ -22,10 +22,7 @@ impl Linker {
         let mut bytecode_offsets = Vec::new();
         let mut string_offsets = Vec::new();
 
-        let has_dependencies = results.len() > 1;
-        let initial_offset = if has_dependencies { 2 } else { 0 };
-
-        let mut current_bytecode_offset = initial_offset;
+        let mut current_bytecode_offset = 0;
         let mut current_string_offset = 0;
 
         // First pass: Calculate all offsets
@@ -34,12 +31,6 @@ impl Linker {
             string_offsets.push(current_string_offset);
             current_bytecode_offset += res.bytecode.len();
             current_string_offset += res.string_pool.len();
-        }
-
-        if has_dependencies {
-            let main_offset = *bytecode_offsets.last().unwrap();
-            self.bytecode.push(nox_shared::Opcode::JMP as i64);
-            self.bytecode.push(main_offset as i64);
         }
 
         // Second pass: Merge and relocate
@@ -77,6 +68,9 @@ impl Linker {
             self.bytecode.extend(module_bytecode);
             self.string_pool.extend(res.string_pool);
         }
+        
+        // Add a final HALT to ensure the VM stops correctly
+        self.bytecode.push(nox_shared::Opcode::HALT as i64);
 
         // Third Pass: Resolve function calls across all linked modules
         for (pos, name) in call_sites {

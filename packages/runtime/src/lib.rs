@@ -29,6 +29,7 @@ impl VM {
         self.state.call_stack.clear();
         self.state.instruction_count = 0;
         self.state.globals.fill(StackValue::Null);
+        self.state.memory.fill(StackValue::Null);
         
         self.execute().await;
         self.state.instruction_count = 0; // Reset after each run (e.g. imports)

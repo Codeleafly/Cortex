@@ -11,8 +11,12 @@ pub fn execute_memory_and_core(opcode: Opcode, state: &mut VMState) -> bool {
         }
         Opcode::PUSH_STR => {
             let idx = state.read_operand() as usize;
-            let val = state.string_pool[idx].clone();
-            state.push(StackValue::String(val));
+            if idx < state.string_pool.len() {
+                let val = state.string_pool[idx].clone();
+                state.push(StackValue::String(val));
+            } else {
+                panic!("Bytecode Error: String pool index {} out of bounds (len: {})", idx, state.string_pool.len());
+            }
             true
         }
         Opcode::POP => {
@@ -107,8 +111,12 @@ pub fn execute_memory_and_core(opcode: Opcode, state: &mut VMState) -> bool {
             let idx = state.pop();
             let val = state.pop();
             if let (StackValue::String(s), StackValue::Number(i)) = (val, idx) {
-                if i >= 0 && (i as usize) < s.len() {
-                    state.push(StackValue::String(s.chars().nth(i as usize).unwrap().to_string()));
+                if i >= 0 {
+                    if let Some(c) = s.chars().nth(i as usize) {
+                        state.push(StackValue::String(c.to_string()));
+                    } else {
+                        state.push(StackValue::Null);
+                    }
                 } else {
                     state.push(StackValue::Null);
                 }
@@ -120,7 +128,7 @@ pub fn execute_memory_and_core(opcode: Opcode, state: &mut VMState) -> bool {
         Opcode::STR_LEN => {
             let val = state.pop();
             if let StackValue::String(s) = val {
-                state.push(StackValue::Number(s.len() as i64));
+                state.push(StackValue::Number(s.chars().count() as i64));
             } else {
                 panic!("STR_LEN requires string");
             }
@@ -144,10 +152,19 @@ pub fn execute_memory_and_core(opcode: Opcode, state: &mut VMState) -> bool {
         Opcode::DICT_GET => {
             let key = state.pop();
             let dict = state.pop();
-            if let (StackValue::Dictionary(d), StackValue::String(k)) = (dict, key) {
-                state.push(d.get(&k).cloned().unwrap_or(StackValue::Null));
-            } else {
-                state.push(StackValue::Null);
+            match (dict, key) {
+                (StackValue::Dictionary(d), StackValue::String(k)) => {
+                    state.push(d.get(&k).cloned().unwrap_or(StackValue::Null));
+                }
+                (StackValue::Array(_), StackValue::String(k)) => {
+                    match k.as_str() {
+                        "push" => state.push(StackValue::Number(-100)),
+                        "get" => state.push(StackValue::Number(-101)),
+                        "len" => state.push(StackValue::Number(-102)),
+                        _ => state.push(StackValue::Null),
+                    }
+                }
+                _ => state.push(StackValue::Null),
             }
             true
         }
@@ -161,6 +178,16 @@ pub fn execute_memory_and_core(opcode: Opcode, state: &mut VMState) -> bool {
             } else {
                 panic!("DICT_SET requires dictionary and string key");
             }
+            true
+        }
+        Opcode::ARRAY_BUILD => {
+            let count = state.read_operand() as usize;
+            let mut arr = Vec::with_capacity(count);
+            for _ in 0..count {
+                arr.push(state.pop());
+            }
+            arr.reverse(); // Pop in reverse order to maintain correct sequence
+            state.push(StackValue::Array(arr));
             true
         }
         Opcode::RANGE => {

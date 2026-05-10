@@ -65,6 +65,8 @@ impl Lexer {
                 '}' => { self.advance(); tokens.push(Token::new(TokenType::RBRACE, None, start_line, start_col)); }
                 '(' => { self.advance(); tokens.push(Token::new(TokenType::LPAREN, None, start_line, start_col)); }
                 ')' => { self.advance(); tokens.push(Token::new(TokenType::RPAREN, None, start_line, start_col)); }
+                '[' => { self.advance(); tokens.push(Token::new(TokenType::LBRACKET, None, start_line, start_col)); }
+                ']' => { self.advance(); tokens.push(Token::new(TokenType::RBRACKET, None, start_line, start_col)); }
                 '+' => { self.advance(); tokens.push(Token::new(TokenType::PLUS, None, start_line, start_col)); }
                 '-' => {
                     self.advance();

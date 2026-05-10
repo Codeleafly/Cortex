@@ -43,6 +43,46 @@ pub fn execute_control(opcode: Opcode, state: &mut VMState) -> bool {
                 }
             }
 
+            if state.stack.len() < arg_count {
+                panic!("Stack Underflow: CALL requires {} arguments but only {} on stack", arg_count, state.stack.len());
+            }
+
+            // Handle built-in methods
+            match address {
+                -100 => { // Array.push
+                    let arr_val = state.pop();
+                    let item = state.pop();
+                    if let StackValue::Array(mut arr) = arr_val {
+                        arr.push(item);
+                        state.push(StackValue::Array(arr));
+                        return true;
+                    }
+                    panic!("Array.push called on non-array");
+                }
+                -101 => { // Array.get
+                    let arr_val = state.pop();
+                    let idx = state.pop();
+                    if let (StackValue::Array(arr), StackValue::Number(i)) = (arr_val, idx) {
+                        if i >= 0 && (i as usize) < arr.len() {
+                            state.push(arr[i as usize].clone());
+                        } else {
+                            state.push(StackValue::Null);
+                        }
+                        return true;
+                    }
+                    panic!("Array.get called with invalid arguments");
+                }
+                -102 => { // Array.len
+                    let arr_val = state.pop();
+                    if let StackValue::Array(arr) = arr_val {
+                        state.push(StackValue::Number(arr.len() as i64));
+                        return true;
+                    }
+                    panic!("Array.len called on non-array");
+                }
+                _ => {}
+            }
+
             let old_sp = state.stack.len() - arg_count;
             state.call_stack.push(CallFrame {
                 return_addr: state.ip,

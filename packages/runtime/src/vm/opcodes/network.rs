@@ -7,7 +7,13 @@ pub async fn execute_network(opcode: Opcode, state: &mut VMState) -> bool {
         Opcode::HTTP_GET => {
             let url_val = state.pop();
             if let StackValue::String(url) = url_val {
-                let client = reqwest::Client::new();
+                state.check_permission("network", Some(&url));
+                
+                let client = reqwest::Client::builder()
+                    .timeout(std::time::Duration::from_secs(10))
+                    .build()
+                    .unwrap_or_else(|_| reqwest::Client::new());
+                
                 let res = client.get(url).send().await;
                 match res {
                     Ok(resp) => {
@@ -33,7 +39,7 @@ pub async fn execute_network(opcode: Opcode, state: &mut VMState) -> bool {
             let s_val = state.pop();
             if let StackValue::String(s) = s_val {
                 let v: serde_json::Value = serde_json::from_str(&s).unwrap_or(serde_json::Value::Null);
-                state.push(json_to_stack(v));
+                state.push(json_to_stack(v, 0));
             } else {
                 state.push(StackValue::Null);
             }
@@ -41,7 +47,7 @@ pub async fn execute_network(opcode: Opcode, state: &mut VMState) -> bool {
         }
         Opcode::JSON_STR => {
             let val = state.pop();
-            let s = serde_json::to_string(&stack_to_json(val)).unwrap_or_default();
+            let s = serde_json::to_string(&stack_to_json(val, 0)).unwrap_or_default();
             state.push(StackValue::String(s));
             true
         }
@@ -56,18 +62,23 @@ pub async fn execute_network(opcode: Opcode, state: &mut VMState) -> bool {
     }
 }
 
-fn json_to_stack(v: serde_json::Value) -> StackValue {
+fn json_to_stack(v: serde_json::Value, depth: usize) -> StackValue {
+    if depth > 100 { return StackValue::Null; }
     match v {
         serde_json::Value::Number(n) => StackValue::Number(n.as_i64().unwrap_or(0)),
         serde_json::Value::String(s) => StackValue::String(s),
         serde_json::Value::Bool(b) => StackValue::Boolean(b),
-        serde_json::Value::Array(_) => {
-             StackValue::Null
+        serde_json::Value::Array(arr) => {
+            let mut new_arr = Vec::with_capacity(arr.len());
+            for val in arr {
+                new_arr.push(json_to_stack(val, depth + 1));
+            }
+            StackValue::Array(new_arr)
         }
         serde_json::Value::Object(map) => {
             let mut dict = HashMap::new();
             for (k, v) in map {
-                dict.insert(k, json_to_stack(v));
+                dict.insert(k, json_to_stack(v, depth + 1));
             }
             StackValue::Dictionary(dict)
         }
@@ -75,15 +86,23 @@ fn json_to_stack(v: serde_json::Value) -> StackValue {
     }
 }
 
-fn stack_to_json(v: StackValue) -> serde_json::Value {
+fn stack_to_json(v: StackValue, depth: usize) -> serde_json::Value {
+    if depth > 100 { return serde_json::Value::Null; }
     match v {
         StackValue::Number(n) => serde_json::Value::Number(n.into()),
         StackValue::String(s) => serde_json::Value::String(s),
         StackValue::Boolean(b) => serde_json::Value::Bool(b),
+        StackValue::Array(arr) => {
+            let mut new_arr = Vec::new();
+            for val in arr {
+                new_arr.push(stack_to_json(val, depth + 1));
+            }
+            serde_json::Value::Array(new_arr)
+        }
         StackValue::Dictionary(dict) => {
             let mut map = serde_json::Map::new();
             for (k, v) in dict {
-                map.insert(k, stack_to_json(v));
+                map.insert(k, stack_to_json(v, depth + 1));
             }
             serde_json::Value::Object(map)
         }
