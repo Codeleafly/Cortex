@@ -12,6 +12,8 @@ pub enum Stmt {
     Fn { name: String, params: Vec<String>, body: Vec<Stmt> },
     Return { value: Expr },
     Import { names: Vec<String>, source: String },
+    Export(Box<Stmt>),
+    ExportList(Vec<String>),
     Expr(Expr),
 }
 
@@ -31,6 +33,7 @@ pub enum Expr {
     NullCoalesce { left: Box<Expr>, right: Box<Expr> },
     AnonymousFn { params: Vec<String>, body: Vec<Stmt> },
     Say(Box<Expr>),
+    Ask(Box<Expr>),
 }
 
 #[derive(Debug, Clone, PartialEq)]

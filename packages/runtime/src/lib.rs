@@ -2,16 +2,18 @@
 pub mod vm;
 
 use nox_shared::Opcode;
-use vm::{VMState, Permissions, StackValue};
+use vm::{VMState, Permissions, StackValue, resolver::ModuleResolver};
 
 pub struct VM {
     pub state: VMState,
+    pub resolver: ModuleResolver,
 }
 
 impl VM {
     pub fn new(permissions: Permissions, is_interactive: bool) -> Self {
         Self {
             state: VMState::new(permissions, is_interactive),
+            resolver: ModuleResolver::new(),
         }
     }
 
@@ -29,6 +31,7 @@ impl VM {
         self.state.globals.fill(StackValue::Null);
         
         self.execute().await;
+        self.state.instruction_count = 0; // Reset after each run (e.g. imports)
     }
 
     async fn execute(&mut self) {
@@ -56,6 +59,7 @@ impl VM {
             if vm::opcodes::execute_io(opcode, &mut self.state) { continue; }
             if vm::opcodes::execute_control(opcode, &mut self.state) { continue; }
             if vm::opcodes::execute_memory_and_core(opcode, &mut self.state) { continue; }
+            if vm::opcodes::execute_network(opcode, &mut self.state).await { continue; }
             
             todo!("Opcode {:?} not yet implemented", opcode);
         }

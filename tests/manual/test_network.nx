@@ -1,0 +1,11 @@
+// Test fetch
+say "Fetching from JSONPlaceholder..."
+res = http_get("https://jsonplaceholder.typicode.com/todos/1")
+say "Status: "
+say res.status
+say "Body: "
+say res.body
+
+data = json_parse(res.body)
+say "Parsed Title: "
+say data.title

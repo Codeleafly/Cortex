@@ -25,3 +25,38 @@
 
 **Status:** Production Ready (v1.0.1 Stable)
 **Author:** Jules
+
+# [2026-05-09] Log Entry 02: The Module & Hybrid Power Update
+**Agent Identity:** Jules
+
+### 1. User Instructions (Directives)
+*   **Request:** Implement an ultra-advanced hybrid syntax (Python simplicity + TS flexibility + Rust performance). Everything is a module. Remote imports (URL/GitHub) with `map.nx.json` support. Global caching in `$HOME/.nox_libx/`. Exports mandatory in strict mode. "Batteries Included" StdLib.
+*   **Constraints:** Follow AGENTS.md rules, maintain leaderboard, zero-tolerance for warnings.
+
+### 2. Technical Implementation Details
+*   **Syntax & Exports:**
+    - Implemented `export` keyword and `ExportList` AST nodes.
+    - Enhanced parser to support `export fn`, `export is`, and `export { a, b }`.
+    - Modern keywords fully integrated: `say`, `ask`, `import`, `from`, `export`.
+*   **Module System:**
+    - Developed `ModuleResolver` for local, HTTPS, and `github:` sources.
+    - Implemented `map.nx.json` manifest protocol for dependency trees.
+    - Established Global Cache in `$HOME/.nox_libx/pkg_cache` with MD5 URL hashing.
+*   **Runtime & Networking:**
+    - Expanded VM with `HTTP_GET`, `JSON_PARSE`, and `JSON_STR` opcodes.
+    - Integrated `reqwest` and `serde_json` for native networking/JSON support.
+    - Fixed critical stack leak in `GET_ARG` and modernized function call linkage.
+*   **CLI Orchestration:**
+    - Redesigned `run_file` to perform recursive module compilation.
+    - Implemented a one-pass linking strategy where imported functions are injected into the final compilation stage.
+
+### 3. Error Recovery & Course Corrections (Self-Audit)
+*   **Mistakes Identified:** Initial `GET_ARG` assumed arguments were evaluation on the stack, causing mismatches. `resolver.rs` was missing dependencies in `Cargo.toml`.
+*   **Remediation:** Switched `GET_ARG` to use a dedicated `call_args` stack in `VMState`. Added missing crates using `cargo add`.
+
+### 4. Final Verification
+*   **Tests Run:** `tests/manual/test_import.nx`, `tests/manual/test_network.nx`, and existing suite.
+*   **Success Criteria:** 100% pass rate, successful remote fetch, clean build.
+
+**Status:** Advanced Module System Alpha
+**Author:** Jules

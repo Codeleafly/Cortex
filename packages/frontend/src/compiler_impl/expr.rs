@@ -16,6 +16,7 @@ impl Compiler {
                         self.emit(Opcode::PUSH_STR as i64);
                         let idx = self.string_pool.len();
                         self.string_pool.push(s);
+                        self.string_offsets.push(self.bytecode.len());
                         self.emit(idx as i64);
                     }
                     LiteralValue::Boolean(b) => {
@@ -35,6 +36,7 @@ impl Compiler {
                         self.emit(Opcode::DUP as i64);
                         self.emit(Opcode::JMP_IF_FALSE as i64);
                         let jump_idx = self.bytecode.len();
+                        self.jump_offsets.push(jump_idx);
                         self.emit(0);
                         self.emit(Opcode::POP as i64);
                         self.expression(*right);
@@ -45,6 +47,7 @@ impl Compiler {
                         self.emit(Opcode::DUP as i64);
                         self.emit(Opcode::JMP_IF_TRUE as i64);
                         let jump_idx = self.bytecode.len();
+                        self.jump_offsets.push(jump_idx);
                         self.emit(0);
                         self.emit(Opcode::POP as i64);
                         self.expression(*right);
@@ -98,14 +101,65 @@ impl Compiler {
                 }
             }
             Expr::Call { callee, args } => {
+                match callee.as_str() {
+                    "http_get" => {
+                        for arg in args { self.expression(arg); }
+                        self.emit(Opcode::HTTP_GET as i64);
+                        return;
+                    }
+                    "json_parse" => {
+                        for arg in args { self.expression(arg); }
+                        self.emit(Opcode::JSON_PARSE as i64);
+                        return;
+                    }
+                    "json_str" => {
+                        for arg in args { self.expression(arg); }
+                        self.emit(Opcode::JSON_STR as i64);
+                        return;
+                    }
+                    "os_info" => {
+                        self.emit(Opcode::OS_INFO as i64);
+                        return;
+                    }
+                    "print" | "say" => {
+                        for arg in args { self.expression(arg); }
+                        self.emit(Opcode::PRINT as i64);
+                        self.emit(Opcode::PUSH as i64);
+                        self.emit(0);
+                        return;
+                    }
+                    "ask" | "input" => {
+                        for arg in args { self.expression(arg); }
+                        self.emit(Opcode::READ_LINE as i64);
+                        return;
+                    }
+                    _ => {}
+                }
+                let arg_len = args.len();
                 for arg in args { self.expression(arg); }
-                let (addr, arg_count) = {
-                    let fn_info = self.functions.get(&callee).expect("Undefined function");
-                    (fn_info.address as i64, fn_info.arg_count as i64)
-                };
-                self.emit(Opcode::CALL as i64);
-                self.emit(addr);
-                self.emit(arg_count);
+                let fn_info = self.functions.get(&callee).cloned();
+                match fn_info {
+                    Some(info) => {
+                        let addr = info.address as i64;
+                        let arg_count = info.arg_count as i64;
+                        self.emit(Opcode::CALL as i64);
+                        self.function_calls.push((self.bytecode.len(), callee.clone()));
+                        self.emit(addr);
+                        self.emit(arg_count);
+                    },
+                    None => {
+                         let var_info = self.resolve_variable(&callee);
+                         if let Some((addr, _)) = var_info {
+                             self.emit(Opcode::LOAD as i64);
+                             self.emit(addr);
+                             self.emit(Opcode::CALL as i64);
+                             self.emit(-1);
+                             self.emit(arg_len as i64);
+                         } else {
+                             panic!("Undefined function or variable: {}", callee);
+                         }
+                    }
+                }
             }
             Expr::Grouping(e) => self.expression(*e),
             Expr::Pipe { left, right } => {
@@ -129,11 +183,13 @@ impl Compiler {
                 self.emit(Opcode::CMP_EQ as i64);
                 self.emit(Opcode::JMP_IF_TRUE as i64);
                 let jump_to_null_idx = self.bytecode.len();
+                self.jump_offsets.push(jump_to_null_idx);
                 self.emit(0);
                 
                 self.emit(Opcode::PUSH_STR as i64);
                 let idx = self.string_pool.len();
                 self.string_pool.push(right);
+                self.string_offsets.push(self.bytecode.len());
                 self.emit(idx as i64);
                 self.emit(Opcode::DICT_GET as i64);
                 
@@ -147,6 +203,7 @@ impl Compiler {
                 self.emit(Opcode::CMP_NEQ as i64);
                 self.emit(Opcode::JMP_IF_TRUE as i64);
                 let jump_to_result_idx = self.bytecode.len();
+                self.jump_offsets.push(jump_to_result_idx);
                 self.emit(0);
                 
                 self.emit(Opcode::POP as i64); // pop the null
@@ -160,6 +217,7 @@ impl Compiler {
                     self.emit(Opcode::PUSH_STR as i64);
                     let idx = self.string_pool.len();
                     self.string_pool.push(key);
+                    self.string_offsets.push(self.bytecode.len());
                     self.emit(idx as i64);
                     self.expression(value);
                 }
@@ -177,12 +235,17 @@ impl Compiler {
             Expr::Say(e) => {
                 self.expression(*e);
                 self.emit(Opcode::PRINT as i64);
-                // say as expression returns the value
-                self.emit(Opcode::DUP as i64);
+                self.emit(Opcode::PUSH as i64);
+                self.emit(0);
+            }
+            Expr::Ask(e) => {
+                self.expression(*e);
+                self.emit(Opcode::READ_LINE as i64);
             }
             Expr::AnonymousFn { params, body } => {
                 self.emit(Opcode::JMP as i64);
                 let jump_over_idx = self.bytecode.len();
+                self.jump_offsets.push(jump_over_idx);
                 self.emit(0);
 
                 let fn_start = self.bytecode.len();

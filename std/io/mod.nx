@@ -1,0 +1,6 @@
+export fn blue(text) => "\x1b[34m" + text + "\x1b[0m"
+export fn red(text) => "\x1b[31m" + text + "\x1b[0m"
+export fn green(text) => "\x1b[32m" + text + "\x1b[0m"
+export fn yellow(text) => "\x1b[33m" + text + "\x1b[0m"
+export fn bold(text) => "\x1b[1m" + text + "\x1b[22m"
+export fn clear() => say "\x1b[H\x1b[2J"

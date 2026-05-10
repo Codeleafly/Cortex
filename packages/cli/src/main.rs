@@ -98,11 +98,78 @@ async fn run_file(path: PathBuf, perms: nox_runtime::vm::Permissions) {
     let mut parser = NoxParser::new(tokens);
     let statements = parser.parse();
     
-    let mut compiler = Compiler::new();
-    let result = compiler.compile(statements);
-    
     let mut vm = VM::new(perms, true);
-    vm.run(result.bytecode, result.string_pool, vec![]).await;
+    let mut final_compiler = Compiler::new();
+
+    // Step 1: Resolve all modules recursively
+    let mut resolved_sources = std::collections::HashSet::new();
+    let mut pending_imports = Vec::new();
+    let mut compilation_results: Vec<nox_frontend::CompilationResult> = Vec::new();
+
+    for stmt in &statements {
+        if let nox_frontend::ast::Stmt::Import { names, source } = stmt {
+            pending_imports.push((names.clone(), source.clone()));
+        }
+    }
+
+    while let Some((_names, source)) = pending_imports.pop() {
+        if resolved_sources.contains(&source) { continue; }
+        resolved_sources.insert(source.clone());
+
+        let mod_path = vm.resolver.resolve(&source).await.expect("Module not found");
+        let mod_source = std::fs::read_to_string(&mod_path).expect("Could not read module");
+
+        let mut l = Lexer::new(&mod_source);
+        let t = l.tokenize();
+        let mut p = NoxParser::new(t);
+        let s = p.parse();
+
+        for stmt in &s {
+            if let nox_frontend::ast::Stmt::Import { names, source: src } = stmt {
+                pending_imports.push((names.clone(), src.clone()));
+            }
+        }
+
+        let mut c = Compiler::new();
+        // Propagate known functions to help resolving calls in this module
+        for res in &compilation_results {
+            for (name, info) in &res.functions {
+                c.functions.insert(name.clone(), info.clone());
+            }
+        }
+
+        c.compile_no_halt(s);
+        let res = c.finish();
+
+        for (name, info) in &res.functions {
+             final_compiler.functions.insert(name.clone(), info.clone());
+        }
+        compilation_results.push(res);
+    }
+
+    final_compiler.compile_no_halt(statements);
+    final_compiler.emit(nox_shared::Opcode::HALT as i64);
+    let main_res = final_compiler.finish();
+
+    let mut linker = nox_frontend::Linker::new();
+
+    compilation_results.reverse();
+    compilation_results.push(main_res);
+    linker.link(compilation_results);
+
+    vm.run(linker.bytecode, linker.string_pool, vec![]).await;
+}
+
+#[allow(dead_code)]
+fn print_bytecode(bytecode: &[i64]) {
+    println!("--- Bytecode Dump ---");
+    let mut i = 0;
+    while i < bytecode.len() {
+        let op = nox_shared::Opcode::from(bytecode[i]);
+        print!("{:04}: {:?}", i, op);
+        println!(" (raw: {})", bytecode[i]);
+        i += 1;
+    }
 }
 
 async fn run_repl() {

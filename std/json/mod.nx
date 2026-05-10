@@ -1,0 +1,2 @@
+export fn parse(s) => json_parse(s)
+export fn stringify(v) => json_str(v)

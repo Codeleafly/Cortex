@@ -1,0 +1,3 @@
+export fn write(path, content) => write_file(path, content)
+export fn read(path) => read_file(path)
+export fn exists(path) => file_exists(path)

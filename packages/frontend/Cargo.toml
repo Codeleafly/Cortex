@@ -5,3 +5,4 @@ edition = "2021"
 
 [dependencies]
 nox-shared = { path = "../shared" }
+colored = "2.2.0"

@@ -1,0 +1,8 @@
+{
+  "name": "math",
+  "version": "1.0.0",
+  "main": "math.nx",
+  "files": {
+    "math.nx": "local"
+  }
+}
