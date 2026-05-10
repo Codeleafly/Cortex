@@ -1,0 +1,2 @@
+export fn dummy() => 0
+say "A"

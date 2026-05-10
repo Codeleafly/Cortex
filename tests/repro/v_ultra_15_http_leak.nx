@@ -1,0 +1,8 @@
+// Reproduction for VULN-ULTRA-15: Stack Leak in Built-in Function Calls
+// Calling 'http_get' with 2 arguments causes one to leak on the stack.
+
+mut count = 0
+while count < 2000 {
+    http_get("http://example.com", "leak")
+    count = count + 1
+}

@@ -1,0 +1,9 @@
+// Reproduction for VULN-ULTRA-15: Stack Leak in Built-in Function Calls
+// This script calls 'print' with 2 arguments. Since 'print' only pops one, 
+// the stack grows by 1 in every iteration until it overflows.
+
+is count = 0
+while count < 2000 {
+    print("leak", count)
+    count = count + 1
+}

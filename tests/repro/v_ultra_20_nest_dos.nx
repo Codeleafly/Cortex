@@ -1,0 +1,7 @@
+mut a = {}
+mut i = 0
+while i < 20000 {
+    a = { n = a }
+    i = i + 1
+}
+say json_str(a)

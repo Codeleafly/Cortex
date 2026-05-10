@@ -1,0 +1,11 @@
+// Reproduction for VULN-ULTRA-12: Host Stack Overflow via Recursive JSON/Dict
+// This script creates a deeply nested dictionary and tries to stringify it.
+// The recursive 'stack_to_json' will overflow the host stack.
+
+mut d = {a = 1}
+mut i = 0
+while i < 5000 {
+    d = {a = d}
+    i = i + 1
+}
+json_str(d)

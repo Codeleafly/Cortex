@@ -1,0 +1,2 @@
+import { dummy } from "./tests/repro/v_ultra_24_mod.nx"
+say "Main"
