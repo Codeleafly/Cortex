@@ -1,5 +1,5 @@
-use nox_shared::{TokenType, Token};
 use crate::lexer_impl::Lexer;
+use nox_shared::{Token, TokenType};
 
 impl Lexer {
     pub fn tokenize(&mut self) -> Vec<Token> {
@@ -13,7 +13,9 @@ impl Lexer {
                     self.col = 1;
                 }
                 self.pos += 1;
-                if c != '\n' { self.col += 1; }
+                if c != '\n' {
+                    self.col += 1;
+                }
                 continue;
             }
 
@@ -61,52 +63,98 @@ impl Lexer {
             let start_line = self.line;
 
             match c {
-                '{' => { self.advance(); tokens.push(Token::new(TokenType::LBRACE, None, start_line, start_col)); }
-                '}' => { self.advance(); tokens.push(Token::new(TokenType::RBRACE, None, start_line, start_col)); }
-                '(' => { self.advance(); tokens.push(Token::new(TokenType::LPAREN, None, start_line, start_col)); }
-                ')' => { self.advance(); tokens.push(Token::new(TokenType::RPAREN, None, start_line, start_col)); }
-                '[' => { self.advance(); tokens.push(Token::new(TokenType::LBRACKET, None, start_line, start_col)); }
-                ']' => { self.advance(); tokens.push(Token::new(TokenType::RBRACKET, None, start_line, start_col)); }
-                '+' => { self.advance(); tokens.push(Token::new(TokenType::PLUS, None, start_line, start_col)); }
+                '{' => {
+                    self.advance();
+                    tokens.push(Token::new(TokenType::LBRACE, None, start_line, start_col));
+                }
+                '}' => {
+                    self.advance();
+                    tokens.push(Token::new(TokenType::RBRACE, None, start_line, start_col));
+                }
+                '(' => {
+                    self.advance();
+                    tokens.push(Token::new(TokenType::LPAREN, None, start_line, start_col));
+                }
+                ')' => {
+                    self.advance();
+                    tokens.push(Token::new(TokenType::RPAREN, None, start_line, start_col));
+                }
+                '[' => {
+                    self.advance();
+                    tokens.push(Token::new(TokenType::LBRACKET, None, start_line, start_col));
+                }
+                ']' => {
+                    self.advance();
+                    tokens.push(Token::new(TokenType::RBRACKET, None, start_line, start_col));
+                }
+                '+' => {
+                    self.advance();
+                    tokens.push(Token::new(TokenType::PLUS, None, start_line, start_col));
+                }
                 '-' => {
                     self.advance();
                     if self.peek() == '>' {
                         self.advance();
-                        tokens.push(Token::new(TokenType::THIN_ARROW, None, start_line, start_col));
+                        tokens.push(Token::new(
+                            TokenType::THIN_ARROW,
+                            None,
+                            start_line,
+                            start_col,
+                        ));
                     } else {
                         tokens.push(Token::new(TokenType::MINUS, None, start_line, start_col));
                     }
                 }
-                '*' => { self.advance(); tokens.push(Token::new(TokenType::STAR, None, start_line, start_col)); }
-                '/' => { self.advance(); tokens.push(Token::new(TokenType::SLASH, None, start_line, start_col)); }
-                ';' => { self.advance(); tokens.push(Token::new(TokenType::SEMICOLON, None, start_line, start_col)); }
-                ',' => { self.advance(); tokens.push(Token::new(TokenType::COMMA, None, start_line, start_col)); }
-                ':' => { self.advance(); tokens.push(Token::new(TokenType::COLON, None, start_line, start_col)); }
+                '*' => {
+                    self.advance();
+                    tokens.push(Token::new(TokenType::STAR, None, start_line, start_col));
+                }
+                '/' => {
+                    self.advance();
+                    tokens.push(Token::new(TokenType::SLASH, None, start_line, start_col));
+                }
+                ';' => {
+                    self.advance();
+                    tokens.push(Token::new(
+                        TokenType::SEMICOLON,
+                        None,
+                        start_line,
+                        start_col,
+                    ));
+                }
+                ',' => {
+                    self.advance();
+                    tokens.push(Token::new(TokenType::COMMA, None, start_line, start_col));
+                }
+                ':' => {
+                    self.advance();
+                    tokens.push(Token::new(TokenType::COLON, None, start_line, start_col));
+                }
                 '!' => {
                     self.advance();
                     if self.peek() == '=' {
                         self.advance();
                         tokens.push(Token::new(TokenType::BANG_EQ, None, start_line, start_col));
-                    } else if self.peek() == 's' && self.peek_next() == 't' {
-                         // Check for !strict
-                         let mut i = 0;
-                         let strict_word = "strict";
-                         let mut matched = true;
-                         while i < strict_word.len() {
-                             if self.source[self.pos + i] != strict_word.chars().nth(i).unwrap() {
-                                 matched = false;
-                                 break;
-                             }
-                             i += 1;
-                         }
-                         if matched {
-                             for _ in 0..strict_word.len() { self.advance(); }
-                             tokens.push(Token::new(TokenType::BANG_STRICT, None, start_line, start_col));
-                         } else {
-                             tokens.push(Token::new(TokenType::BANG, None, start_line, start_col));
-                         }
                     } else {
-                        tokens.push(Token::new(TokenType::BANG, None, start_line, start_col));
+                        let strict_word: Vec<char> = "strict".chars().collect();
+                        let has_strict = self
+                            .source
+                            .get(self.pos..self.pos + strict_word.len())
+                            .is_some_and(|candidate| candidate == strict_word.as_slice());
+
+                        if has_strict {
+                            for _ in 0..strict_word.len() {
+                                self.advance();
+                            }
+                            tokens.push(Token::new(
+                                TokenType::BANG_STRICT,
+                                None,
+                                start_line,
+                                start_col,
+                            ));
+                        } else {
+                            tokens.push(Token::new(TokenType::BANG, None, start_line, start_col));
+                        }
                     }
                 }
                 '=' => {
@@ -148,7 +196,10 @@ impl Lexer {
                         self.advance();
                         tokens.push(Token::new(TokenType::PIPE, None, start_line, start_col));
                     } else {
-                        panic!("Unexpected character: | at line {}, col {}", start_line, start_col);
+                        panic!(
+                            "Unexpected character: | at line {}, col {}",
+                            start_line, start_col
+                        );
                     }
                 }
                 '&' => {
@@ -157,7 +208,10 @@ impl Lexer {
                         self.advance();
                         tokens.push(Token::new(TokenType::AND_AND, None, start_line, start_col));
                     } else {
-                        panic!("Unexpected character: & at line {}, col {}", start_line, start_col);
+                        panic!(
+                            "Unexpected character: & at line {}, col {}",
+                            start_line, start_col
+                        );
                     }
                 }
                 '.' => {
@@ -166,22 +220,43 @@ impl Lexer {
                         self.advance();
                         tokens.push(Token::new(TokenType::DOT_DOT, None, start_line, start_col));
                     } else {
-                        tokens.push(Token::new(TokenType::IDENTIFIER, Some(".".to_string()), start_line, start_col));
+                        tokens.push(Token::new(
+                            TokenType::IDENTIFIER,
+                            Some(".".to_string()),
+                            start_line,
+                            start_col,
+                        ));
                     }
                 }
                 '?' => {
                     self.advance();
                     if self.peek() == '.' {
                         self.advance();
-                        tokens.push(Token::new(TokenType::QUESTION_DOT, None, start_line, start_col));
+                        tokens.push(Token::new(
+                            TokenType::QUESTION_DOT,
+                            None,
+                            start_line,
+                            start_col,
+                        ));
                     } else if self.peek() == '?' {
                         self.advance();
-                        tokens.push(Token::new(TokenType::NULL_COAL, None, start_line, start_col));
+                        tokens.push(Token::new(
+                            TokenType::NULL_COAL,
+                            None,
+                            start_line,
+                            start_col,
+                        ));
                     } else {
-                        panic!("Unexpected character: ? at line {}, col {}", start_line, start_col);
+                        panic!(
+                            "Unexpected character: ? at line {}, col {}",
+                            start_line, start_col
+                        );
                     }
                 }
-                _ => panic!("Unexpected character: {} at line {}, col {}", c, start_line, start_col),
+                _ => panic!(
+                    "Unexpected character: {} at line {}, col {}",
+                    c, start_line, start_col
+                ),
             }
         }
         tokens.push(Token::new(TokenType::EOF, None, self.line, self.col));

@@ -1,84 +1,42 @@
-# Nox Technical Remediation Ledger (ULTRA-FIX) - [STATUS: IMPLEMENTED & VERIFIED]
-**Author:** Cyber (Sentinel Prime)
+# Nox Solution Ledger
 
-## 1. Security Patches & Solutions
+**Last Reconciled:** 2026-05-11
+**Reconciler:** GPT-5.5-Codex
 
-### VULN-ULTRA-01: Host Command Injection
-**Fix:** Replace `sh -c` with a direct call to the executable using `Command::new`. Implement a whitelist of allowed binaries.
-```rust
-// Proposed fix in io.rs
-let output = Command::new("ls") // Hardcoded or whitelisted
-    .arg(arg_str)
-    .output();
-```
+Every entry corresponds to a `Bug.md` entry.
 
-### VULN-ULTRA-02: Path Traversal
-**Fix:** Ensure `safe_resolve` never returns a path that hasn't been canonicalized against the sandbox root.
-```rust
-// Proposed fix in state.rs
-let resolved = fs::canonicalize(&full_path)?;
-if !resolved.starts_with(&self.root_dir) {
-    return Err("Sandbox Escape Detected");
-}
-```
+## BUG-2026-05-11-01 — Array method-call pipeline
 
-### VULN-ULTRA-03: Stack Overflow (JSON)
-**Fix:** Replace recursive JSON conversion logic in `network.rs` with an iterative approach using `Vec<Task>`.
+**Fix:** Method calls named `push`, `get`, and `len` now compile to array opcodes instead of dictionary lookup plus dynamic call. `ARRAY_PUSH`, `ARRAY_GET`, and `ARRAY_LEN` are implemented in the VM. Expression statements like `result.push(value)` on mutable variables store the returned array back into the receiver, allowing `std/sys/args()` to accumulate arguments.
 
-### VULN-ULTRA-04: VM Stack Leak
-**Fix:** The VM must pop exactly `arg_count` elements for EVERY built-in function call, or the compiler must emit `POP` instructions.
+**Verification:** `array_method_calls_update_mutable_receiver`, `std_sys_args_uses_array_methods`, and `cargo test -q`.
 
-### VULN-ULTRA-05: Memory OOM
-**Fix:** Implement `MAX_MEMORY_LIMIT` (e.g., 1MB) in `ensure_memory` and `ensure_globals`.
-```rust
-if addr > 1_000_000 { panic!("Memory Limit Exceeded"); }
-```
+## BUG-2026-05-11-02 — Safe malformed `!strict` lexing
 
-### VULN-ULTRA-09: Safe Enum Conversion
-**Fix:** Remove `unsafe { transmute(val) }`. Use a safe `match` or `TryFrom` trait.
+**Fix:** The lexer now checks the remaining source slice with `get(...)` before comparing against `strict`, eliminating direct unchecked indexing for short malformed directives.
 
-### VULN-ULTRA-13 & 14: Modernize Stdlib & Add Brackets
-**Fix:** Refactor `std/sys/mod.nx` to use `is` and `mut`. Update Lexer and `TokenType` to support `[` and `]`, and implement `DICT_BUILD` or `ARRAY_BUILD` opcodes correctly.
+**Verification:** `malformed_strict_directive_does_not_panic` and `cargo test -q`.
 
-### VULN-ULTRA-15 & 22: Unify Parser Keywords
-**Fix:** Ensure all built-in function names are treated as identifiers in the lexer, OR add them to the parser's `primary()` expression list so they can be parsed as callable expressions.
+## BUG-2026-05-11-03 — Duplicate match relocation bookkeeping
 
-### VULN-ULTRA-16: CALL Guard
-**Fix:** Add check in `Opcode::CALL` to ensure `state.stack.len() >= arg_count`.
+**Fix:** The `Stmt::Match` compiler branch records each emitted jump operand once, preventing duplicate relocation of the same bytecode cell.
 
-### VULN-ULTRA-17: Canonical Whitelist Check
-**Fix:** Always canonicalize paths before performing `.starts_with()` checks against the whitelist. Never trust raw absolute paths from user input.
+**Verification:** `match_jump_offsets_are_recorded_once_per_jump_operand` and `cargo test -q`.
 
-### VULN-ULTRA-18: JSON Array Support
-**Fix:** Update `json_to_stack` and `stack_to_json` to support recursive `Vec<StackValue>` (requires adding `Array` variant to `StackValue`).
+## BUG-2026-05-11-04 — Import/export filtering
 
-### VULN-ULTRA-19 & 34: Network/System Permissions
-**Fix:** Introduce `Permissions::network` and `Permissions::system`. Add `check_permission` calls to `HTTP_GET` and `OS_INFO`.
+**Fix:** CLI module resolution now tracks requested names per source, verifies those names against module exports, exposes only requested exported functions to importing compilers, and filters imported module top-level statements to avoid blanket side-effect inclusion.
 
-### VULN-ULTRA-20 & 25: Depth-Limited Recursion
-**Fix:** Implement a `max_depth` counter in recursive VM operations (`clone`, `PartialEq`, JSON serialization) to prevent host stack exhaustion.
+**Verification:** `linked_imports_only_expose_requested_exports` and `cargo test -q`.
 
-### VULN-ULTRA-21: Unicode-Safe STR_AT
-**Fix:** Use `.chars().count()` for bounds checking or perform a safe `nth()` check and return `Null` if `None`.
+## BUG-2026-05-11-05 — Stale CLI command documentation
 
-### VULN-ULTRA-24: Linker Initialization Fix
-**Fix:** The Linker should emit a call to each module's entry point instead of a single `JMP` to the main module, or the main module should be responsible for calling imported initialization blocks.
+**Fix:** `AGENTS.md` now references the actual package name: `cargo run --package nox -- repl`.
 
-### VULN-ULTRA-26 & 27: Method Call Implementation
-**Fix:** Update Parser to support `Expr::MethodCall` and Compiler to emit `Opcode::LOAD` + `Opcode::CALL`.
+**Verification:** Documentation review and `cargo test -q`.
 
-### VULN-ULTRA-28 & 30: Async IO & Resource Accounting
-**Fix:** Use `tokio::process::Command` for non-blocking execution and implement a "gas" model where expensive operations (string manipulation, IO) increment the instruction count proportionally to their cost.
+## BUG-2026-05-11-06 — Arrow block function parsing
 
-### VULN-ULTRA-29: VM State Isolation
-**Fix:** Explicitly `clear()` or re-initialize the `memory` and `globals` vectors in `VM::run`.
+**Fix:** Function declarations using `=> { ... }` now parse the block as a function body instead of treating `{ ... }` as a dictionary expression. This aligns the parser with current stdlib syntax.
 
-### VULN-ULTRA-31: REPL Sandbox
-**Fix:** Wrap the `vm.run` call in `std::panic::catch_unwind` or use a separate worker thread/process for script execution to protect the REPL shell.
-
-### VULN-ULTRA-32 & 33: Bytecode Validation
-**Fix:** Implement a robust validation pass before execution that checks all stack operations and pool indices for safety.
-
-## 2. Architectural Recommendations
-- **Capability-Based Security:** Switch from flat permissions to granular resource handles.
-- **Strict Bytecode Validation:** Add a pre-execution pass to verify all JMP targets and stack effects.
+**Verification:** `std_sys_args_uses_array_methods` and `cargo test -q`.

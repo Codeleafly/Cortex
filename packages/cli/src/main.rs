@@ -1,10 +1,11 @@
 use clap::{Parser, Subcommand};
 use colored::*;
-use std::path::PathBuf;
+use nox_frontend::{Compiler, Lexer, Parser as NoxParser};
+use nox_runtime::VM;
 use rustyline::error::ReadlineError;
 use rustyline::DefaultEditor;
-use nox_runtime::VM;
-use nox_frontend::{Lexer, Parser as NoxParser, Compiler};
+use std::collections::{HashMap, HashSet};
+use std::path::PathBuf;
 
 #[derive(Parser)]
 #[command(name = "nox")]
@@ -57,7 +58,13 @@ async fn main() {
     let cli = Cli::parse();
 
     match cli.command {
-        Some(Commands::Run { file, allow_read, allow_write, allow_run, allow_all }) => {
+        Some(Commands::Run {
+            file,
+            allow_read,
+            allow_write,
+            allow_run,
+            allow_all,
+        }) => {
             let perms = get_perms(allow_read, allow_write, allow_run, allow_all);
             run_file(file, perms).await;
         }
@@ -66,7 +73,12 @@ async fn main() {
         }
         None => {
             if let Some(file) = cli.file {
-                let perms = get_perms(cli.allow_read, cli.allow_write, cli.allow_run, cli.allow_all);
+                let perms = get_perms(
+                    cli.allow_read,
+                    cli.allow_write,
+                    cli.allow_run,
+                    cli.allow_all,
+                );
                 run_file(file, perms).await;
             } else {
                 run_repl().await;
@@ -77,9 +89,19 @@ async fn main() {
 
 fn get_perms(read: bool, write: bool, run: bool, all: bool) -> nox_runtime::vm::Permissions {
     if all {
-        nox_runtime::vm::Permissions { read: true, write: true, run: true, network: true }
+        nox_runtime::vm::Permissions {
+            read: true,
+            write: true,
+            run: true,
+            network: true,
+        }
     } else {
-        nox_runtime::vm::Permissions { read, write, run, network: false }
+        nox_runtime::vm::Permissions {
+            read,
+            write,
+            run,
+            network: false,
+        }
     }
 }
 
@@ -94,55 +116,83 @@ async fn run_file(path: PathBuf, perms: nox_runtime::vm::Permissions) {
 
     let mut lexer = Lexer::new(&source);
     let tokens = lexer.tokenize();
-    
+
     let mut parser = NoxParser::new(tokens);
     let statements = parser.parse();
-    
+
     let mut vm = VM::new(perms, true);
     let mut final_compiler = Compiler::new();
 
-    // Step 1: Resolve all modules recursively
-    let mut resolved_sources = std::collections::HashSet::new();
+    // Step 1: Resolve all modules recursively. Import names are tracked per
+    // source so only explicitly imported, exported functions are visible to
+    // dependants instead of treating modules as blanket includes.
+    let mut resolved_sources = HashSet::new();
+    let mut requested_exports: HashMap<String, HashSet<String>> = HashMap::new();
     let mut pending_imports = Vec::new();
     let mut compilation_results: Vec<nox_frontend::CompilationResult> = Vec::new();
 
     for stmt in &statements {
         if let nox_frontend::ast::Stmt::Import { names, source } = stmt {
+            requested_exports
+                .entry(source.clone())
+                .or_default()
+                .extend(names.iter().cloned());
             pending_imports.push((names.clone(), source.clone()));
         }
     }
 
     while let Some((_names, source)) = pending_imports.pop() {
-        if resolved_sources.contains(&source) { continue; }
+        if resolved_sources.contains(&source) {
+            continue;
+        }
         resolved_sources.insert(source.clone());
 
-        let mod_path = vm.resolver.resolve(&source).await.expect("Module not found");
+        let mod_path = vm
+            .resolver
+            .resolve(&source)
+            .await
+            .expect("Module not found");
         let mod_source = std::fs::read_to_string(&mod_path).expect("Could not read module");
 
         let mut l = Lexer::new(&mod_source);
         let t = l.tokenize();
         let mut p = NoxParser::new(t);
-        let s = p.parse();
+        let module_statements = p.parse();
 
-        for stmt in &s {
+        for stmt in &module_statements {
             if let nox_frontend::ast::Stmt::Import { names, source: src } = stmt {
+                requested_exports
+                    .entry(src.clone())
+                    .or_default()
+                    .extend(names.iter().cloned());
                 pending_imports.push((names.clone(), src.clone()));
             }
         }
 
         let mut c = Compiler::new();
-        // Propagate known functions to help resolving calls in this module
-        for res in &compilation_results {
-            for (name, info) in &res.functions {
-                c.functions.insert(name.clone(), info.clone());
-            }
+        for (name, info) in &final_compiler.functions {
+            c.functions.insert(name.clone(), info.clone());
         }
 
-        c.compile_no_halt(s);
+        c.compile_no_halt(filter_module_statements(module_statements));
         let res = c.finish();
 
-        for (name, info) in &res.functions {
-             final_compiler.functions.insert(name.clone(), info.clone());
+        let exported: HashSet<String> = res.exports.iter().cloned().collect();
+        if let Some(requested) = requested_exports.get(&source) {
+            for name in requested {
+                if !exported.contains(name) {
+                    eprintln!(
+                        "{} Module '{}' does not export '{}'",
+                        "Error:".red().bold(),
+                        source,
+                        name
+                    );
+                    return;
+                }
+                if let Some(info) = res.functions.get(name) {
+                    final_compiler.functions.insert(name.clone(), info.clone());
+                }
+            }
         }
         compilation_results.push(res);
     }
@@ -158,6 +208,23 @@ async fn run_file(path: PathBuf, perms: nox_runtime::vm::Permissions) {
     linker.link(compilation_results);
 
     vm.run(linker.bytecode, linker.string_pool, vec![]).await;
+}
+
+fn filter_module_statements(
+    statements: Vec<nox_frontend::ast::Stmt>,
+) -> Vec<nox_frontend::ast::Stmt> {
+    statements
+        .into_iter()
+        .filter(|stmt| {
+            matches!(
+                stmt,
+                nox_frontend::ast::Stmt::Import { .. }
+                    | nox_frontend::ast::Stmt::Export(_)
+                    | nox_frontend::ast::Stmt::ExportList(_)
+                    | nox_frontend::ast::Stmt::Fn { .. }
+            )
+        })
+        .collect()
 }
 
 #[allow(dead_code)]
@@ -177,20 +244,34 @@ async fn run_repl() {
     println!("Type '.exit' to quit, '.help' for help.\n");
 
     let mut rl = DefaultEditor::new().expect("Failed to create REPL editor");
-    let mut vm = VM::new(nox_runtime::vm::Permissions { read: true, write: true, run: true, network: true }, true);
+    let mut vm = VM::new(
+        nox_runtime::vm::Permissions {
+            read: true,
+            write: true,
+            run: true,
+            network: true,
+        },
+        true,
+    );
     let mut compiler = Compiler::new();
 
     let mut buffer = String::new();
 
     loop {
-        let prompt = if buffer.is_empty() { "nox> ".magenta().to_string() } else { "... ".magenta().to_string() };
+        let prompt = if buffer.is_empty() {
+            "nox> ".magenta().to_string()
+        } else {
+            "... ".magenta().to_string()
+        };
         let readline = rl.readline(&prompt);
 
         match readline {
             Ok(line) => {
                 let _ = rl.add_history_entry(line.as_str());
 
-                if line.trim() == ".exit" { break; }
+                if line.trim() == ".exit" {
+                    break;
+                }
                 if line.trim() == ".help" {
                     println!("Nox REPL Help:");
                     println!("  .exit  - Exit REPL");
@@ -199,7 +280,15 @@ async fn run_repl() {
                     continue;
                 }
                 if line.trim() == ".reset" {
-                    vm = VM::new(nox_runtime::vm::Permissions { read: true, write: true, run: true, network: true }, true);
+                    vm = VM::new(
+                        nox_runtime::vm::Permissions {
+                            read: true,
+                            write: true,
+                            run: true,
+                            network: true,
+                        },
+                        true,
+                    );
                     compiler = Compiler::new();
                     buffer.clear();
                     println!("Environment reset.");
@@ -226,7 +315,12 @@ async fn run_repl() {
                         Ok(stmts) => {
                             let result = compiler.compile(stmts);
                             use futures::FutureExt;
-                            let run_future = std::panic::AssertUnwindSafe(vm.run(result.bytecode, result.string_pool, vec![])).catch_unwind();
+                            let run_future = std::panic::AssertUnwindSafe(vm.run(
+                                result.bytecode,
+                                result.string_pool,
+                                vec![],
+                            ))
+                            .catch_unwind();
                             if let Err(_) = run_future.await {
                                 eprintln!("{}", "Error: Runtime panic during execution".red());
                             }
@@ -236,10 +330,10 @@ async fn run_repl() {
                         }
                     }
                 }
-            },
+            }
             Err(ReadlineError::Interrupted) | Err(ReadlineError::Eof) => {
                 break;
-            },
+            }
             Err(err) => {
                 println!("Error: {:?}", err);
                 break;

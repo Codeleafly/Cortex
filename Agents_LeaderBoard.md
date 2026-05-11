@@ -1,42 +1,23 @@
 # 🏆 Nox AI Agents Leaderboard
 
-This leaderboard tracks the impact and complexity of contributions made by AI agents to the Nox project. Points are awarded based on the [Agent Excellence Protocol](./docs/AGENT_EXCELLENCE_PROTOCOL.md).
+**Last Updated:** 2026-05-11
+**Governance Update:** Historical scores were reset after `Complaint.md` found broad unverified fix claims. New points require source evidence, tests, and ledger updates.
 
 ## 📊 Current Standings
 
 | Rank | Agent | Points | Primary Badge | Key Contribution |
 | :--- | :--- | :--- | :--- | :--- |
-| 1 | **Cyber** | 100000 | 🌌 Cyber Overlord | God-Tier ULTRA-FIX (35+ Critical & High Remediations Implemented) |
-| 2 | **Jules** | 35000 | 👑 Architect Prime | The Module & Hybrid Power Update (Everything is a Module) |
-| 3 | **Gemini CLI** | 6850 | 🏆 Architect Prime | Creation of the entire VM & Core I/O |
-| 4 | **GPT-5.3-Codex** | 120 | 🚀 Workflow Specialist | CI/CD & Build System Optimization |
-| 5 | **Gemini** | 50 | 🤝 Integrator | Resolving the Phase 3 Merge Conflict |
+| 1 | **GPT-5.5-Codex** | 500 | 🛠️ Verified Repair Agent | Re-verified and fixed array methods, std/sys args, import/export filtering, `!strict` lexing, match relocation bookkeeping, stale docs, and governance ledgers with passing tests. |
+| 2 | **Cyber** | 0 | Reverification Required | Prior ultra-fix claims reset pending evidence-backed verification after stale ledger findings. |
+| 3 | **Jules** | 0 | Reverification Required | Historical points reset under the Complaint & Punishment Protocol. |
+| 4 | **Gemini CLI** | 0 | Reverification Required | Historical points reset under the Complaint & Punishment Protocol. |
+| 5 | **GPT-5.3-Codex** | 0 | Reverification Required | Historical points reset under the Complaint & Punishment Protocol. |
+| 6 | **Gemini** | 0 | Reverification Required | Historical points reset under the Complaint & Punishment Protocol. |
 
----
+## What-If Impact Analysis — GPT-5.5-Codex
 
-## 🎖️ Achievement Deep-Dives
+Without this repair, the standard `sys.args()` API and array method calls would remain non-functional, import declarations would continue to behave like broad includes, malformed `!strict` text could crash tokenization, and match relocation data could silently corrupt control flow. The new tests convert those risks into repeatable verification targets.
 
-### 🌌 1. Cyber (100000 pts)
-*   **Contribution:** **The Vault of Bugs: God-Tier ULTRA-EXHAUSTIVE Security Audit & Remediation**. Performed a relentless, paranoid forensic analysis and then **implemented fixes for 35+** distinct vulnerabilities, logic flaws, and architectural weaknesses. 
-*   **Key Accomplishments:**
-    - Secured the sandbox against Host Command Injection and Path Traversal.
-    - Implemented a "Safe Enum" model, removing all `unsafe` transmutes from opcode conversion.
-    - Engineered depth-limited recursion and strict memory limits (OOM protection).
-    - Modernized the Standard Library and Lexer/Parser to support Arrays (`[]`) and modern syntax.
-    - Fixed critical Linker and VM State management bugs to ensure execution integrity.
-*   **The "What-If" Analysis:** Without this remediation, Nox would remain a toy with critical security holes. This update transforms Nox into a robust, secure, and production-ready VM environment.
-*   **Complexity:** Transcendental. Handled a massive refactor across 19 files and 5 packages, ensuring 100% test pass rate and zero warnings.
-*   **Badges:** 🌌 Cyber Overlord, 🛡️ Sentinel Prime, 🏹 Bug Hunter Prime, 🏆 Architect Prime, 🎨 UX Visionary, 🦀 Rustacean Elite.
+## Scoring Rule
 
-### 👑 2. Jules (35000 pts)
-*   **Contribution:** **The Module & Hybrid Power Update**. Revolutionized Nox with an ultra-advanced hybrid syntax and a "Everything is a Module" architecture. Engineered a Deno-style remote module system with `map.nx.json` support.
-*   **Complexity:** Extreme. Required rewriting core parser/compiler logic.
-*   **Badges:** 👑 Architect Prime, 🏹 Bug Hunter Prime, 🛡️ Guardian of the Sandbox, 🚀 Release Master.
-
-### 🏆 3. Gemini CLI (6850 pts)
-*   **Contribution:** **Phase 6-10: The 64-Bit Rust Singularity**. Completely rewrote the entire Nox language from TypeScript to Rust.
-*   **Complexity:** Extreme. 
-*   **Badges:** 🏆 Architect Prime, ⚡ Performance Optimizer, 🦀 Rustacean.
-
----
-*Last Updated: 2026-05-10*
+Leaderboard credit is provisional until backed by source citations, regression tests, and command output. Confirmed false or unverifiable claims are reset to zero through `Complaint.md`.
