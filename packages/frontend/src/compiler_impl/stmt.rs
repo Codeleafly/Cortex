@@ -1,12 +1,16 @@
-use nox_shared::Opcode;
 use crate::ast::Stmt;
 use crate::compiler_impl::{Compiler, FunctionInfo};
+use nox_shared::Opcode;
 use std::collections::HashMap;
 
 impl Compiler {
     pub fn statement(&mut self, stmt: Stmt) {
         match stmt {
-            Stmt::Let { name, initializer, is_mutable } => {
+            Stmt::Let {
+                name,
+                initializer,
+                is_mutable,
+            } => {
                 self.expression(initializer);
                 let addr = self.define_variable(name, is_mutable);
                 self.emit(Opcode::STORE as i64);
@@ -17,7 +21,10 @@ impl Compiler {
                 match var_info {
                     Some((addr, is_mutable)) => {
                         if !is_mutable {
-                            panic!("Immutable Error: Cannot re-assign constant variable '{}'", name);
+                            panic!(
+                                "Immutable Error: Cannot re-assign constant variable '{}'",
+                                name
+                            );
                         }
                         self.expression(value);
                         self.emit(Opcode::STORE as i64);
@@ -36,7 +43,11 @@ impl Compiler {
                 self.expression(expression);
                 self.emit(Opcode::PRINT as i64);
             }
-            Stmt::If { condition, then_branch, else_branch } => {
+            Stmt::If {
+                condition,
+                then_branch,
+                else_branch,
+            } => {
                 self.expression(condition);
                 self.emit(Opcode::JMP_IF_FALSE as i64);
                 let jump_to_else_idx = self.bytecode.len();
@@ -44,7 +55,9 @@ impl Compiler {
                 self.emit(0);
 
                 self.scopes.push(HashMap::new());
-                for s in then_branch { self.statement(s); }
+                for s in then_branch {
+                    self.statement(s);
+                }
                 self.scopes.pop();
 
                 if let Some(else_stmts) = else_branch {
@@ -52,13 +65,15 @@ impl Compiler {
                     let jump_to_end_idx = self.bytecode.len();
                     self.jump_offsets.push(jump_to_end_idx);
                     self.emit(0);
-                    
+
                     self.bytecode[jump_to_else_idx] = self.bytecode.len() as i64;
-                    
+
                     self.scopes.push(HashMap::new());
-                    for s in else_stmts { self.statement(s); }
+                    for s in else_stmts {
+                        self.statement(s);
+                    }
                     self.scopes.pop();
-                    
+
                     self.bytecode[jump_to_end_idx] = self.bytecode.len() as i64;
                 } else {
                     self.bytecode[jump_to_else_idx] = self.bytecode.len() as i64;
@@ -73,7 +88,9 @@ impl Compiler {
                 self.emit(0);
 
                 self.scopes.push(HashMap::new());
-                for s in body { self.statement(s); }
+                for s in body {
+                    self.statement(s);
+                }
                 self.scopes.pop();
 
                 self.emit(Opcode::JMP as i64);
@@ -88,7 +105,13 @@ impl Compiler {
                 self.emit(0);
 
                 let fn_start = self.bytecode.len();
-                self.functions.insert(name.clone(), FunctionInfo { address: fn_start, arg_count: params.len() });
+                self.functions.insert(
+                    name.clone(),
+                    FunctionInfo {
+                        address: fn_start,
+                        arg_count: params.len(),
+                    },
+                );
                 self.local_functions.insert(name.clone());
 
                 let old_start_scope = self.function_start_scope_index;
@@ -101,7 +124,9 @@ impl Compiler {
                     self.emit(addr);
                 }
 
-                for s in body { self.statement(s); }
+                for s in body {
+                    self.statement(s);
+                }
 
                 self.emit(Opcode::PUSH as i64);
                 self.emit(0); // null
@@ -119,21 +144,28 @@ impl Compiler {
                 self.imports.push((names, source));
             }
             Stmt::Export(inner) => {
-                 match &*inner {
-                     Stmt::Let { name, .. } => self.exports.push(name.clone()),
-                     Stmt::Fn { name, .. } => self.exports.push(name.clone()),
-                     _ => {}
-                 }
-                 self.statement(*inner.clone());
+                match &*inner {
+                    Stmt::Let { name, .. } => self.exports.push(name.clone()),
+                    Stmt::Fn { name, .. } => self.exports.push(name.clone()),
+                    _ => {}
+                }
+                self.statement(*inner.clone());
             }
             Stmt::ExportList(names) => {
                 self.exports.extend(names);
             }
             Stmt::Expr(expr) => {
+                if self.compile_mutating_method_statement(&expr) {
+                    return;
+                }
                 self.expression(expr);
                 self.emit(Opcode::POP as i64);
             }
-            Stmt::For { item, iterable, body } => {
+            Stmt::For {
+                item,
+                iterable,
+                body,
+            } => {
                 self.expression(iterable);
                 let loop_start = self.bytecode.len() as i64;
                 self.emit(Opcode::ITER_NEXT as i64);
@@ -146,7 +178,9 @@ impl Compiler {
                 self.emit(Opcode::STORE as i64);
                 self.emit(addr);
 
-                for s in body { self.statement(s); }
+                for s in body {
+                    self.statement(s);
+                }
                 self.scopes.pop();
 
                 self.emit(Opcode::JMP as i64);
@@ -184,12 +218,13 @@ impl Compiler {
                         self.emit(Opcode::POP as i64); // Pop the original match value
 
                         self.scopes.push(HashMap::new());
-                        for s in body { self.statement(s); }
+                        for s in body {
+                            self.statement(s);
+                        }
                         self.scopes.pop();
 
                         self.emit(Opcode::JMP as i64);
                         end_jumps.push(self.bytecode.len());
-                        self.jump_offsets.push(self.bytecode.len());
                         self.jump_offsets.push(self.bytecode.len());
                         self.emit(0);
 
@@ -198,7 +233,9 @@ impl Compiler {
                     } else {
                         self.emit(Opcode::POP as i64); // Pop the original match value
                         self.scopes.push(HashMap::new());
-                        for s in body { self.statement(s); }
+                        for s in body {
+                            self.statement(s);
+                        }
                         self.scopes.pop();
 
                         self.emit(Opcode::JMP as i64);

@@ -9,7 +9,7 @@ Nox is a high-performance, general-purpose programming language built from scrat
 - **Primary Commands:** 
   - `cargo build`: Compiles all packages.
   - `cargo test`: Runs all integration and unit tests.
-  - `cargo run --package nox-cli -- repl`: Starts the interactive REPL.
+  - `cargo run --package nox -- repl`: Starts the interactive REPL.
 
 ## Core Mandates (Mandatory for all AI Agents)
 1. **Plan First:** Always enter Plan Mode and get user approval before modifying code.
@@ -37,6 +37,7 @@ Nox is a high-performance, general-purpose programming language built from scrat
 23. **Systemic Refactoring:** The codebase is now entirely Rust. Ensure all newly added code strictly follows idiomatic Rust practices and maintains 100% Modern Nox syntax compliance.
 24. **Professional Distribution:** AI agents MUST prioritize standard, professional installer packages for releases. For Windows releases, generate Microsoft Installer (`.msi`) packages. For Linux releases, generate Debian (`.deb`) packages. These installers must automatically add Nox to the global `PATH`. Raw executables (`.exe`, `./nox`) are strictly permitted for local development and testing only.
 26. **Blueprint Protocol (`PLAN.md`):** Use `PLAN.md` strictly as a temporary, human-readable roadmap for GitHub visibility and user coordination. AI agents MUST still rely on the internal `Plan Mode` tool for permanent AI task tracking, state management, and execution orchestration.
+27. **Complaint & Punishment Protocol:** Verified false implementation claims, stale ledger claims presented as verified, or hidden failures MUST be filed in `Complaint.md`. Any agent may file a complaint against itself or another agent, but every complaint MUST include evidence, affected files, requested action, and final disposition. Proven false-credit or false-verification claims reset the offending milestone credit to zero until a new agent re-verifies the work with passing commands and updates `Bug.md`, `Solution.md`, `Complaint.md`, and `Agents_LeaderBoard.md`.
 
 ## Progressive Disclosure
 For detailed rules, architectural deep-dives, and coding patterns, refer to:

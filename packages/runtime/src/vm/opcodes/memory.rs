@@ -1,5 +1,5 @@
+use crate::vm::{StackValue, VMState};
 use nox_shared::Opcode;
-use crate::vm::{VMState, StackValue};
 use std::collections::HashMap;
 
 pub fn execute_memory_and_core(opcode: Opcode, state: &mut VMState) -> bool {
@@ -15,7 +15,11 @@ pub fn execute_memory_and_core(opcode: Opcode, state: &mut VMState) -> bool {
                 let val = state.string_pool[idx].clone();
                 state.push(StackValue::String(val));
             } else {
-                panic!("Bytecode Error: String pool index {} out of bounds (len: {})", idx, state.string_pool.len());
+                panic!(
+                    "Bytecode Error: String pool index {} out of bounds (len: {})",
+                    idx,
+                    state.string_pool.len()
+                );
             }
             true
         }
@@ -156,14 +160,12 @@ pub fn execute_memory_and_core(opcode: Opcode, state: &mut VMState) -> bool {
                 (StackValue::Dictionary(d), StackValue::String(k)) => {
                     state.push(d.get(&k).cloned().unwrap_or(StackValue::Null));
                 }
-                (StackValue::Array(_), StackValue::String(k)) => {
-                    match k.as_str() {
-                        "push" => state.push(StackValue::Number(-100)),
-                        "get" => state.push(StackValue::Number(-101)),
-                        "len" => state.push(StackValue::Number(-102)),
-                        _ => state.push(StackValue::Null),
-                    }
-                }
+                (StackValue::Array(_), StackValue::String(k)) => match k.as_str() {
+                    "push" => state.push(StackValue::Number(-100)),
+                    "get" => state.push(StackValue::Number(-101)),
+                    "len" => state.push(StackValue::Number(-102)),
+                    _ => state.push(StackValue::Null),
+                },
                 _ => state.push(StackValue::Null),
             }
             true
@@ -188,6 +190,40 @@ pub fn execute_memory_and_core(opcode: Opcode, state: &mut VMState) -> bool {
             }
             arr.reverse(); // Pop in reverse order to maintain correct sequence
             state.push(StackValue::Array(arr));
+            true
+        }
+        Opcode::ARRAY_PUSH => {
+            let item = state.pop();
+            let arr_val = state.pop();
+            if let StackValue::Array(mut arr) = arr_val {
+                arr.push(item);
+                state.push(StackValue::Array(arr));
+            } else {
+                panic!("Array.push called on non-array");
+            }
+            true
+        }
+        Opcode::ARRAY_GET => {
+            let idx = state.pop();
+            let arr_val = state.pop();
+            if let (StackValue::Array(arr), StackValue::Number(i)) = (arr_val, idx) {
+                if i >= 0 && (i as usize) < arr.len() {
+                    state.push(arr[i as usize].clone());
+                } else {
+                    state.push(StackValue::Null);
+                }
+            } else {
+                panic!("Array.get called with invalid arguments");
+            }
+            true
+        }
+        Opcode::ARRAY_LEN => {
+            let arr_val = state.pop();
+            if let StackValue::Array(arr) = arr_val {
+                state.push(StackValue::Number(arr.len() as i64));
+            } else {
+                panic!("Array.len called on non-array");
+            }
             true
         }
         Opcode::RANGE => {
